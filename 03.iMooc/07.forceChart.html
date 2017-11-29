@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Force02</title>
+    <title>力导向图</title>
     <style>
         .link {
             fill: none;
@@ -171,10 +171,12 @@
                 .style("stroke", function (d) {
                     var lineColor;
                     // 根据关系的不同设置线条颜色
-                    if (d.type == "SERVE" || d.type == "OWN") {
-                        lineColor = "#A254A2";
+                    if (d.type == "SERVE") {
+                        lineColor = "#ff0000";
+                    } else if (d.type == "OWN") {
+                        lineColor = "#00ff00";
                     } else if (d.type == "INVEST_C") {
-                        lineColor = "#B43232";
+                        lineColor = "#0000ff";
                     }
                     return lineColor;
                 })
@@ -215,26 +217,14 @@
                 .enter()
                 .append("circle")
                 .style("fill", function (node) {
-                    var color; // 圆圈背景色
-                    var link = links[node.index];
-                    if (node.id == link.source.id && link.type == "SERVE") {
-                        color = "#F6E8E9";
-                    } else {
-                        color = "#F9EBF9";
-                    }
-                    return color;
+                    // 节点背景颜色
+                    return node.ntype === "Human" ? "#c93" : "#c43";
                 })
                 .style('stroke', function (node) {
-                    var color;// 圆圈边框的颜色
-                    var link = links[node.index];
-                    if (node.id == link.source.id && link.type == "SERVE") {
-                        color = "#B43232";
-                    } else {
-                        color = "#A254A2";
-                    }
-                    return color;
+                    // 节点描边颜色
+                    return node.ntype === "Human" ? "#f93" : "#f43";
                 })
-                .attr("r", 28) // 设置圆圈半径
+                .attr("r", 28) // 设置节点半径
                 .on("click", function (node) {
                     // 单击时,连线加粗
                     linkLine.style("stroke-width", function (line) {
@@ -396,6 +386,7 @@
 
                 return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
             }
+
             // 设置节点和文字的坐标
             function transform1(d) {
                 return "translate(" + d.x + "," + d.y + ")";
