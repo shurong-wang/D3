@@ -82,22 +82,31 @@
             // 起点和终点相同的关系映射
             const sameLinkMap = (function (relations) {
                 const hash = {};
-                relations.map(function ({startNode, endNode}) {
+                relations.map(function ({startNode, endNode, label}) {
                     const key = startNode + '-' + endNode;
-                    hash[key] = hash[key] ? hash[key] + 1 : 1;
+                    if (hash[key]) {
+                        hash[key] += 1;
+                        hash[key + '-label'] += '；' + label;
+                    } else {
+                        hash[key] = 1;
+                        hash[key + '-label'] = label;
+                    }
                 });
                 return hash;
             })(relations);
 
             // 格式化 links（links 的属性 source 必须从 0 开始）
             const links = relations.map(function ({startNode, endNode, label, type}) {
+                const mapKey = startNode + '-' + endNode;
                 let lcount = sameLinkMap[startNode + '-' + endNode];
+                let alllabel = sameLinkMap[startNode + '-' + endNode + '-label'];
                 return {
                     source: nodesMap[startNode],
                     target: nodesMap[endNode],
                     label,
                     type,
-                    lcount
+                    alllabel: sameLinkMap[mapKey + '-label'],
+                    lcount: sameLinkMap[mapKey],
                 }
             });
 
@@ -207,8 +216,9 @@
                     return '#linkline' + i 
                 })
                 .style("pointer-events", "none")
+                .style("fill", "#000")
                 .text(function (d) { 
-                    return d.label; 
+                    return d.alllabel; 
                 });
 
             // 节点（圆）
