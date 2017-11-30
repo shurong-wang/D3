@@ -41,7 +41,7 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
 
-        var width = 1280;
+        var width = 600;
         var height = 600;
 
         var svg = d3.select("body").append("svg")
@@ -97,8 +97,7 @@
                     target: nodesMap[endNode],
                     label,
                     type,
-                    lkey: --lcount,
-                    lcount: sameLinkMap[startNode + '-' + endNode]
+                    lcount
                 }
             });
 
@@ -327,8 +326,12 @@
 
             // 连线路径
             function linkLinePath(d) {
-                return 'M ' + (d.source.x) + ',' + d.source.y 
-                    + ' L ' + (d.target.x) + ',' + d.target.y; 
+                const sx = Math.round(d.source.x);
+                const sy = Math.round(d.source.y);
+                const tx = Math.round(d.target.x);
+                const ty = Math.round(d.target.y);
+
+                return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty; 
             }
 
         }

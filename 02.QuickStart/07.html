@@ -1,41 +1,38 @@
-<!DOCTYPE html>
 <html>
 
 <head>
 	<meta charset="utf-8">
-	<title>力导向图</title>
+	<title>力学图</title>
 	<style>
-		.labeltext {
-			font-size: 16px;
+		.nodetext {
+			font-size: 12px;
 			font-family: SimSun;
 			fill: #000000;
-		}
-
-		.nodetext {
-			font-size: 14px;
-			font-family: 微软雅黑;
-			fill: #fff;
-			cursor: pointer;
-			user-select: none;
 		}
 
 		.linetext {
 			font-size: 12px;
 			font-family: SimSun;
-			fill: #0000FF;
+			fill: #1f77b4;
 			fill-opacity: 0.0;
+		}
+
+		.circleImg {
+			stroke: #ff7f0e;
+			stroke-width: 1.5px;
 		}
 	</style>
 </head>
 
 <body>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<script>		   
+	<script>           
 
-		var width = 980;
-		var height = 600;
+		var width = 900;
+		var height = 800;
 		var img_w = 77;
-		var img_h = 90;
+		var img_h = 80;
+		var radius = 30;    //圆形半径
 		var api = "source/relation.json";
 		var imagePath = 'source/images/';
 
@@ -43,43 +40,34 @@
 			.attr("width", width)
 			.attr("height", height);
 
+
 		d3.json(api, function (error, root) {
 
 			if (error) {
-				return console.error(error);
+				return console.log(error);
 			}
-			
-			const { nodes, edges } = root;
+			console.log(root);
 
+			//D3力导向布局
 			var force = d3.layout.force()
-				.nodes(nodes)
-				.links(edges)
+				.nodes(root.nodes)
+				.links(root.edges)
 				.size([width, height])
-				.linkStrength(0)
 				.linkDistance(200)
 				.charge(-1500)
 				.start();
 
+			//边             
 			var edges_line = svg.selectAll("line")
-				.data(edges)
+				.data(root.edges)
 				.enter()
 				.append("line")
 				.style("stroke", "#ccc")
-				.style("stroke-width", 1)
-				.style("cursor", "pointer")
-				.on("mouseenter", function (d, i) {
-					//显示连接线上的文字
-					console.log(d, i);
+				.style("stroke-width", 1);
 
-				})
-				.on("mouseleave", function (d, i) {
-					//隐去连接线上的文字
-					console.log(d, i);
-
-				})
-
+			//边上的文字（人物之间的关系）            
 			var edges_text = svg.selectAll(".linetext")
-				.data(edges)
+				.data(root.edges)
 				.enter()
 				.append("text")
 				.attr("class", "linetext")
@@ -87,42 +75,41 @@
 					return d.relation;
 				});
 
-			var label_text_1 = svg.append("text")
-				.attr("class", "labeltext")
-				.attr("x", 10)
-				.attr("y", 16)
-				.text("运动状态：开始");
-
-			var label_text_2 = svg.append("text")
-				.attr("class", "labeltext")
-				.attr("x", 10)
-				.attr("y", 40)
-				.text("拖拽状态：结束");
-				
 			var drag = force.drag()
 				.on("dragstart", function (d, i) {
-					//拖拽开始后设定被拖拽对象为固定
 					d.fixed = true;
-					label_text_2.text("拖拽状态：开始");
+					console.log("拖拽状态：开始");
 				})
 				.on("dragend", function (d, i) {
-					label_text_2.text("拖拽状态：结束");
+					console.log.text("拖拽状态：结束");
 				})
 				.on("drag", function (d, i) {
-					label_text_2.text("拖拽状态：进行中");
+					console.log.text("拖拽状态：进行中");
 				});
 
+			// 圆形图片节点（人物头像）
 			var nodes_img = svg.selectAll("image")
-				.data(nodes)
+				.data(root.nodes)
 				.enter()
-				.append("image")
-				.attr("width", img_w)
-				.attr("height", img_h)
-				.attr("xlink:href", function (d) {
-					return imagePath + d.image;
+				.append("circle")
+				.attr("class", "circleImg")
+				.attr("r", radius)
+				.attr("fill", function (d, i) {
+					//创建圆形图片
+					var defs = svg.append("defs");
+					var catpattern = defs.append("pattern")
+						.attr("id", "catpattern" + i)
+						.attr("height", 1)
+						.attr("width", 1)
+					catpattern.append("image")
+						.attr("x", - (img_w / 2 - radius))
+						.attr("y", - (img_h / 2 - radius))
+						.attr("width", img_w)
+						.attr("height", img_h)
+						.attr("xlink:href", imagePath + d.image)
+					return "url(#catpattern" + i + ")";
 				})
-				.style("cursor", "pointer")
-				.on("mouseenter", function (d, i) {
+				.on("mouseover", function (d, i) {
 					//显示连接线上的文字
 					edges_text.style("fill-opacity", function (edge) {
 						if (edge.source === d || edge.target === d) {
@@ -130,7 +117,7 @@
 						}
 					});
 				})
-				.on("mouseleave", function (d, i) {
+				.on("mouseout", function (d, i) {
 					//隐去连接线上的文字
 					edges_text.style("fill-opacity", function (edge) {
 						if (edge.source === d || edge.target === d) {
@@ -138,16 +125,16 @@
 						}
 					});
 				})
+				.call(drag)
 				.on("dblclick", function (d, i) {
 					d.fixed = false;
-				})
-				.call(drag);
+				});
 
 			var text_dx = -20;
-			var text_dy = -20;
+			var text_dy = 20;
 
 			var nodes_text = svg.selectAll(".nodetext")
-				.data(nodes)
+				.data(root.nodes)
 				.enter()
 				.append("text")
 				.attr("class", "nodetext")
@@ -155,25 +142,13 @@
 				.attr("dy", text_dy)
 				.text(function (d) {
 					return d.name;
-				}).call(drag);
+				});
 
-			//力学图运动开始时
-			force.on("start", function () {
-				label_text_1.text("运动状态：开始");
-			});
-
-			//力学图运动结束时
-			force.on("end", function () {
-				label_text_1.text("运动状态：结束");
-			});
 
 			force.on("tick", function () {
 
-				//修改标签文字
-				label_text_1.text("运动状态：进行中");
-
 				//限制结点的边界
-				nodes.forEach(function (d, i) {
+				root.nodes.forEach(function (d, i) {
 					d.x = d.x - img_w / 2 < 0 ? img_w / 2 : d.x;
 					d.x = d.x + img_w / 2 > width ? width - img_w / 2 : d.x;
 					d.y = d.y - img_h / 2 < 0 ? img_h / 2 : d.y;
@@ -192,13 +167,12 @@
 
 
 				//更新结点图片和文字
-				nodes_img.attr("x", function (d) { return d.x - img_w / 2; });
-				nodes_img.attr("y", function (d) { return d.y - img_h / 2; });
+				nodes_img.attr("cx", function (d) { return d.x });
+				nodes_img.attr("cy", function (d) { return d.y });
 
 				nodes_text.attr("x", function (d) { return d.x });
 				nodes_text.attr("y", function (d) { return d.y + img_w / 2; });
 			});
-
 		});
 
 	</script>
