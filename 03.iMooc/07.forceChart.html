@@ -99,8 +99,15 @@
                 .links(links)               // 设定连线数组
                 .size([width, height])      // 画布的大小
                 .linkDistance(180)          // 连线长度
+                // .linkStrength(0)            // 拖动节点是否影响相邻节点
                 .charge(-1500)              // 排斥/吸引，值越小越排斥
+                .on("start", function () {
+                    console.log("force-start");
+                })
                 .on("tick", tick)           // 动画计算
+                .on("end", function () {
+                    console.log("force-end");
+                })
                 .start();                   // 开始转换
             
             // 控制节点拖拽
@@ -124,33 +131,17 @@
                     //.attr("markerUnits", "strokeWidth")   // 设置箭头随着线的粗细变化
                     .attr("markerUnits", "userSpaceOnUse")
                     .attr("viewBox", "0 -5 10 10")          // 坐标系的区域
-                    .attr("refX", 32)                       // 箭头坐标
+                    .attr("refX", 42)                       // 箭头坐标
                     .attr("refY", 0)
                     .attr("markerWidth", 12)                // 标识的大小
                     .attr("markerHeight", 12)
                     .attr("orient", "auto")                 // 自动确认箭头方向和角度值
                     .attr("stroke-width", 2)                // 箭头宽度
                     .append("path")
-                    .attr("d", "M0,-5 L10,0 L0,5")          // 箭头的路径
-                    .attr('fill', '#000000');               // 箭头颜色
+                    .attr("d", "M0,-3 L9,0 L0,3")           // 箭头的路径
+                    .attr('fill', '#666');                  // 箭头颜色
 
-            // // 将连接线设置为曲线
-            // var path = svg.append("g").selectAll("path")
-            //     .data(force.links())
-            //     .enter().append("path")
-            //     .attr("class", function (d) { 
-            //         return "link " + d.type; 
-            //     })
-            //     .style("stroke",function (d) {
-            //         //console.log(d);
-            //         return "#A254A2";//连接线的颜色
-            //     })
-            //     .attr("marker-end", function (d) { 
-            //         return "url(#" + d.type + ")"; 
-            //     });
-        
-
-            // 连线    
+            // 节点连线    
             var linkLine = svg.selectAll(".edgepath")
                 .data(force.links())  // 使用 force.links 数据
                 .enter()
@@ -182,7 +173,7 @@
                 })
                 .style("pointer-events", "none")
                 .style("stroke-width", 0.5) // 线条粗细
-                .attr("marker-end", "url(#arrow)"); // 根据箭头标记的 id 标记箭头
+                .attr("marker-end", "url(#arrow)"); // 根据 id 标记箭头
 
             // 连线的文字
             var lineText = svg.append("g").selectAll(".edgelabel")
@@ -224,9 +215,12 @@
                     // 节点描边颜色
                     return node.ntype === "Human" ? "#f93" : "#f43";
                 })
-                .attr("r", 28) // 设置节点半径
+                .attr("r", function (node) {
+                    // 设置节点半径
+                    return node.ntype === "Human" ? 30 : 40;
+                })
                 .on("click", function (node) {
-                    // 单击时,连线加粗
+                    // 单击连线加粗
                     linkLine.style("stroke-width", function (line) {
                         // console.log(line);
                         if (line.source.id == node.id || line.target.id == node.id) {
@@ -235,47 +229,16 @@
                             return 0.5;
                         }
                     });
-                    //d3.select(this).style('stroke-width',2);
                 })
                 .call(forceDrag); // 使顶点可以被拖动
-            
-            // circle.append("text")  
-            // .attr("dy", ".35em")  
-            // .attr("text-anchor", "middle") // 在圆圈内添加文字  
-            // .text(function(d) { 
-            //     //console.log(d);
-            //     return d.id; 
-            // });
 
-            // 节点提示文字
-            circle.append("svg:title")
-                .text(function (node) {
-                    var link = links[node.index];
-                    if (node.id == link.source.id && link.type == "SERVE") {
-                        return "双击可查看详情"
-                    }
-                });
-
-            // // 矩形
-            // var rect=svg.append("rect")
-            //         .attr({"x":100,"y":100,
-            //                 "width":100,"height":50,
-            //                 "rx":5,//水平圆角
-            //                 "ry":10//竖直圆角
-            //             })
-            //         .style({
-            //             "stroke":"red",
-            //             "stroke-width":1,
-            //             "fill":"yellow"
-            // });
-
-            var text = svg.append("g").selectAll("text")
+            // 节点文字
+            var nodeText = svg.append("g").selectAll("text")
                 .data(force.nodes())
-                // 返回缺失元素的占位对象（placeholder），指向绑定的数据中比选定元素集多出的一部分元素
                 .enter()
                 .append("text")
                 .attr("dy", ".35em")
-                .attr("text-anchor", "middle") // 在圆圈中加上数据  
+                .attr("text-anchor", "middle")   
                 .style('fill', function (node) {
                     var color; // 文字颜色
                     var link = links[node.index];
@@ -325,44 +288,17 @@
                     }
                 });
 
-            // // 将文字显示在圆圈的外面 
-            // var text2 = svg.append("g").selectAll("text")
-            //     .data(force.links())
-            //     //返回缺失元素的占位对象（placeholder），指向绑定的数据中比选定元素集多出的一部分元素。
-            //     .enter()
-            //     .append("text")
-            //     .attr("x", 150)//设置文字坐标
-            //     .attr("y", ".50em")
-            //     .text(function(d) { 
-            //         //console.log(d);
-            //         //return d.name; 
-            //         //return d.relation;
-            //         console.log(d);
-            //         return  '1111';
-            //     });
-
             function tick() {
-                //path.attr("d", linkArc); // 连接线
-                circle.attr("transform", transform1); // 圆圈
-                text.attr("transform", transform2); // 节点文字
-                //lineText.attr("transform", transform3);
-                //text2.attr("d", linkArc);//连接线文字
-                //console.log("text2...................");
-                //console.log(text2);
-                //linkLine.attr("x1",function(d){ return d.source.x; });
-                //linkLine.attr("y1",function(d){ return d.source.y; });
-                //linkLine.attr("x2",function(d){ return d.target.x; });
-                //linkLine.attr("y2",function(d){ return d.target.y; });
-
-                //linkLine.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; });
-                //linkLine.attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
-
-
+                // 节点位置
+                circle.attr("transform", circleTranslate);
+                // 节点文字位置
+                nodeText.attr("transform", textTranslate);
+                // 连线位置
                 linkLine.attr('d', function (d) {
                     var path = 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
                     return path;
                 });
-
+                // 连线文字位置
                 lineText.attr('transform', function (d, i) {
                     if (d.target.x < d.source.x) {
                         bbox = this.getBBox();
@@ -376,22 +312,11 @@
                 });
             }
 
-            // 设置连接线的坐标,使用椭圆弧路径段双向编码
-            function linkArc(d) {
-                //var dx = d.target.x - d.source.x,
-                // dy = d.target.y - d.source.y,
-                // dr = Math.sqrt(dx * dx + dy * dy);
-                //return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-                //打点path格式是：Msource.x,source.yArr00,1target.x,target.y  
-
-                return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
-            }
-
             // 设置节点和文字的坐标
-            function transform1(d) {
+            function circleTranslate(d) {
                 return "translate(" + d.x + "," + d.y + ")";
             }
-            function transform2(d) {
+            function textTranslate(d) {
                 return "translate(" + (d.x) + "," + d.y + ")";
             }
 
