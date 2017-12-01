@@ -62,7 +62,6 @@
         // 初始化
         function initialize(data) {
             let {nodes, relations} = data;
-
             // 生成 nodes map
             const nodesMap = (function (nodes) {
                 const hash = {};
@@ -116,30 +115,22 @@
                 .links(links)               // 设定连线数组
                 .size([width, height])      // 画布的大小
                 .linkDistance(200)          // 连线长度
-                // .linkStrength(0)            // 拖动节点是否影响相邻节点
-                .charge(-3000)              // 排斥/吸引，值越小越排斥
-                .on("start", function () {
-                    // console.log("force-start");
-                })
-                .on("tick", tick)           // 动画计算
-                .on("end", function () {
-                    // console.log("force-end");
-                })
-                .start();                   // 开始转换
+                .charge(-3000);             // 排斥/吸引，值越小越排斥
 
-            // 控制节点拖拽
-            var forceDrag = force.drag()
-                .on("dragstart", function (d, i) {
-                    // 拖拽开始后设定被拖拽对象为固定
-                    d.fixed = true;
-                })
-                .on("dragend", function (d, i) {
-                    // ...
-                })
-                .on("drag", function (d, i) {
-                    // ...
-                });
-    
+            // 开启力导向布局
+            force.start();
+            // 手动快速布局
+            for (let i = 0, n = 1000; i < n; ++i) {
+                force.tick();
+            }
+            // 停止力布局
+            force.stop();
+            // 固定节点
+            nodes.forEach(d => {
+                const t = d;
+                t.fixed = true;
+            });
+
             // 箭头
             var marker = svg.append("marker")
                 //.attr("id", function(d) { return d; })
@@ -206,7 +197,7 @@
                     'dx': function (d) {
                         return 80;
                     },
-                    'dy': 5
+                    'dy': 5,
                     //'font-size':10,
                     //'fill':'#aaa'
                 });
@@ -222,7 +213,7 @@
                 });
 
             // 节点（圆）
-            var circle = svg.append("g").selectAll("circle")
+            var nodeCircle = svg.append("g").selectAll("circle")
                 .data(force.nodes())    // 使用 force.nodes 数据
                 .enter()
                 .append("circle")
@@ -249,7 +240,7 @@
                         }
                     });
                 })
-                .call(forceDrag); // 使顶点可以被拖动
+                .call(force.drag); // 使节点可以被拖动
 
             // 节点文字
             var nodeText = svg.append("g").selectAll("text")
@@ -307,9 +298,10 @@
                     }
                 });
 
+            // 更新力导向图
             function tick() {
                 // 节点位置
-                circle.attr("transform", function (d) {
+                nodeCircle.attr("transform", function (d) {
                     return "translate(" + d.x + "," + d.y + ")";
                 });
                 // 节点文字位置
@@ -343,6 +335,13 @@
 
                 return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty; 
             }
+
+
+            // 更新力导向图（注意调用位置：必须在 nodeCircle, nodeText, linkLine, lineText 后）
+            tick();
+
+            // 监听力学图运动事件，更新坐标
+            force.on('tick', tick);
 
         }
 
