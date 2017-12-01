@@ -51,11 +51,13 @@
 
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
-
         var width = 600;
         var height = 600;
+        var api = "source/data.json";
+        var nodesMap, linkMap;
 
         var canvas = d3.select("#canvas");
+
         var svg = canvas.append("svg")
             .attr("class", "relationGraph")
             .attr("width", width)
@@ -64,74 +66,38 @@
         var forceG = d3.select("svg").append("g")
             .attr("class", "forceG");
 
-        var api = "source/data.json";
-
-        d3.json(api, function (error, data) {
+        // 请求数据，绘制图表
+        d3.json(api, function (error, resp) {
             if (error) {
                 return console.error(error);
             }
-            // console.log(data);
 
-            initialize(data);
+            initialize(resp);
         });
 
         // 初始化
-        function initialize(data) {
-            let {nodes, relations} = data;
-            // 生成 nodes map
-            const nodesMap = (function (nodes) {
-                const hash = {};
-                nodes.map(function ({id, name, ntype}) {
-                    hash[id] = {
-                        id,
-                        name,
-                        ntype
-                    };
-                });
-                return hash;
-            })(nodes);
+        function initialize(resp) {
+            let {nodes, relations} = resp;
 
-            // 格式化 nodes（必须用 d3.values 处理 nodesMap，不能直接传入 nodes）
+            // 生成 nodes map
+            nodesMap = genNodesMap(nodes);
+
+            // 构建 nodes（不能直接使用 api 中的 nodes）
             nodes = d3.values(nodesMap);
 
             // 起点和终点相同的关系映射
-            const sameLinkMap = (function (relations) {
-                const hash = {};
-                relations.map(function ({startNode, endNode, label}) {
-                    const key = startNode + '-' + endNode;
-                    if (hash[key]) {
-                        hash[key] += 1;
-                        hash[key + '-label'] += '；' + label;
-                    } else {
-                        hash[key] = 1;
-                        hash[key + '-label'] = label;
-                    }
-                });
-                return hash;
-            })(relations);
+            linkMap = genLinkMap(relations);
 
-            // 格式化 links（links 的属性 source 必须从 0 开始）
-            const links = relations.map(function ({startNode, endNode, label, type}) {
-                const mapKey = startNode + '-' + endNode;
-                let lcount = sameLinkMap[startNode + '-' + endNode];
-                let alllabel = sameLinkMap[startNode + '-' + endNode + '-label'];
-                return {
-                    source: nodesMap[startNode],
-                    target: nodesMap[endNode],
-                    label,
-                    type,
-                    alllabel: sameLinkMap[mapKey + '-label'],
-                    lcount: sameLinkMap[mapKey],
-                }
-            });
+            // 构建 links（source 属性必须从 0 开始）
+            const links = genLinks(relations);
 
             // 布局力导向图
             var force = d3.layout.force()
-                .nodes(nodes)               // 设定节点数组
-                .links(links)               // 设定连线数组
-                .size([width, height])      // 画布的大小
-                .linkDistance(200)          // 连线长度
-                .charge(-3000);             // 排斥/吸引，值越小越排斥
+                .nodes(nodes) // 设定节点数组
+                .links(links) // 设定连线数组
+                .size([width, height]) // 画布的大小
+                .linkDistance(200) // 连线长度
+                .charge(-3000); // 排斥/吸引，值越小越排斥
 
             // 开启力导向布局
             force.start();
@@ -141,7 +107,7 @@
             }
             // 停止力布局
             force.stop();
-            // 固定节点
+            // 固定所有节点
             nodes.forEach(d => {
                 const t = d;
                 t.fixed = true;
@@ -153,33 +119,33 @@
                 .attr("id", "arrow")
                 //.attr("markerUnits", "strokeWidth")   // 设置箭头随着线的粗细变化
                 .attr("markerUnits", "userSpaceOnUse")
-                .attr("viewBox", "0 -5 10 10")          // 坐标系的区域
-                .attr("refX", 40)                       // 箭头坐标
+                .attr("viewBox", "0 -5 10 10") // 坐标系的区域
+                .attr("refX", 40) // 箭头坐标
                 .attr("refY", 0)
-                .attr("markerWidth", 12)                // 标识的大小
+                .attr("markerWidth", 12) // 标识的大小
                 .attr("markerHeight", 12)
-                .attr("orient", "auto")                 // 自动确认箭头方向和角度值
-                .attr("stroke-width", 2)                // 箭头宽度
+                .attr("orient", "auto") // 自动确认箭头方向和角度值
+                .attr("stroke-width", 2) // 箭头宽度
                 .append("path")
-                .attr("d", "M0,-3 L9,0 L0,3")           // 箭头的路径
-                .attr('fill', '#666');                  // 箭头颜色
+                .attr("d", "M0,-3 L9,0 L0,3") // 箭头的路径
+                .attr('fill', '#666'); // 箭头颜色
 
             // 节点连线    
             var linkLine = forceG.selectAll(".linkline")
-                .data(force.links())  // 使用 force.links 数据
+                .data(force.links()) // 使用 force.links 数据
                 .enter()
                 .append("path")
                 .attr({
                     'd': function (d) {
-                        return linkLinePath(d);
+                        return genLinkPath(d);
                     },
                     'class': 'linkline',
                     // 'fill-opacity':0,
                     // 'stroke-opacity':0,
                     // 'fill':'blue',
                     // 'stroke':'red',
-                    'id': function (d, i) { 
-                        return 'linkline' + i; 
+                    'id': function (d, i) {
+                        return 'linkline' + i;
                     }
                 })
                 .style("stroke", function (d) {
@@ -206,8 +172,8 @@
                 .style("pointer-events", "none")
                 .attr({
                     'class': 'linetext',
-                    'id': function (d, i) { 
-                        return 'linkline' + i; 
+                    'id': function (d, i) {
+                        return 'linkline' + i;
                     },
                     'dx': function (d) {
                         return 80;
@@ -218,18 +184,18 @@
                 });
 
             lineText.append('textPath')
-                .attr('xlink:href', function (d, i) { 
-                    return '#linkline' + i 
+                .attr('xlink:href', function (d, i) {
+                    return '#linkline' + i
                 })
                 .style("pointer-events", "none")
                 .style("fill", "#000")
-                .text(function (d) { 
-                    return d.alllabel; 
+                .text(function (d) {
+                    return d.alllabel;
                 });
 
             // 节点（圆）
             var nodeCircle = forceG.append("g").selectAll("circle")
-                .data(force.nodes())    // 使用 force.nodes 数据
+                .data(force.nodes()) // 使用 force.nodes 数据
                 .enter()
                 .append("circle")
                 .style("fill", function (node) {
@@ -263,7 +229,7 @@
                 .enter()
                 .append("text")
                 .attr("dy", ".35em")
-                .attr("text-anchor", "middle")   
+                .attr("text-anchor", "middle")
                 .style('fill', function (node) {
                     let color; // 文字颜色
                     let link = links[node.index];
@@ -281,8 +247,8 @@
                         d3.select(this).append('tspan')
                             .attr('x', 0)
                             .attr('y', 2)
-                            .text(function () { 
-                                return d.name; 
+                            .text(function () {
+                                return d.name;
                             });
                     }
                     // 如果小于四个字符，不换行
@@ -290,26 +256,30 @@
                         d3.select(this).append('tspan')
                             .attr('x', 0)
                             .attr('y', 2)
-                            .text(function () { 
-                                return d.name; 
+                            .text(function () {
+                                return d.name;
                             });
                     } else {
                         let top = d.name.substring(0, 4);
                         let bot = d.name.substring(4, d.name.length);
 
-                        d3.select(this).text(function () { 
-                            return ''; 
+                        d3.select(this).text(function () {
+                            return '';
                         });
 
                         d3.select(this).append('tspan')
                             .attr('x', 0)
                             .attr('y', -7)
-                            .text(function () { return top; });
+                            .text(function () {
+                                return top;
+                            });
 
                         d3.select(this).append('tspan')
                             .attr('x', 0)
                             .attr('y', 10)
-                            .text(function () { return bot; });
+                            .text(function () {
+                                return bot;
+                            });
                     }
                 });
 
@@ -325,7 +295,7 @@
                 });
                 // 连线位置
                 linkLine.attr('d', function (d) {
-                    return linkLinePath(d);
+                    return genLinkPath(d);
                 });
                 // 连线文字角度
                 lineText.attr('transform', function (d, i) {
@@ -334,32 +304,91 @@
                         rx = bbox.x + bbox.width / 2;
                         ry = bbox.y + bbox.height / 2;
                         return 'rotate(180 ' + rx + ' ' + ry + ')';
-                    }
-                    else {
+                    } else {
                         return 'rotate(0)';
                     }
                 });
             }
 
-            // 连线路径
-            function linkLinePath(d) {
-                const sx = Math.round(d.source.x);
-                const sy = Math.round(d.source.y);
-                const tx = Math.round(d.target.x);
-                const ty = Math.round(d.target.y);
-
-                return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty; 
-            }
-
-
-            // 更新力导向图（注意调用位置：必须在 nodeCircle, nodeText, linkLine, lineText 后）
-            tick();
+            // 更新力导向图
+            tick(); // 注意：调用位置须在 nodeCircle, nodeText, linkLine, lineText 声明后
 
             // 监听力学图运动事件，更新坐标
             force.on('tick', tick);
 
+            // 设置缩放/平移
+            zooming();
+
         }
 
+        function genLinks(relations) {
+            return relations.map(function ({startNode, endNode, label, type}) {
+                const mapKey = startNode + '-' + endNode;
+                let lcount = linkMap[startNode + '-' + endNode];
+                let alllabel = linkMap[startNode + '-' + endNode + '-label'];
+                return {
+                    source: nodesMap[startNode],
+                    target: nodesMap[endNode],
+                    label,
+                    type,
+                    alllabel: linkMap[mapKey + '-label'],
+                    lcount: linkMap[mapKey],
+                }
+            })
+        }
+    
+        function genLinkMap(relations) {
+            const hash = {};
+            relations.map(function ({startNode, endNode, label}) {
+                const key = startNode + '-' + endNode;
+                if (hash[key]) {
+                    hash[key] += 1;
+                    hash[key + '-label'] += '；' + label;
+                } else {
+                    hash[key] = 1;
+                    hash[key + '-label'] = label;
+                }
+            });
+            return hash;
+        }
+
+        function genNodesMap(nodes) {
+            const hash = {};
+            nodes.map(function ({id, name, ntype}) {
+                hash[id] = {
+                    id,
+                    name,
+                    ntype
+                };
+            });
+            return hash;
+        }
+        
+        // 生成关系连线路径
+        function genLinkPath(d) {
+            const sx = Math.round(d.source.x);
+            const sy = Math.round(d.source.y);
+            const tx = Math.round(d.target.x);
+            const ty = Math.round(d.target.y);
+
+            return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
+        }
+
+        // 缩放与平移
+        function zooming() {
+            const zoomed = () => {
+                const { translate, scale } = d3.event;
+                forceG.attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+            };
+            svg.append("rect")
+                .attr("fill", "none")
+                .attr("pointer-events", "all")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.behavior.zoom()
+                    .scaleExtent([0.25, 4])
+                    .on("zoom", zoomed));
+        }
     </script>
 </body>
 
