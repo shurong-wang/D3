@@ -1,0 +1,76 @@
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>饼状图</title>
+</head>
+
+<style>
+
+</style>
+
+<body>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script>
+		var width = 400;
+		var height = 400;
+		var dataset = [30, 10, 43, 55, 13];
+
+		var svg = d3.select("body")
+			.append("svg")
+			.attr("width", width)
+			.attr("height", height);
+
+		var pie = d3.layout.pie();
+
+		var piedata = pie(dataset);
+
+		var outerRadius = 150; // 外半径
+		var innerRadius = 50; 	// 内半径（空心），为 0 则中间没有空白
+
+		// 弧生成器
+		var arc = d3.svg.arc() 
+			.innerRadius(innerRadius) // 设置内半径
+			.outerRadius(outerRadius); // 设置外半径
+
+		// 颜色生成器
+		var color = d3.scale.category10();
+
+		// 添加分组元素 <g> 存放弧的相关元素
+		var arcs = svg.selectAll("g")
+			.data(piedata)
+			.enter()
+			.append("g")
+			.attr("transform", "translate(" + (width / 2) + "," + (width / 2) + ")");
+
+		// 对每个 <g> 元素添加 <path>
+		arcs.append("path")
+			.attr("fill", function (d, i) {
+				return color(i);
+			})
+			.attr("d", function (d) {
+				// <path> + 弧生成器 => 绘制弧形
+				return arc(d);
+			});
+
+		// 在每一个弧线中心添加文本
+		arcs.append("text")
+			.attr("transform", function (d) {
+				// arc.centroid(d) 能算出弧线的中心
+				return "translate(" + arc.centroid(d) + ")";
+			})
+			.attr("text-anchor", "middle")
+			.text(function (d) {
+				// 注意: text() 参数是 d.data ，而不是 d
+				// 因为绑定的数据是对象，里面有 d.startAngle, d.endAngle, d.data 等
+				// 其中 d.data 才是转换前的整数的值
+				return d.data;
+			});
+
+		console.log(dataset);
+		console.log(piedata);
+	</script>
+
+</body>
+
+</html>
