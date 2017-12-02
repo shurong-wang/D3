@@ -50,9 +50,9 @@
 
     <script src='http://d3js.org/d3.v3.min.js' charset='utf-8'></script>
     <script>
-        var width = 600;
-        var height = 600;
-        var styleMap = {
+        const width = 600;
+        const height = 600;
+        const styleMap = {
             node: {
                 fillColor: {
                     Human: '#F05733',
@@ -75,30 +75,29 @@
                 }
             }
         };
-        var api = 'data/v4.json';
-        var nodesMap, linkMap;
+        const api = 'data/v4.json';
+        let nodesMap = {};
+        let linkMap = {};
 
         // 力导向图
-        var force = d3.layout.force()
+        const force = d3.layout.force()
             .size([width, height]) // 画布的大小
             .linkDistance(200) // 连线长度
             .charge(-2000); // 排斥/吸引，值越小越排斥
 
         // 全图缩放器
-        var zoom = d3.behavior.zoom()
+        const zoom = d3.behavior.zoom()
             .scaleExtent([0.25, 2])
             .on('zoom', zoomFn);
 
         // 节点拖拽器（使用 d3.behavior.drag 节点拖动失效）
-        var drag = force.drag()
-            .origin(function (d) {
-                return d;
-            })
+        const drag = force.drag()
+            .origin(d => d)
             .on('dragstart', dragstartFn)
             .on('drag', dragFn);
 
         // SVG
-        var svg = d3.select('#canvas').append('svg')
+        const svg = d3.select('#canvas').append('svg')
             .attr('width', width)
             .attr('height', height)
             .append('g')
@@ -106,17 +105,17 @@
             .on('dblclick.zoom', null);
 
         // 缩放层（位置必须在 container 之前）
-        var zoomOverlay = svg.append('rect')
+        const zoomOverlay = svg.append('rect')
             .attr('width', width)
             .attr('height', height)
             .style('fill', 'none')
             .style('pointer-events', 'all');
 
-        var container = svg.append('g')
+        const container = svg.append('g')
             .attr('class', 'container');
 
         // 请求数据，绘制图表
-        d3.json(api, function (error, resp) {
+        d3.json(api, (error, resp) => {
             if (error) {
                 return console.error(error);
             }
@@ -165,12 +164,10 @@
             });
 
             // 箭头
-            var marker = container.append('svg:defs').selectAll('marker')
+            const marker = container.append('svg:defs').selectAll('marker')
                 .data(force.links())
                 .enter().append('svg:marker')
-                .attr('id', function (d) {
-                    return d.type + '-arrow';
-                })
+                .attr('id', d => d.type + '-arrow')
                 .attr('markerUnits', 'userSpaceOnUse')
                 .attr('viewBox', '0 -5 10 10')
                 .attr('refX', 39)
@@ -181,71 +178,49 @@
                 .attr('stroke-width', 2)
                 .append('svg:path')
                 .attr('d', 'M2,0 L0,-3 L9,0 L0,3 M2,0 L0,-3')
-                .attr('fill', function (d) {
-                    return styleMap.line.strokeColor[d.type];
-                });
+                .attr('fill', d => styleMap.line.strokeColor[d.type]);
 
             // 节点连线    
-            var linkLine = container.selectAll('.link')
+            const linkLine = container.selectAll('.link')
                 .data(force.links())
                 .enter()
                 .append('path')
                 .attr('class', 'link')
                 .attr({
-                    'marker-end': function (d) { // 标记箭头
-                        return 'url(#' + d.type + '-arrow)'
-                    },
-                    'd': function (d) {
-                        return genLinkPath(d);
-                    },
-                    'id': function (d, i) {
-                        return 'link' + i;
-                    }
+                    // 标记箭头
+                    'marker-end': d => 'url(#' + d.type + '-arrow)',
+                    'd': d => genLinkPath(d),
+                    'id': (d, i) => 'link' + i,
                 })
-                .style('stroke', function (d) {
-                    // 根据关系的不同设置线条颜色
-                    return styleMap.line.strokeColor[d.type];
-                });
-
+                // 根据关系的不同设置线条颜色
+                .style('stroke', d => styleMap.line.strokeColor[d.type]);
 
             // 连线的文字
-            var lineText = container.append('g').selectAll('.linetext')
+            const lineText = container.append('g').selectAll('.linetext')
                 .data(force.links())
                 .enter()
                 .append('text')
                 .style('fill', '#000')
                 .attr({
                     'class': 'linetext',
-                    'id': function (d, i) {
-                        return 'link' + i;
-                    },
-                    'dx': function (d) {
-                        return 80;
-                    },
+                    'id': (d, i) => 'link' + i,
+                    'dx': d => 80,
                     'dy': 5
                 });
 
             lineText.append('textPath')
-                .attr('xlink:href', function (d, i) {
-                    return '#link' + i
-                })
-                .text(function (d) {
-                    return d.alllabel;
-                });
+                .attr('xlink:href', (d, i) => '#link' + i)
+                .text(d => d.alllabel);
 
             // 节点（圆）
-            var nodeCircle = container.append('g')
+            const nodeCircle = container.append('g')
                 .selectAll('.node')
                 .data(force.nodes())
                 .enter()
                 .append('g')
                 .attr('class', 'node')
-                .attr('cx', function (d) {
-                    return d.x;
-                })
-                .attr('cy', function (d) {
-                    return d.y;
-                })
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y)
                 .call(drag); // 节点可拖动
 
             nodeCircle.append('circle')
@@ -264,7 +239,6 @@
                 .on('mouseover', function (node) {
                     // 加重节点样式
                     d3.select(this).classed('node-active', true);
-
                     // 加重连线样式
                     linkLine.classed('link-active', function (line) {
                         return isLinking(node, line);
@@ -276,10 +250,8 @@
                 }).on('mouseout', function (node) {
                     // 恢复节点样式
                     d3.select(this).classed('node-active', false);
-
                     // 连线恢复样式
                     linkLine.classed('link-active', false);
-
                     // 显示所有连线文字
                     lineText.style('fill-opacity', function (line) {
                         return 1.0;
@@ -287,7 +259,7 @@
                 });
 
             // 节点文字
-            var nodeText = container.append('g').selectAll('text')
+            const nodeText = container.append('g').selectAll('text')
                 .data(force.nodes())
                 .enter()
                 .append('text')
@@ -341,17 +313,11 @@
             // 更新力导向图
             function tick() {
                 // 节点位置
-                nodeCircle.attr('transform', function (d) {
-                    return 'translate(' + d.x + ',' + d.y + ')';
-                });
+                nodeCircle.attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
                 // 节点文字位置
-                nodeText.attr('transform', function (d) {
-                    return 'translate(' + (d.x) + ',' + d.y + ')';
-                });
+                nodeText.attr('transform', d => 'translate(' + (d.x) + ',' + d.y + ')');
                 // 连线位置
-                linkLine.attr('d', function (d) {
-                    return genLinkPath(d);
-                });
+                linkLine.attr('d', d => genLinkPath(d));
                 // 连线文字角度
                 lineText.attr('transform', function (d, i) {
                     if (d.target.x < d.source.x) {
