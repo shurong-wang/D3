@@ -1,201 +1,183 @@
-{
+﻿{
     "nodes": [
         {
-            "id": 1,
-            "name": "刘琪",
-            "ntype": "Human"
+            "name": "云天河",
+            "image": "tianhe.png"
         },
         {
-            "id": 2,
-            "name": "邻久企业管理服务（天津）有限公司",
-            "ntype": "Company"
+            "name": "韩菱纱",
+            "image": "lingsha.png"
         },
         {
-            "id": 3,
-            "name": "许开辰",
-            "ntype": "Human"
+            "name": "柳梦璃",
+            "image": "mengli.png"
         },
         {
-            "id": 4,
-            "name": "便利蜂企业管理咨询（上海）有限公司",
-            "ntype": "Company"
+            "name": "慕容紫英",
+            "image": "ziying.png"
         },
         {
-            "id": 5,
-            "name": "天马乐骋（天津）商贸有限公司",
-            "ntype": "Company"
+            "name": "云天青",
+            "image": "tianqing.png"
         },
         {
-            "id": 6,
-            "name": "Blibee（HK）",
-            "ntype": "Company"
+            "name": "夙玉",
+            "image": "suyu.png"
         },
         {
-            "id": 7,
-            "name": "生活家商贸（中国）有限公司",
-            "ntype": "Company"
+            "name": "玄霄",
+            "image": "xuanxiao.png"
         },
         {
-            "id": 8,
-            "name": "便利蜂商贸有限公司",
-            "ntype": "Company"
+            "name": "夙瑶",
+            "image": "suyao.png"
         },
         {
-            "id": 9,
-            "name": "睦邻企业管理服务（北京）有限公司",
-            "ntype": "Company"
+            "name": "太清",
+            "image": "taiqing.png"
+        },
+        {
+            "name": "宗炼",
+            "image": "zonglian.png"
+        },
+        {
+            "name": "婵幽",
+            "image": "chanyou.png"
+        },
+        {
+            "name": "奚仲",
+            "image": "xizhong.png"
+        },
+        {
+            "name": "归邪",
+            "image": "guixie.png"
         }
     ],
-    "relations": [
+    "edges": [
         {
-            "startNode": 1,
-            "endNode": 2,
-            "label": "监事",
-            "type": "SERVE"
+            "source": 0,
+            "target": 1,
+            "relation": "挚友"
         },
         {
-            "startNode": 1,
-            "endNode": 4,
-            "label": "法人",
-            "type": "OWN"
+            "source": 0,
+            "target": 2,
+            "relation": "挚友"
         },
         {
-            "startNode": 1,
-            "endNode": 4,
-            "label": "执行董事",
-            "type": "SERVE"
+            "source": 0,
+            "target": 3,
+            "relation": "挚友"
         },
         {
-            "startNode": 1,
-            "endNode": 5,
-            "label": "监事",
-            "type": "SERVE"
+            "source": 1,
+            "target": 2,
+            "relation": "挚友"
         },
         {
-            "startNode": 1,
-            "endNode": 7,
-            "label": "总经理",
-            "type": "SERVE"
+            "source": 1,
+            "target": 3,
+            "relation": "挚友"
         },
         {
-            "startNode": 1,
-            "endNode": 7,
-            "label": "执行董事",
-            "type": "SERVE"
+            "source": 2,
+            "target": 3,
+            "relation": "挚友"
         },
         {
-            "startNode": 1,
-            "endNode": 7,
-            "label": "法人",
-            "type": "OWN"
+            "source": 0,
+            "target": 4,
+            "relation": "父子"
         },
         {
-            "startNode": 1,
-            "endNode": 8,
-            "label": "法人",
-            "type": "OWN"
+            "source": 0,
+            "target": 5,
+            "relation": "母子"
         },
         {
-            "startNode": 1,
-            "endNode": 8,
-            "label": "总经理",
-            "type": "SERVE"
+            "source": 4,
+            "target": 5,
+            "relation": "夫妻"
         },
         {
-            "startNode": 1,
-            "endNode": 8,
-            "label": "执行董事",
-            "type": "SERVE"
+            "source": 0,
+            "target": 6,
+            "relation": "义兄弟"
         },
         {
-            "startNode": 1,
-            "endNode": 9,
-            "label": "监事",
-            "type": "SERVE"
+            "source": 4,
+            "target": 6,
+            "relation": "同门"
         },
         {
-            "startNode": 3,
-            "endNode": 2,
-            "label": "法人",
-            "type": "OWN"
+            "source": 5,
+            "target": 6,
+            "relation": "同门"
         },
         {
-            "startNode": 3,
-            "endNode": 2,
-            "label": "总经理",
-            "type": "SERVE"
+            "source": 4,
+            "target": 7,
+            "relation": "同门"
         },
         {
-            "startNode": 3,
-            "endNode": 2,
-            "label": "执行董事",
-            "type": "SERVE"
+            "source": 5,
+            "target": 7,
+            "relation": "同门"
         },
         {
-            "startNode": 3,
-            "endNode": 4,
-            "label": "监事",
-            "type": "SERVE"
+            "source": 6,
+            "target": 7,
+            "relation": "同门"
         },
         {
-            "startNode": 3,
-            "endNode": 5,
-            "label": "执行董事",
-            "type": "SERVE"
+            "source": 4,
+            "target": 8,
+            "relation": "师徒"
         },
         {
-            "startNode": 3,
-            "endNode": 5,
-            "label": "经理",
-            "type": "SERVE"
+            "source": 5,
+            "target": 8,
+            "relation": "师徒"
         },
         {
-            "startNode": 3,
-            "endNode": 5,
-            "label": "法人",
-            "type": "OWN"
+            "source": 6,
+            "target": 8,
+            "relation": "师徒"
         },
         {
-            "startNode": 3,
-            "endNode": 7,
-            "label": "监事",
-            "type": "SERVE"
+            "source": 7,
+            "target": 8,
+            "relation": "师徒"
         },
         {
-            "startNode": 3,
-            "endNode": 8,
-            "label": "监事",
-            "type": "SERVE"
+            "source": 8,
+            "target": 9,
+            "relation": "同门"
         },
         {
-            "startNode": 3,
-            "endNode": 9,
-            "label": "执行董事",
-            "type": "SERVE"
+            "source": 3,
+            "target": 9,
+            "relation": "师徒"
         },
         {
-            "startNode": 3,
-            "endNode": 9,
-            "label": "法人",
-            "type": "OWN"
+            "source": 2,
+            "target": 10,
+            "relation": "母子"
         },
         {
-            "startNode": 3,
-            "endNode": 9,
-            "label": "总经理",
-            "type": "SERVE"
+            "source": 10,
+            "target": 11,
+            "relation": "主臣"
         },
         {
-            "startNode": 6,
-            "endNode": 4,
-            "label": "参股",
-            "type": "INVEST_C"
+            "source": 10,
+            "target": 12,
+            "relation": "主臣"
         },
         {
-            "startNode": 6,
-            "endNode": 8,
-            "label": "参股",
-            "type": "INVEST_C"
+            "source": 11,
+            "target": 12,
+            "relation": "同僚"
         }
     ]
 }

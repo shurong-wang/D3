@@ -1,428 +1,182 @@
-<!DOCTYPE html>
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <title>力导向图 V2</title>
-    <style>
-        #canvas {
-            border: 1px solid #ccc;
-        }
+	<meta charset="utf-8">
+	<title>力导向图 V2</title>
+	<style>
+		.nodetext {
+			font-size: 12px;
+			font-family: SimSun;
+			fill: #000000;
+		}
 
-        svg {
-            border: 1px solid red;
-        }
+		.linetext {
+			font-size: 12px;
+			font-family: SimSun;
+			fill: #1f77b4;
+			fill-opacity: 0.0;
+		}
 
-        .linkline {
-            fill: none;
-            stroke: #666;
-            stroke-width: 1.5px;
-        }
-
-        .linkline.licensing {
-            stroke: green;
-        }
-
-        .linkline.arrow {
-            stroke-dasharray: 0, 21;
-        }
-
-        circle {
-            fill: #ccc;
-            stroke: #333;
-            stroke-width: 1.5px;
-        }
-
-        text {
-            font: 12px Microsoft YaHei;
-            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .linetext {
-            font-size: 12px Microsoft YaHei;
-        }
-    </style>
+		.circleImg {
+			stroke: #ff7f0e;
+			stroke-width: 1.5px;
+		}
+	</style>
 </head>
 
 <body>
-    <div id="canvas"></div>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script>           
 
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script>
-        var width = 600;
-        var height = 600;
-        var api = "data/v2.json";
-        var nodesMap, linkMap;
+		var width = 900;
+		var height = 800;
+		var img_w = 77;
+		var img_h = 80;
+		var radius = 30;    //圆形半径
+		var api = "data/v2.json";
+		var imagePath = 'data/images/';
 
-       // 力导向图
-        var force = d3.layout.force()
-            .size([width, height]) // 画布的大小
-            .linkDistance(200) // 连线长度
-            .charge(-3000); // 排斥/吸引，值越小越排斥
-
-        // 全图缩放器
-        var zoom = d3.behavior.zoom()
-            .scaleExtent([0.25, 2])
-            .on("zoom", zoomFn);
-
-        // 节点拖拽器
-        var drag = force.drag()
-            .origin(function (d) { 
-                return d; 
-            })
-            .on("dragstart", dragstartFn)
-            .on("drag", dragFn);
-
-        // SVG
-        var svg = d3.select("#canvas").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .call(zoom)
-            .on('dblclick.zoom', null);
-        
-        // 缩放层（位置必须在 container 之前）
-        var zoomOverlay = svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .style("fill", "none")
-        .style("pointer-events", "all");
-
-        var container = svg.append("g")
-            .attr("class", "container");
-
-        // 请求数据，绘制图表
-        d3.json(api, function (error, resp) {
-            if (error) {
-                return console.error(error);
-            }
-
-            initialize(resp);
-        });
-
-        // 初始化
-        function initialize(resp) {
-            let {nodes, relations} = resp;
-
-            // 生成 nodes map
-            nodesMap = genNodesMap(nodes);
-
-            // 构建 nodes（不能直接使用 api 中的 nodes）
-            nodes = d3.values(nodesMap);
-
-            // 起点和终点相同的关系映射
-            linkMap = genLinkMap(relations);
-
-            // 构建 links（source 属性必须从 0 开始）
-            const links = genLinks(relations);
-
-            // 绑定力导向图数据
-            force
-                .nodes(nodes) // 设定节点数组
-                .links(links); // 设定连线数组
-
-            // 开启力导向布局
-            force.start();
-
-            // 手动快速布局
-            for (let i = 0, n = 1000; i < n; ++i) {
-                force.tick();
-            }
-
-            // 停止力布局
-            force.stop();
-
-            // 固定所有节点
-            nodes.forEach(d => {
-                d.fixed = true;
-            });
-
-            // 箭头
-            var marker = container.append("marker")
-                //.attr("id", function(d) { return d; })
-                .attr("id", "arrow")
-                //.attr("markerUnits", "strokeWidth")   // 设置箭头随着线的粗细变化
-                .attr("markerUnits", "userSpaceOnUse")
-                .attr("viewBox", "0 -5 10 10") // 坐标系的区域
-                .attr("refX", 40) // 箭头坐标
-                .attr("refY", 0)
-                .attr("markerWidth", 12) // 标识的大小
-                .attr("markerHeight", 12)
-                .attr("orient", "auto") // 自动确认箭头方向和角度值
-                .attr("stroke-width", 2) // 箭头宽度
-                .append("path")
-                .attr("d", "M0,-3 L9,0 L0,3") // 箭头的路径
-                .attr('fill', '#666'); // 箭头颜色
-
-            // 节点连线    
-            var linkLine = container.selectAll(".linkline")
-                .data(force.links()) // 使用 force.links 数据
-                .enter()
-                .append("path")
-                .attr({
-                    'd': function (d) {
-                        return genLinkPath(d);
-                    },
-                    'class': 'linkline',
-                    'fill-opacity': 0.3,
-                    'stroke-opacity': 0.3,
-                    'id': function (d, i) {
-                        return 'linkline' + i;
-                    }
-                })
-                .style("stroke", function (d) {
-                    let lineColor;
-                    // 根据关系的不同设置线条颜色
-                    if (d.type == "SERVE") {
-                        lineColor = "#ff0000";
-                    } else if (d.type == "OWN") {
-                        lineColor = "#00ff00";
-                    } else if (d.type == "INVEST_C") {
-                        lineColor = "#0000ff";
-                    }
-                    return lineColor;
-                })
-                .style("pointer-events", "none")
-                .style("stroke-width", 0.5) // 线条粗细
-                .attr("marker-end", "url(#arrow)"); // 根据 id 标记箭头
-
-            // 连线的文字
-            var lineText = container.append("g").selectAll(".linetext")
-                .data(force.links())
-                .enter()
-                .append("text")
-                .style("pointer-events", "none")
-                .attr({
-                    'class': 'linetext',
-                    'id': function (d, i) {
-                        return 'linkline' + i;
-                    },
-                    'dx': function (d) {
-                        return 80;
-                    },
-                    'dy': 5,
-                    //'font-size':10,
-                    //'fill':'#aaa'
-                });
-
-            lineText.append('textPath')
-                .attr('xlink:href', function (d, i) {
-                    return '#linkline' + i
-                })
-                .style("pointer-events", "none")
-                .style("fill", "#000")
-                .text(function (d) {
-                    return d.alllabel;
-                });
-        
-            // 节点（圆）
-            var nodeCircle = container.append("g")
-                .attr("class", "nodes")
-                .selectAll(".node")
-                .data(force.nodes())
-                .enter()
-                .append("g")
-                .attr("class", "node")
-                .attr("cx", function (d) { return d.x; })
-                .attr("cy", function (d) { return d.y; })
-                .call(drag);  // 节点可拖动
-
-            nodeCircle.append("circle")
-                .style("fill", function (node) {
-                    // 节点背景颜色
-                    return node.ntype === "Human" ? "#c93" : "#c43";
-                })
-                .style('stroke', function (node) {
-                    // 节点描边颜色
-                    return node.ntype === "Human" ? "#f93" : "#f43";
-                })
-                .attr("r", function (node) {
-                    // 设置节点半径
-                    return node.ntype === "Human" ? 28 : 36;
-                })
-                .on("click", function (node) {
-                    // 单击连线加粗
-                    linkLine.style("stroke-width", function (line) {
-                        if (line.source.id == node.id || line.target.id == node.id) {
-                            return 2;
-                        } else {
-                            return 0.5;
-                        }
-                    });
-                });
-
-            // 节点文字
-            var nodeText = container.append("g").selectAll("text")
-                .data(force.nodes())
-                .enter()
-                .append("text")
-                .attr("dy", ".35em")
-                .attr("text-anchor", "middle")
-                .style('fill', function (node) {
-                    let color; // 文字颜色
-                    let link = links[node.index];
-                    if (node.id == link.source.id && link.type == "SERVE") {
-                        color = "#B43232";
-                    } else {
-                        color = "#A254A2";
-                    }
-                    return color;
-                }).attr('x', function (d) {
-                    // console.log(d.name+"---"+ d.name.length);
-                    let re_en = /[a-zA-Z]+/g;
-                    // 如果是全英文，不换行
-                    if (d.name.match(re_en)) {
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', 2)
-                            .text(function () {
-                                return d.name;
-                            });
-                    }
-                    // 如果小于四个字符，不换行
-                    else if (d.name.length <= 4) {
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', 2)
-                            .text(function () {
-                                return d.name;
-                            });
-                    } else {
-                        let top = d.name.substring(0, 4);
-                        let bot = d.name.substring(4, d.name.length);
-
-                        d3.select(this).text(function () {
-                            return '';
-                        });
-
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', -7)
-                            .text(function () {
-                                return top;
-                            });
-
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', 10)
-                            .text(function () {
-                                return bot;
-                            });
-                    }
-                });
-
-            // 更新力导向图
-            function tick() {
-                // 节点位置
-                nodeCircle.attr("transform", function (d) {
-                    return "translate(" + d.x + "," + d.y + ")";
-                });
-                // 节点文字位置
-                nodeText.attr("transform", function (d) {
-                    return "translate(" + (d.x) + "," + d.y + ")";
-                });
-                // 连线位置
-                linkLine.attr('d', function (d) {
-                    return genLinkPath(d);
-                });
-                // 连线文字角度
-                lineText.attr('transform', function (d, i) {
-                    if (d.target.x < d.source.x) {
-                        bbox = this.getBBox();
-                        rx = bbox.x + bbox.width / 2;
-                        ry = bbox.y + bbox.height / 2;
-                        return 'rotate(180 ' + rx + ' ' + ry + ')';
-                    } else {
-                        return 'rotate(0)';
-                    }
-                });
-            }
-
-            // 更新力导向图
-            tick(); // 注意：调用位置须在 nodeCircle, nodeText, linkLine, lineText 声明后
-
-            // 监听力学图运动事件，更新坐标
-            force.on('tick', tick);
-
-        }
+		var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height);
 
 
-        function genLinks(relations) {
-            return relations.map(function ({startNode, endNode, label, type}) {
-                const mapKey = startNode + '-' + endNode;
-                let lcount = linkMap[startNode + '-' + endNode];
-                let alllabel = linkMap[startNode + '-' + endNode + '-label'];
-                return {
-                    source: nodesMap[startNode],
-                    target: nodesMap[endNode],
-                    label,
-                    type,
-                    alllabel: linkMap[mapKey + '-label'],
-                    lcount: linkMap[mapKey],
-                }
-            })
-        }
-    
-        function genLinkMap(relations) {
-            const hash = {};
-            relations.map(function ({startNode, endNode, label}) {
-                const key = startNode + '-' + endNode;
-                if (hash[key]) {
-                    hash[key] += 1;
-                    hash[key + '-label'] += '；' + label;
-                } else {
-                    hash[key] = 1;
-                    hash[key + '-label'] = label;
-                }
-            });
-            return hash;
-        }
+		d3.json(api, function (error, root) {
 
-        function genNodesMap(nodes) {
-            const hash = {};
-            nodes.map(function ({id, name, ntype}) {
-                hash[id] = {
-                    id,
-                    name,
-                    ntype
-                };
-            });
-            return hash;
-        }
-        
-        // 生成关系连线路径
-        function genLinkPath(d) {
-            const sx = Math.round(d.source.x);
-            const sy = Math.round(d.source.y);
-            const tx = Math.round(d.target.x);
-            const ty = Math.round(d.target.y);
+			if (error) {
+				return console.log(error);
+			}
+			console.log(root);
 
-            return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
-        }
+			//D3力导向布局
+			var force = d3.layout.force()
+				.nodes(root.nodes)
+				.links(root.edges)
+				.size([width, height])
+				.linkDistance(200)
+				.charge(-1500)
+				.start();
 
-         function zoomFn() {
-            const { translate, scale } = d3.event;
-            container.attr("transform", "translate(" + translate + ")scale(" + scale + ")");
-        }
+			//边             
+			var edges_line = svg.selectAll("line")
+				.data(root.edges)
+				.enter()
+				.append("line")
+				.style("stroke", "#ccc")
+				.style("stroke-width", 1);
 
-        function dragstartFn(d) {
-            d3.event.sourceEvent.stopPropagation();
-            force.start();
-        }
+			//边上的文字（人物之间的关系）            
+			var edges_text = svg.selectAll(".linetext")
+				.data(root.edges)
+				.enter()
+				.append("text")
+				.attr("class", "linetext")
+				.text(function (d) {
+					return d.relation;
+				});
 
-        function dragFn(d) {
-            d3.select(this)
-                .attr("cx", d.x = d3.event.x)
-                .attr("cy", d.y = d3.event.y);
-        }
+			var drag = force.drag()
+				.on("dragstart", function (d, i) {
+					d.fixed = true;
+					console.log("拖拽状态：开始");
+				})
+				.on("dragend", function (d, i) {
+					console.log.text("拖拽状态：结束");
+				})
+				.on("drag", function (d, i) {
+					console.log.text("拖拽状态：进行中");
+				});
 
-        function dragendFn(d) {
-            // ...
-        }
-        
-    </script>
+			// 圆形图片节点（人物头像）
+			var nodes_img = svg.selectAll("image")
+				.data(root.nodes)
+				.enter()
+				.append("circle")
+				.attr("class", "circleImg")
+				.attr("r", radius)
+				.attr("fill", function (d, i) {
+					//创建圆形图片
+					var defs = svg.append("defs");
+					var catpattern = defs.append("pattern")
+						.attr("id", "catpattern" + i)
+						.attr("height", 1)
+						.attr("width", 1)
+					catpattern.append("image")
+						.attr("x", - (img_w / 2 - radius))
+						.attr("y", - (img_h / 2 - radius))
+						.attr("width", img_w)
+						.attr("height", img_h)
+						.attr("xlink:href", imagePath + d.image)
+					return "url(#catpattern" + i + ")";
+				})
+				.on("mouseover", function (d, i) {
+					//显示连接线上的文字
+					edges_text.style("fill-opacity", function (edge) {
+						if (edge.source === d || edge.target === d) {
+							return 1.0;
+						}
+					});
+				})
+				.on("mouseout", function (d, i) {
+					//隐去连接线上的文字
+					edges_text.style("fill-opacity", function (edge) {
+						if (edge.source === d || edge.target === d) {
+							return 0.0;
+						}
+					});
+				})
+				.call(drag)
+				.on("dblclick", function (d, i) {
+					d.fixed = false;
+				});
+
+			var text_dx = -20;
+			var text_dy = 20;
+
+			var nodes_text = svg.selectAll(".nodetext")
+				.data(root.nodes)
+				.enter()
+				.append("text")
+				.attr("class", "nodetext")
+				.attr("dx", text_dx)
+				.attr("dy", text_dy)
+				.text(function (d) {
+					return d.name;
+				});
+
+
+			force.on("tick", function () {
+
+				//限制结点的边界
+				root.nodes.forEach(function (d, i) {
+					d.x = d.x - img_w / 2 < 0 ? img_w / 2 : d.x;
+					d.x = d.x + img_w / 2 > width ? width - img_w / 2 : d.x;
+					d.y = d.y - img_h / 2 < 0 ? img_h / 2 : d.y;
+					d.y = d.y + img_h / 2 + text_dy > height ? height - img_h / 2 - text_dy : d.y;
+				});
+
+				//更新连接线的位置
+				edges_line.attr("x1", function (d) { return d.source.x; });
+				edges_line.attr("y1", function (d) { return d.source.y; });
+				edges_line.attr("x2", function (d) { return d.target.x; });
+				edges_line.attr("y2", function (d) { return d.target.y; });
+
+				//更新连接线上文字的位置
+				edges_text.attr("x", function (d) { return (d.source.x + d.target.x) / 2; });
+				edges_text.attr("y", function (d) { return (d.source.y + d.target.y) / 2; });
+
+
+				//更新结点图片和文字
+				nodes_img.attr("cx", function (d) { return d.x });
+				nodes_img.attr("cy", function (d) { return d.y });
+
+				nodes_text.attr("x", function (d) { return d.x });
+				nodes_text.attr("y", function (d) { return d.y + img_w / 2; });
+			});
+		});
+
+	</script>
+
 </body>
 
 </html>
