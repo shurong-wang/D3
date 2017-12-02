@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>力导向图</title>
+    <title>力导向图 V2</title>
     <style>
         #canvas {
             border: 1px solid #ccc;
@@ -53,11 +53,8 @@
     <script>
         var width = 600;
         var height = 600;
-        var api = "source/data.json";
+        var api = "data/v2.json";
         var nodesMap, linkMap;
-
-        // 画布
-        var canvas = d3.select("#canvas");
 
        // 力导向图
         var force = d3.layout.force()
@@ -72,26 +69,29 @@
 
         // 节点拖拽器
         var drag = force.drag()
-            .origin(function (d) { return d; })
+            .origin(function (d) { 
+                return d; 
+            })
             .on("dragstart", dragstartFn)
             .on("drag", dragFn);
 
-        var svg = canvas.append("svg")
-            .attr("class", "relationGraph")
+        // SVG
+        var svg = d3.select("#canvas").append("svg")
             .attr("width", width)
             .attr("height", height)
             .append("g")
             .call(zoom)
             .on('dblclick.zoom', null);
+        
+        // 缩放层（位置必须在 container 之前）
+        var zoomOverlay = svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all");
 
         var container = svg.append("g")
             .attr("class", "container");
-
-        var zoomOverlay = svg.append("rect")
-            .attr("width", width)
-            .attr("height", height)
-            .style("fill", "none")
-            .style("pointer-events", "all");
 
         // 请求数据，绘制图表
         d3.json(api, function (error, resp) {
