@@ -15,8 +15,7 @@
         }
 
         text {
-            font: 12px Microsoft YaHei;
-            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+            font: Microsoft YaHei;
             pointer-events: none;
             user-select: none;
         }
@@ -39,9 +38,11 @@
             stroke-width: 2;
         }
 
-        .linetext {
+        .linetext { 
             font-size: 12px Microsoft YaHei;
-        }
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff; 
+        } 
+        
     </style>
 </head>
 
@@ -75,6 +76,9 @@
                 }
             }
         };
+        const nodeTextFontSize = 12;
+        const lineTextFontSize = 11;
+
         const api = 'data/v4.json';
         let nodesMap = {};
         let linkMap = {};
@@ -200,7 +204,7 @@
                 .data(force.links())
                 .enter()
                 .append('text')
-                .style('fill', '#000')
+                .style('font-size', lineTextFontSize)
                 .attr({
                     'class': 'linetext',
                     'id': (d, i) => 'link' + i,
@@ -209,6 +213,9 @@
                 });
 
             lineText.append('textPath')
+                .style('letter-spacing', '0pt')
+                .attr('lengthAdjust', 'spacingAndGlyphs')
+                .attr('textLength', d => d.alllabel.length * 10)
                 .attr('xlink:href', (d, i) => '#link' + i)
                 .text(d => d.alllabel);
 
@@ -269,50 +276,12 @@
                 .enter()
                 .append('text')
                 .attr('class', 'nodetext')
-                .attr('dy', '.35em')
+                .style('font-size', nodeTextFontSize)
+                .style('fill', '#fff')
                 .attr('text-anchor', 'middle')
-                .attr('x', function (d) {
-                    // console.log(d.name+'---'+ d.name.length);
-                    let re_en = /[a-zA-Z]+/g;
-                    // 如果是全英文，不换行
-                    if (d.name.match(re_en)) {
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', 2)
-                            .text(function () {
-                                return d.name;
-                            });
-                    }
-                    // 如果小于四个字符，不换行
-                    else if (d.name.length <= 4) {
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', 2)
-                            .text(function () {
-                                return d.name;
-                            });
-                    } else {
-                        let top = d.name.substring(0, 4);
-                        let bot = d.name.substring(4, d.name.length);
-
-                        d3.select(this).text(function () {
-                            return '';
-                        });
-
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', -7)
-                            .text(function () {
-                                return top;
-                            });
-
-                        d3.select(this).append('tspan')
-                            .attr('x', 0)
-                            .attr('y', 10)
-                            .text(function () {
-                                return bot;
-                            });
-                    }
+                .attr('dy', '.35em')
+                .attr('x', function ({ name }) {
+                   return textBreaking(d3.select(this), name);
                 });
 
             // 更新力导向图
@@ -378,7 +347,7 @@
                 const key = startNode + '-' + endNode;
                 if (hash[key]) {
                     hash[key] += 1;
-                    hash[key + '-label'] += '；' + label;
+                    hash[key + '-label'] += '、' + label;
                 } else {
                     hash[key] = 1;
                     hash[key + '-label'] = label;
@@ -434,6 +403,49 @@
 
         function isLinking(node, line) {
             return line.source.id == node.id || line.target.id == node.id
+        }
+
+        function textBreaking(d3text, text) {
+            const len = text.length;
+            if (len <= 4) {
+                d3text.append('tspan')
+                    .attr('x', 0)
+                    .attr('y', 2)
+                    .text(text);
+            } else {
+                const topText = text.substring(0, 4);
+                const midText = text.substring(4, 9);
+                let botText = text.substring(9, len);
+                let topY = -18;
+                let midY = 4;
+                let botY = 22;
+                if (len <= 9) {
+                    topY += 9;
+                    midY += 9;
+                } else {
+                    botText = text.substring(9, 11) + '...';
+                }
+
+                d3text.text('');
+                d3text.append('tspan')
+                    .attr('x', 0)
+                    .attr('y', topY)
+                    .text(function () {
+                        return topText;
+                    });
+                d3text.append('tspan')
+                    .attr('x', 0)
+                    .attr('y', midY)
+                    .text(function () {
+                        return midText;
+                    });
+                d3text.append('tspan')
+                    .attr('x', 0)
+                    .attr('y', botY)
+                    .text(function () {
+                        return botText;
+                    });
+            }
         }
     </script>
 </body>
