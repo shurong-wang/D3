@@ -238,7 +238,11 @@
                 })
                 .on('mouseover', function (node) {
                     // 加重节点样式
+                    const fillColor = styleMap.node.fillColor[node.ntype];
+                    const hoverColor = d3.rgb(fillColor).brighter(0.33);
+                    d3.select(this).style('fill', hoverColor);
                     d3.select(this).classed('node-active', true);
+
                     // 加重连线样式
                     linkLine.classed('link-active', function (line) {
                         return isLinking(node, line);
@@ -249,6 +253,7 @@
                     });
                 }).on('mouseout', function (node) {
                     // 恢复节点样式
+                    d3.select(this).style('fill', styleMap.node.fillColor[node.ntype]);
                     d3.select(this).classed('node-active', false);
                     // 连线恢复样式
                     linkLine.classed('link-active', false);
