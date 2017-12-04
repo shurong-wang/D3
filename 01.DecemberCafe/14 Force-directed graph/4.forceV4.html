@@ -38,11 +38,10 @@
             stroke-width: 2;
         }
 
-        .linetext { 
+        .linetext {
             font-size: 12px Microsoft YaHei;
-            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff; 
-        } 
-        
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+        }
     </style>
 </head>
 
@@ -63,6 +62,10 @@
                     Human: '#BF2B12',
                     Company: '#0E6DA2'
                 },
+                textFillColor: {
+                    Human: '#ff0',
+                    Company: '#fff'
+                },
                 radius: {
                     Human: 26,
                     Company: 36
@@ -79,8 +82,8 @@
         const nodeTextFontSize = 12;
         const lineTextFontSize = 11;
 
-        const api = 'data/v4.json';
-        // const api = 'data/v4.simple.json';
+        // const api = 'data/v4.json';
+        const api = 'data/v4.simple.json';
 
         let nodesMap = {};
         let linkMap = {};
@@ -135,6 +138,8 @@
                 nodes,
                 relations
             } = resp;
+
+            const nodesLength = nodes.length;
 
             // 生成 nodes map
             nodesMap = genNodesMap(nodes);
@@ -234,44 +239,34 @@
 
             nodeCircle.append('circle')
                 // .style('fill-opacity', .3)
-                .style('fill', function (node) {
-                    // 节点背景颜色
-                    return styleMap.node.fillColor[node.ntype];
-                })
-                .style('stroke', function (node) {
-                    // 节点描边颜色
-                    return styleMap.node.strokeColor[node.ntype];
-                })
-                .attr('r', function (node) {
-                    // 设置节点半径
-                    return styleMap.node.radius[node.ntype];
-                })
-                .on('mouseover', function (node) {
-                    // 加重节点样式
-                    const fillColor = styleMap.node.fillColor[node.ntype];
-                    const hoverColor = d3.rgb(fillColor).brighter(0.33);
-                    d3.select(this).style('fill', hoverColor);
-                    d3.select(this).classed('node-active', true);
+                .style('fill', node => styleMap.node.fillColor[node.ntype]) // 节点背景颜色
+                .style('stroke', node => styleMap.node.strokeColor[node.ntype]) // 节点描边颜色
+                .attr('r', node => styleMap.node.radius[node.ntype]); // 设置节点半径
 
-                    // 加重连线样式
-                    linkLine.classed('link-active', function (line) {
-                        return isLinking(node, line);
-                    });
-                    // 只显示相连连线文字
-                    lineText.style('fill-opacity', function (line) {
-                        return isLinking(node, line) ? 1.0 : 0.0;
-                    });
-                }).on('mouseout', function (node) {
-                    // 恢复节点样式
-                    d3.select(this).style('fill', styleMap.node.fillColor[node.ntype]);
-                    d3.select(this).classed('node-active', false);
-                    // 连线恢复样式
-                    linkLine.classed('link-active', false);
-                    // 显示所有连线文字
-                    lineText.style('fill-opacity', function (line) {
-                        return 1.0;
-                    });
-                });
+            nodeCircle.on('mouseover', function (node) {
+                // 提升节点层级
+                nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
+
+                // 加重节点样式
+                const fillColor = styleMap.node.fillColor[node.ntype];
+                const hoverColor = d3.rgb(fillColor).brighter(0.33);
+                d3.select(this).style('fill', hoverColor);
+                d3.select(this).classed('node-active', true);
+
+                // 加重连线样式
+                linkLine.classed('link-active', line => isLinking(node, line));
+                // 只显示相连连线文字
+                lineText.style('fill-opacity', line => isLinking(node, line) ? 1.0 : 0.0);
+
+            }).on('mouseout', function (node, i) {
+                // 恢复节点样式
+                d3.select(this).style('fill', styleMap.node.fillColor[node.ntype]);
+                d3.select(this).classed('node-active', false);
+                // 连线恢复样式
+                linkLine.classed('link-active', false);
+                // 显示所有连线文字
+                lineText.style('fill-opacity', '1.0');
+            });
 
             // 节点文字
             const nodeText = container.append('g').selectAll('text')
@@ -280,11 +275,12 @@
                 .append('text')
                 .attr('class', 'nodetext')
                 .style('font-size', nodeTextFontSize)
-                .style('fill', '#fff')
+                .style('font-weight', 600)
+                .style('fill',   ({ ntype }) => styleMap.node.textFillColor[ntype])
                 .attr('text-anchor', 'middle')
                 .attr('dy', '.35em')
                 .attr('x', function ({ name }) {
-                   return textBreaking(d3.select(this), name);
+                    return textBreaking(d3.select(this), name);
                 });
 
             // 更新力导向图
@@ -298,7 +294,7 @@
                 // 连线文字角度
                 lineText.attr('dx', d => getLineTextDx(d));
                 // 连线文字角度 
-                lineText.attr('transform', function (d) { 
+                lineText.attr('transform', function (d) {
                     return getLineTextAngle(d, this.getBBox());
                 });
             }
@@ -446,13 +442,13 @@
         }
 
         function getLineTextDx(d) {
-            
+
             const sr = styleMap.node.radius[d.source.ntype];
             const sx = d.source.x;
             const sy = d.source.y;
             const tx = d.target.x;
             const ty = d.target.y;
-        
+
             const distance = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
 
             const textLength = d.alllabel.length;
@@ -464,7 +460,7 @@
 
         function getLineTextAngle(d, bbox) {
             if (d.target.x < d.source.x) {
-                const {x, y, width, height} = bbox;
+                const { x, y, width, height } = bbox;
                 const rx = x + width / 2;
                 const ry = y + height / 2;
                 return 'rotate(180 ' + rx + ' ' + ry + ')';

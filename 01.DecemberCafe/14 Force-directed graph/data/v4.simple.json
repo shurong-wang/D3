@@ -15,7 +15,7 @@
         {
             "startNode": 1,
             "endNode": 4,
-            "label": "法人、股东、执行董事",
+            "label": "执行董事",
             "type": "SERVE"
         }
     ]
