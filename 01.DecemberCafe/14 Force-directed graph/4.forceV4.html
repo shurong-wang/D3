@@ -80,6 +80,8 @@
         const lineTextFontSize = 11;
 
         const api = 'data/v4.json';
+        // const api = 'data/v4.simple.json';
+
         let nodesMap = {};
         let linkMap = {};
 
@@ -208,14 +210,14 @@
                 .attr({
                     'class': 'linetext',
                     'id': (d, i) => 'link' + i,
-                    'dx': d => 80,
+                    'dx': d => getLineTextDx(d),
                     'dy': 5
                 });
 
             lineText.append('textPath')
-                .style('letter-spacing', '0pt')
-                .attr('lengthAdjust', 'spacingAndGlyphs')
-                .attr('textLength', d => d.alllabel.length * 10)
+                // .style('letter-spacing', '0pt')
+                // .attr('lengthAdjust', 'spacingAndGlyphs')
+                // .attr('textLength', d => d.alllabel.length * 10)
                 .attr('xlink:href', (d, i) => '#link' + i)
                 .text(d => d.alllabel);
 
@@ -231,6 +233,7 @@
                 .call(drag); // 节点可拖动
 
             nodeCircle.append('circle')
+                // .style('fill-opacity', .3)
                 .style('fill', function (node) {
                     // 节点背景颜色
                     return styleMap.node.fillColor[node.ntype];
@@ -290,31 +293,25 @@
                 nodeCircle.attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
                 // 节点文字位置
                 nodeText.attr('transform', d => 'translate(' + (d.x) + ',' + d.y + ')');
-                // 连线位置
+                // 连线路径
                 linkLine.attr('d', d => genLinkPath(d));
                 // 连线文字角度
-                lineText.attr('transform', function (d, i) {
-                    if (d.target.x < d.source.x) {
-                        const {x, y, width, height} = this.getBBox();
-                        const rx = x + width / 2;
-                        const ry = y + height / 2;
-                        return 'rotate(180 ' + rx + ' ' + ry + ')';
-                    } else {
-                        return 'rotate(0)';
-                    }
+                lineText.attr('dx', d => getLineTextDx(d));
+                // 连线文字角度 
+                lineText.attr('transform', function (d) { 
+                    return getLineTextAngle(d, this.getBBox());
                 });
             }
 
             // 更新力导向图
-            // tick 必须调用（否则，节点会堆积在左上角）
-            // 且位置在 nodeCircle, nodeText, linkLine, lineText 后
+            // 注意1：必须调用一次 tick （否则，节点会堆积在左上角）
+            // 注意2：调用位置必须在 nodeCircle, nodeText, linkLine, lineText 后
             tick();
 
             // 监听力学图运动事件，更新坐标
             force.on('tick', tick);
 
         }
-
 
         function genLinks(relations) {
             return relations.map(function ({
@@ -447,6 +444,35 @@
                     });
             }
         }
+
+        function getLineTextDx(d) {
+            
+            const sr = styleMap.node.radius[d.source.ntype];
+            const sx = d.source.x;
+            const sy = d.source.y;
+            const tx = d.target.x;
+            const ty = d.target.y;
+        
+            const distance = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
+
+            const textLength = d.alllabel.length;
+            const deviation = 8; // 调整误差
+            const dx = (distance - sr - textLength * lineTextFontSize) / 2 + deviation;
+
+            return dx;
+        }
+
+        function getLineTextAngle(d, bbox) {
+            if (d.target.x < d.source.x) {
+                const {x, y, width, height} = bbox;
+                const rx = x + width / 2;
+                const ry = y + height / 2;
+                return 'rotate(180 ' + rx + ' ' + ry + ')';
+            } else {
+                return 'rotate(0)';
+            }
+        }
+
     </script>
 </body>
 
