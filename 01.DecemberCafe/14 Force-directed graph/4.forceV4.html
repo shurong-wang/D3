@@ -243,42 +243,44 @@
                 .style('stroke', node => styleMap.node.strokeColor[node.ntype]) // 节点描边颜色
                 .attr('r', node => styleMap.node.radius[node.ntype]) // 设置节点半径
                 .on('mouseover', function (node) {
-                // 提升节点层级
-                // this.parentNode.appendChild(this);
-                nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
+                    // 提升节点层级
+                    // this.parentNode.appendChild(this);
+                    nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
 
-                // 加重节点样式
-                const fillColor = styleMap.node.fillColor[node.ntype];
-                const hoverColor = d3.rgb(fillColor).brighter(0.33);
-                d3.select(this).style('fill', hoverColor);
-                d3.select(this).classed('node-active', true);
+                    // 加重节点样式
+                    const fillColor = styleMap.node.fillColor[node.ntype];
+                    const hoverColor = d3.rgb(fillColor).brighter(0.33);
+                    d3.select(this).style('fill', hoverColor);
+                    d3.select(this).classed('node-active', true);
 
-                // 加重连线样式
-                linkLine.classed('link-active', line => isLinking(node, line));
-                // 只显示相连连线文字
-                lineText.style('fill-opacity', line => isLinking(node, line) ? 1.0 : 0.0);
+                    // 加重连线样式
+                    linkLine.classed('link-active', line => isLinking(node, line));
+                    // 只显示相连连线文字
+                    lineText.style('fill-opacity', line => isLinking(node, line) ? 1.0 : 0.0);
 
-            }).on('mouseout', function (node, i) {
-                // 恢复节点样式
-                d3.select(this).style('fill', styleMap.node.fillColor[node.ntype]);
-                d3.select(this).classed('node-active', false);
-                // 连线恢复样式
-                linkLine.classed('link-active', false);
-                // 显示所有连线文字
-                lineText.style('fill-opacity', '1.0');
-            });
+                })
+                .on('mouseout', function (node, i) {
+                    // 恢复节点样式
+                    d3.select(this).style('fill', styleMap.node.fillColor[node.ntype]);
+                    d3.select(this).classed('node-active', false);
+                    // 连线恢复样式
+                    linkLine.classed('link-active', false);
+                    // 显示所有连线文字
+                    lineText.style('fill-opacity', '1.0');
+                });
 
+            // 节点文字
             const nodeText = nodeCircle.append('text')
                 .attr('class', 'nodetext')
                 .style('font-size', nodeTextFontSize)
                 .style('font-weight', 600)
-                .style('fill',   ({ ntype }) => styleMap.node.textFillColor[ntype])
+                .style('fill', ({ ntype }) => styleMap.node.textFillColor[ntype])
                 .attr('text-anchor', 'middle')
                 .attr('dy', '.35em')
                 .attr('x', function ({ name }) {
                     return textBreaking(d3.select(this), name);
                 });
-            
+
             // 更新力导向图
             function tick() {
                 // 节点位置
