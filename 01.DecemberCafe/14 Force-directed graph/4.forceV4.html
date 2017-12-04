@@ -241,9 +241,8 @@
                 // .style('fill-opacity', .3)
                 .style('fill', node => styleMap.node.fillColor[node.ntype]) // 节点背景颜色
                 .style('stroke', node => styleMap.node.strokeColor[node.ntype]) // 节点描边颜色
-                .attr('r', node => styleMap.node.radius[node.ntype]); // 设置节点半径
-
-            nodeCircle.on('mouseover', function (node) {
+                .attr('r', node => styleMap.node.radius[node.ntype]) // 设置节点半径
+                .on('mouseover', function (node) {
                 // 提升节点层级
                 // this.parentNode.appendChild(this);
                 nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
@@ -269,11 +268,7 @@
                 lineText.style('fill-opacity', '1.0');
             });
 
-            // 节点文字
-            const nodeText = container.append('g').selectAll('text')
-                .data(force.nodes())
-                .enter()
-                .append('text')
+            const nodeText = nodeCircle.append('text')
                 .attr('class', 'nodetext')
                 .style('font-size', nodeTextFontSize)
                 .style('font-weight', 600)
@@ -283,16 +278,14 @@
                 .attr('x', function ({ name }) {
                     return textBreaking(d3.select(this), name);
                 });
-
+            
             // 更新力导向图
             function tick() {
                 // 节点位置
                 nodeCircle.attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
-                // 节点文字位置
-                nodeText.attr('transform', d => 'translate(' + (d.x) + ',' + d.y + ')');
                 // 连线路径
                 linkLine.attr('d', d => genLinkPath(d));
-                // 连线文字角度
+                // 连线文字位置
                 lineText.attr('dx', d => getLineTextDx(d));
                 // 连线文字角度 
                 lineText.attr('transform', function (d) {
