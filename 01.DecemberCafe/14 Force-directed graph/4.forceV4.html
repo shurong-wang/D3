@@ -245,6 +245,7 @@
 
             nodeCircle.on('mouseover', function (node) {
                 // 提升节点层级
+                // this.parentNode.appendChild(this);
                 nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
 
                 // 加重节点样式
