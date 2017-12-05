@@ -52,6 +52,7 @@
     <script>
         const width = 600;
         const height = 600;
+
         const styleMap = {
             node: {
                 fillColor: {
@@ -87,6 +88,27 @@
 
         let nodesMap = {};
         let linkMap = {};
+
+        const menuMap = {
+				width: 500,
+				height: 500,
+				innerRadius: 36,
+				outerRadius: 36 + 24,
+				color: '#00B9C4',
+				dataset: [25, 25, 25, 25],
+				iconPath: 'menu-icon/',
+				handle: [
+					'info',
+					'equity',
+					'tree',
+					'relation'
+				],
+				iconSize: {
+					width: 15,
+					height: 15
+				}
+			};
+
 
         // 力导向图
         const force = d3.layout.force()
@@ -232,9 +254,11 @@
                 .data(force.nodes())
                 .enter()
                 .append('g')
+                .style('cursor', 'pointer')
                 .attr('class', 'node')
                 .attr('cx', d => d.x)
                 .attr('cy', d => d.y)
+                .each(d => d.isActive = true)
                 .call(drag); // 节点可拖动
 
             nodeCircle.append('circle')
@@ -246,18 +270,17 @@
                     // 提升节点层级
                     // this.parentNode.appendChild(this);
                     nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
-
                     // 加重节点样式
                     const fillColor = styleMap.node.fillColor[node.ntype];
                     const hoverColor = d3.rgb(fillColor).brighter(0.33);
                     d3.select(this).style('fill', hoverColor);
                     d3.select(this).classed('node-active', true);
-
                     // 加重连线样式
                     linkLine.classed('link-active', line => isLinking(node, line));
                     // 只显示相连连线文字
                     lineText.style('fill-opacity', line => isLinking(node, line) ? 1.0 : 0.0);
-
+                    // 显示节点菜单
+                    node.isActive = true;
                 })
                 .on('mouseout', function (node, i) {
                     // 恢复节点样式
@@ -267,6 +290,8 @@
                     linkLine.classed('link-active', false);
                     // 显示所有连线文字
                     lineText.style('fill-opacity', '1.0');
+                    // 隐藏节点菜单
+                    node.isActive = false;
                 });
 
             // 节点文字
@@ -280,6 +305,43 @@
                 .attr('x', function ({ name }) {
                     return textBreaking(d3.select(this), name);
                 });
+
+            // 节点菜单
+			const pie = d3.layout.pie();
+
+			const arc = d3.svg.arc()
+				.innerRadius(menuMap.innerRadius)
+				.outerRadius(menuMap.outerRadius);
+
+			const menuContainer = nodeCircle.filter(function ({ntype}) {
+                return ntype === 'Company';
+            })
+                .append('g')
+                .style('display', d => d.isActive ? 'block' : 'none');
+	
+			const wheelMenu = menuContainer
+                .selectAll('.wheel-menu')
+				.data(pie(menuMap.dataset))
+				.enter()
+				.append('g')
+				.on('click', function (d, i) {
+					console.log(menuMap.handle[i]);
+				});
+
+            wheelMenu.append('path')
+				.attr('fill', menuMap.color)
+				.attr('stroke', '#fff')
+				.attr('stroke-width', 1)
+				.attr('d', d => arc(d));
+
+            wheelMenu.append('image')
+				.attr('width', menuMap.iconSize.width)
+				.attr('height', menuMap.iconSize.height)
+				.attr('x', - (menuMap.iconSize.width / 2))
+				.attr('y', - (menuMap.iconSize.width / 2))
+				.attr('transform', d => 'translate(' + arc.centroid(d) + ')')
+				.attr('xlink:href', (d, i) => menuMap.iconPath + menuMap.handle[i] + '.png');
+
 
             // 更新力导向图
             function tick() {

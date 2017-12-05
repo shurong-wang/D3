@@ -1,0 +1,88 @@
+<html>
+
+<head>
+	<meta charset='utf-8'>
+	<title>径向菜单</title>
+</head>
+
+<style>
+</style>
+
+<body>
+	<div style='display:inline-block; margin: 5px; padding: 2px 6px; background-color:#ccc'>
+		<img src='menu-icon/equity.png' alt='' srcset=''>
+		<img src='menu-icon/info.png' alt='' srcset=''>
+		<img src='menu-icon/relation.png' alt='' srcset=''>
+		<img src='menu-icon/tree.png' alt='' srcset=''>
+	</div>
+
+	<div id='wheel-menu'></div>
+
+	<script src='http://d3js.org/d3.v3.min.js' charset='utf-8'></script>
+	<script>
+
+		function genWheelMenu() {
+			const menuMap = {
+				width: 500,
+				height: 500,
+				innerRadius: 36,
+				outerRadius: 36 + 30,
+				color: '#00B9C4',
+				dataset: [25, 25, 25, 25],
+				iconPath: 'menu-icon/',
+				handle: [
+					'info',
+					'equity',
+					'tree',
+					'relation'
+				],
+				iconSize: {
+					width: 15,
+					height: 15
+				}
+			};
+
+			const svg = d3.select('#wheel-menu').append('svg')
+				.attr('width', menuMap.width)
+				.attr('height', menuMap.height)
+				.style('cursor', 'pointer');
+
+			const pie = d3.layout.pie();
+
+			const arc = d3.svg.arc()
+				.innerRadius(menuMap.innerRadius)
+				.outerRadius(menuMap.outerRadius);
+
+			const gAll = svg.append('g')
+				.attr('transform', (d, i) => 'translate(' + menuMap.outerRadius + ',' + menuMap.outerRadius + ')');
+
+			const arcs = gAll.selectAll('.arcs-g')
+				.data(pie(menuMap.dataset))
+				.enter()
+				.append('g')
+				.on('click', function (d, i) {
+					alert(menuMap.handle[i]);
+				});
+
+			arcs.append('path')
+				.attr('fill', menuMap.color)
+				.attr('stroke', '#fff')
+				.attr('stroke-width', 1)
+				.attr('d', d => arc(d));
+
+			arcs.append('image')
+				.attr('width', menuMap.iconSize.width)
+				.attr('height', menuMap.iconSize.height)
+				.attr('x', - (menuMap.iconSize.width / 2))
+				.attr('y', - (menuMap.iconSize.width / 2))
+				.attr('transform', d => 'translate(' + arc.centroid(d) + ')')
+				.attr('xlink:href', (d, i) => menuMap.iconPath + menuMap.handle[i] + '.png');
+
+		}
+
+		genWheelMenu();
+	</script>
+
+</body>
+
+</html>
