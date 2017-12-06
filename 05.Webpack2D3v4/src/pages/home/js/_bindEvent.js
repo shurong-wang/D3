@@ -25,9 +25,6 @@ export default function (json, update, vis, force, node, link) {
         }
         unbindAddNode();
         unbindAddLink();
-
-        //按钮状态切换
-        $(this).addClass('btn-primary selected').siblings().removeClass("btn-primary selected");
     })
 
 
@@ -72,15 +69,15 @@ export default function (json, update, vis, force, node, link) {
                 mouseupNode = null;
             let dragLine = vis.append("line").attr("class", "drag-line");
             node.on("mousedown.add-link", function (d) {
-                    mousedownNode = d
-                    dragLine.attr("class", "drag-line")
-                        .lower()
-                        .attr("x1", d["x"])
-                        .attr("y1", d["y"])
-                        .attr("x2", d["x"])
-                        .attr("y2", d["y"])
-                    d3.event.stopPropagation();
-                })
+                mousedownNode = d
+                dragLine.attr("class", "drag-line")
+                    .lower()
+                    .attr("x1", d["x"])
+                    .attr("y1", d["y"])
+                    .attr("x2", d["x"])
+                    .attr("y2", d["y"])
+                d3.event.stopPropagation();
+            })
                 .on("mouseup.add-link", function (d) {
                     dragLine.attr("class", "drag-line-hidden")
                     if (mousedownNode) {
@@ -128,8 +125,8 @@ export default function (json, update, vis, force, node, link) {
                     let [x, y] = d3.mouse(this);
                     dragLine.attr("x1", mousedownNode["x"])
                         .attr("y1", mousedownNode["y"])
-                        .attr("x2", `${x/scale- +translate[0]/scale}`)
-                        .attr("y2", `${y/scale- +translate[1]/scale}`);
+                        .attr("x2", `${x / scale - +translate[0] / scale}`)
+                        .attr("y2", `${y / scale - +translate[1] / scale}`);
                     d3.event.preventDefault();
                 })
                 .on("mouseup.add-link", function () {
@@ -151,7 +148,6 @@ export default function (json, update, vis, force, node, link) {
 
 //删除节点
 export function __delNode(json, update, selNode) {
-    let needDelLinks = new Set();
     selNode = selNode || d3.selectAll('.node.active').data();
     if (selNode.length == 1) {
         json.nodes.forEach(function (d, i) {
@@ -160,7 +156,10 @@ export function __delNode(json, update, selNode) {
             }
         });
         for (let linkIdx = 0; linkIdx < json.links.length; linkIdx++) {
-            if (json.links[linkIdx]["source"]["id"] == selNode[0]["id"] || json.links[linkIdx]["target"]["id"] == selNode[0]["id"]) {
+            if (
+                json.links[linkIdx]["source"]["id"] == selNode[0]["id"]
+                || json.links[linkIdx]["target"]["id"] == selNode[0]["id"]
+            ) {
                 json.links.splice(linkIdx, 1);
                 linkIdx--
             }
@@ -176,7 +175,10 @@ export function __delLink(json, update, selLink) {
     selLink = selLink || d3.selectAll('.link.active').data();
     if (selLink.length == 1) {
         json.links.forEach(function (d, i) {
-            if (d["source"]["id"] == selLink[0]["source"]["id"] && d["target"]["id"] == selLink[0]["target"]["id"]) {
+            if (
+                d["source"]["id"] == selLink[0]["source"]["id"] 
+                && d["target"]["id"] == selLink[0]["target"]["id"]
+            ) {
                 json.links.splice(i, 1);
             }
         });

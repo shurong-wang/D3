@@ -1,12 +1,12 @@
-export default function(highlightObject,tooltip,dialog,json,update,weightFilter){
+export default function (highlightObject, tooltip, dialog, json, update, weightFilter) {
     return {
-        bindMenuEvent(obj){
-            d3.select('.tooltip .cm-btn.collapseCurNode').on('click',()=>{ highlightObject(obj)});
-            d3.select('.tooltip .cm-btn.editCurrentNode').on('click',()=>{this.editCurrentNode(obj)})
-            d3.select('.tooltip .cm-btn.editCurrentLink').on('click',()=>{this.editCurrentLink(obj)})
+        bindMenuEvent(obj) {
+            d3.select('.tooltip .cm-btn.collapseCurNode').on('click', () => { highlightObject(obj) });
+            d3.select('.tooltip .cm-btn.editCurrentNode').on('click', () => { this.editCurrentNode(obj) })
+            d3.select('.tooltip .cm-btn.editCurrentLink').on('click', () => { this.editCurrentLink(obj) })
         },
-        highlightToolTip(obj){//右键菜单
-            let toolTpl=`
+        highlightToolTip(obj) {//右键菜单
+            let toolTpl = `
                 <div class='title'>操作当前节点</div>
                 <table class='detail-info'>
                     <tr><td><span class='cm-btn collapseCurNode' >收起当前节点</span></td></tr>
@@ -16,22 +16,25 @@ export default function(highlightObject,tooltip,dialog,json,update,weightFilter)
             `;
 
             if (obj) {
-                if(obj['source']!=undefined&&obj.target!=undefined){
-                    toolTpl=`
+                if (obj['source'] != undefined && obj.target != undefined) {
+                    toolTpl = `
                         <div class='title'>操作当前连线</div>
                         <table class='detail-info'>
                             <tr><td><span class='cm-btn editCurrentLink' >编辑当前连线</span></td></tr>
                         </table>
                     `;
                 }
-                tooltip.html(toolTpl).style("left",`${d3.event.pageX}px`).style("top",`${d3.event.pageY}px`).style("display","block");
+                tooltip.html(toolTpl)
+                    .style("left", `${d3.event.pageX}px`)
+                    .style("top", `${d3.event.pageY}px`)
+                    .style("display", "block");
                 this.bindMenuEvent(obj);
             } else {
-                tooltip.style("display",'none');
+                tooltip.style("display", 'none');
             }
         },
-        editCurrentNode:function(obj){//编辑节点属性
-            let dialogTpl=`
+        editCurrentNode: function (obj) {//编辑节点属性
+            let dialogTpl = `
              <table class="op-dialog edit-node-dialog">
                  <tr>
                      <td class="td-til" >
@@ -57,19 +60,19 @@ export default function(highlightObject,tooltip,dialog,json,update,weightFilter)
                 okValue: '确定',
                 cancelValue: '取消',
                 ok() {
-                    let iptNodeGroup=$('.edit-node-dialog').find('.node-group').val();
-                    if(!!iptNodeGroup){
-                        json.nodes.forEach((item)=>{
-                            item.name==obj.name&&(item.group=iptNodeGroup)
+                    let iptNodeGroup = $('.edit-node-dialog').find('.node-group').val();
+                    if (!!iptNodeGroup) {
+                        json.nodes.forEach((item) => {
+                            item.name == obj.name && (item.group = iptNodeGroup)
                         });
                         update(json)
                     }
                 },
-                cancel(){}
+                cancel() { }
             }).showModal();
         },
-        editCurrentLink:function(obj){//编辑连线属性
-            let dialogTpl=`
+        editCurrentLink: function (obj) {//编辑连线属性
+            let dialogTpl = `
              <table class="op-dialog edit-link-dialog">
                 <tr>
                      <td class="td-til" >
@@ -103,16 +106,16 @@ export default function(highlightObject,tooltip,dialog,json,update,weightFilter)
                 okValue: '确定',
                 cancelValue: '取消',
                 ok() {
-                    let iptWeight=$('.edit-link-dialog').find('.cur-weight').val();
-                    if(!!iptWeight){
-                        json.links.forEach((item)=>{
-                            item.index==obj.index&&(item.weight=iptWeight)
+                    let iptWeight = $('.edit-link-dialog').find('.cur-weight').val();
+                    if (!!iptWeight) {
+                        json.links.forEach((item) => {
+                            item.index == obj.index && (item.weight = iptWeight)
                         });
                         update(json);
                         weightFilter();
                     }
                 },
-                cancel(){}
+                cancel() { }
             }).showModal();
         }
     }

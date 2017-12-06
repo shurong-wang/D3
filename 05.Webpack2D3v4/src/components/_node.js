@@ -1,5 +1,5 @@
 import nodeIcon from "../images/node.png";
-export default function(json, vis) {
+export default function (json, vis) {
     let colors = d3.schemeCategory10,
         groupMap = {};
     let groups = [...new Set(json.nodes.reduce((prev, cur) => (prev.concat(cur.group)), []))]
@@ -9,17 +9,17 @@ export default function(json, vis) {
     node.exit().remove();
     node = node.enter()
         .append("svg:g")
-        .attr("class", d=>(d["isNew"] ? "node new-node" : "node"))
+        .attr("class", d => (d["isNew"] ? "node new-node" : "node"))
         .attr("id", d => ("node-" + d["id"]))
         .merge(node)
-        
-    node.selectAll(".node-bg").remove();    
+
+    node.selectAll(".node-bg").remove();
     node.selectAll(".node-icon").remove();
     node.selectAll(".node-name").remove();
     node.selectAll(".node-group").remove();
-        
+
     node.append('svg:circle')
-        .attr("class","node-bg")
+        .attr("class", "node-bg")
         .attr("r", "12px")
         .attr("fill", "#5bc0de")
     node.append("svg:image")
@@ -41,7 +41,10 @@ export default function(json, vis) {
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
         .attr("fill", "#286090")
-        .html(d => d["group"].length ? ("【" + d["group"].reduce((prev, cur) => (`${prev}<tspan fill=${groupMap[cur]}>${cur}</tspan>` + " "), "") + "】").replace(/\s+】/, "】") : "");
+        .html(d => d["group"].length 
+            ? ("【" + d["group"].reduce((prev, cur) => (`${prev}<tspan fill=${groupMap[cur]}>${cur}</tspan>` + " "), "") + "】").replace(/\s+】/, "】")
+            : ""
+        );
 
     return node;
 

@@ -10,7 +10,7 @@ export default function (json, update, vis, node, link) {
     //节点右键菜单
     node.on("contextmenu", function (d) {
             d.contextmenuData = {
-                "title": "操作当前节点",
+                "title": "",
                 "list": [{
                     "class": "node-del",
                     "text": "删除节点"
@@ -48,7 +48,7 @@ export default function (json, update, vis, node, link) {
     //连线右键菜单 
     link.on("contextmenu", function (d) {
             d.contextmenuData = {
-                "title": "操作当前连线",
+                "title": "",
                 "list": [{
                     "class": "link-del",
                     "text": "删除连线"

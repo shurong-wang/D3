@@ -18,26 +18,30 @@ import _bindLinkAndNodeEvent from './_bindLinkAndNodeEvent.js'; //绑定节点�
 //绘图数据获取 
 API.getData().then(function (rps) {
     if (rps["success"] && rps["result"]) {
-        let json = Object.prototype.toString.call(rps["result"]) == "[object String]" ? JSON.parse(rps["result"]) : rps["result"];
+        const json = Object.prototype.toString.call(rps["result"]) == "[object String]"
+            ? JSON.parse(rps["result"])
+            : rps["result"];
         graphInit(json);
     }
 });
 
 //绘图初始化
 function graphInit(json) {
-    let vis = _vis(); //创建svg视图
-    let force = _force(); //力导向图布局
-    let exportPng = _exportPng(); //导出图片
+    const vis = _vis(); //创建svg视图
+    const force = _force(); //力导向图布局
+    const exportPng = _exportPng(); //导出图片
+    
+    //更新绘图数据
     function update() {
         //转换数据
         force.nodes(json["nodes"]);
         force.force("link").links(json["links"]);
         //生成节点连接线
-        let link = _link(json, vis);
-        let node = _node(json, vis);
-        let linetext = _linetext(json, vis);
-        let bindEvent = _bindEvent(json, update, vis, force, node, link);
-        let bindLinkAndNodeEvent = _bindLinkAndNodeEvent(json, update, vis, node, link);
+        const link = _link(json, vis);
+        const node = _node(json, vis);
+        const linetext = _linetext(json, vis);
+        const bindEvent = _bindEvent(json, update, vis, force, node, link);
+        const bindLinkAndNodeEvent = _bindLinkAndNodeEvent(json, update, vis, node, link);
         // node.call(_nodeDrag(force));//绑定拖拽
         force.alphaTarget(.1);
         force.restart();
