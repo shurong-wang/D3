@@ -5,10 +5,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-    <link rel="stylesheet" href="./js/thirdPart/bootstrap/css/bootstrap.css" />
+    <title>拓扑图</title>
     <script src="./js/thirdPart/jquery/jquery.min.js"></script>
-    <script src="./js/thirdPart/bootstrap/js/bootstrap.min.js"></script>
     <script src="./js/dll.bundle.js"></script>
 </head>
 
@@ -16,22 +14,17 @@
     <div class="container-fluid wrapper hfc">
         <div class="row hfc">
             <div class="col-md-12 hfc">
-                <div class="btn-group btn-group-vertical fn-toolbar">
-                    <button class="btn btn-default" id="J_AddNode" type="button">
-                        <em class="icon-align-left"></em>添加节点</button>
-                    <button class="btn btn-default" id="J_DelNode" type="button">
-                        <em class="icon-align-center"></em>删除节点</button>
-                    <button class="btn btn-default" id="J_AddLink" type="button">
-                        <em class="icon-align-right"></em>添加连线</button>
-                    <button class="btn btn-default" id="J_DelLink" type="button">
-                        <em class="icon-align-justify"></em>删除连线</button>
-                    <button class="btn btn-default" id="J_ExportPng" type="button">
-                        <em class="icon-align-justify"></em>导出图片</button>
-                    <button class="btn btn-default" id="J_ExportExcel" type="button">
-                        <em class="icon-align-justify"></em>导出Excel</button>
+                <div class="fn-toolbar">
+                    <button id="J_AddNode">添加节点</button>
+                    <button id="J_DelNode">删除节点</button>
+                    <button id="J_AddLink">添加连线</button>
+                    <button id="J_DelLink">删除连线</button>
+                    <button id="J_ExportPng">导出图片</button>
+                    <button id="J_ExportExcel">导出 Excel</button>
                 </div>
-                <div class="graph-area hfc">
 
+                <div class="graph-area hfc">
+                    <!-- 画布 -->
                 </div>
 
             </div>
