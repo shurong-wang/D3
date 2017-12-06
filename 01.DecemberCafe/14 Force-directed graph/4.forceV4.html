@@ -59,7 +59,7 @@
                 Company: '#0E6DA2'
             },
             textFillColor: {
-                Human: '#ff0',
+                Human: '#fff',
                 Company: '#fff'
             },
             radius: {
@@ -78,7 +78,7 @@
             isAction: false
         };
     
-        const nodeTextFontSize = 12;
+        const nodeTextFontSize = 11;
         const lineTextFontSize = 11;
 
         const api = 'data/v4.json';
@@ -144,6 +144,7 @@
             .style('pointer-events', 'all');
 
         const container = svg.append('g')
+            .attr('transform', 'scale(0.6)')
             .attr('class', 'container');
 
         // 请求数据，绘制图表
@@ -308,7 +309,7 @@
                 .attr('class', 'nodetext')
                 .attr('id', node => 'node-text-' + node.index )
                 .style('font-size', nodeTextFontSize)
-                .style('font-weight', 600)
+                .style('font-weight', 400)
                 .style('fill', ({ ntype }) => nodeConf.textFillColor[ntype])
                 .attr('text-anchor', 'middle')
                 .attr('dy', '.35em')
