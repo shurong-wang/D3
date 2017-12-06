@@ -65,8 +65,7 @@
             radius: {
                 Human: 26,
                 Company: 36
-            },
-            isAction: false
+            }
         };
 
         const lineConf = {
@@ -74,19 +73,17 @@
                 SERVE: '#9ACEDE',
                 OWN: '#D5E6AF',
                 INVEST_C: '#EE7456'
-            },
-            isAction: false
+            }
         };
 
         const nodeTextFontSize = 11;
         const lineTextFontSize = 11;
 
-        // const api = 'data/v4.json';
-        const api = 'data/v4.simple.json';
+        const api = 'data/v4.json';
+        // const api = 'data/v4.simple.json';
 
         let nodesMap = {};
         let linkMap = {};
-        let nodeHoverTimer = null;
 
         const menuConf = {
             width: 500,
@@ -104,8 +101,7 @@
             iconSize: {
                 width: 15,
                 height: 15
-            },
-            isAction: false
+            }
         };
         menuConf.innerRadius = nodeConf.radius.Company;
         menuConf.outerRadius = menuConf.innerRadius + menuConf.offetRadius;
@@ -269,48 +265,24 @@
                 .style('stroke', node => nodeConf.strokeColor[node.ntype]) // 节点描边颜色
                 .attr('class', 'node-circle')
                 .attr('id', node => 'node-circle-' + node.id)
-                .attr('r', node => nodeConf.radius[node.ntype]) // 设置节点半径
-                .on('mouseenter', function (currNode) {
-                    nodeConf.isAction = true;
-                    // 提升节点层级
-                    // this.parentNode.appendChild(this);
+                .attr('r', node => nodeConf.radius[node.ntype]); // 设置节点半径
+
+            // 节点（圆）交互
+            nodeCircle.on('mouseenter', function (currNode) {
+                    // 提升节点层级 
                     nodeCircle.sort((a, b) => a.id === currNode.id ? 1 : -1);
-                    // 加重节点样式
-                    d3.select(this).style({
-                        'fill': d3.rgb(nodeConf.fillColor[currNode.ntype]).brighter(0.2)
-                    });
-                    // 加重连线样式
-                    linkLine.classed('link-active', link => isLinking(currNode, link));
-                    // 只显示相连连线文字
-                    lineText.style('fill-opacity', link => isLinking(currNode, link) ? 1.0 : 0.0);
-                    // 显示节点菜单
-                    menuConf.nodeHoverTimer && clearTimeout(menuConf.nodeHoverTimer);
-                    menuWrapper.filter(node => node.id === currNode.id)
-                        .attr('refX', 49)
-                        .style('display', 'block');
-                    // 放大箭头
-                    marker.filter(link => isLinking(currNode, link))
-                        .style('transform', 'scale(1.5)');
+                    // this.parentNode.appendChild(this);
+
+                    toggleMenu(menuWrapper, currNode, true);
+                    toggleLine(linkLine, currNode, true) 
+                    toggleLineText(lineText, currNode, true);
+                    toggleMarker(marker, currNode, true);
                 })
                 .on('mouseleave', function (currNode) {
-                    nodeConf.isAction = true;
-                    // 恢复节点样式
-                    d3.select(this).style('fill', nodeConf.fillColor[currNode.ntype]);
-                    // 连线恢复样式
-                    linkLine.classed('link-active', false);
-                    // 显示所有连线文字
-                    lineText.style('fill-opacity', '1.0');
-                    // 隐藏节点菜单
-                    menuConf.nodeHoverTimer = setTimeout(function () {
-                        if (!menuConf.isAction && !nodeCircle.isAction) {
-                            menuWrapper.filter(node => node.id === currNode.id)
-                                .style('display', 'none');
-                        }
-                    }, 100);
-                    // 恢复箭头
-                    marker.filter(link => isLinking(currNode, link))
-                        .attr('refX', 39)
-                        .style('transform', 'scale(1)');
+                    toggleMenu(menuWrapper, currNode, false);
+                    toggleLine(linkLine, currNode, false) 
+                    toggleLineText(lineText, currNode, false);
+                    toggleMarker(marker, currNode, false);
                 });
 
             // 节点文字
@@ -334,17 +306,7 @@
             const menuWrapper = nodeCircle.filter(({ ntype }) => ntype === 'Company')
                 .append('g')
                 .attr('id', node => 'menu-wrapper-' + node.id)
-                .style('display', 'none')
-                .on('mouseenter', function (node, i) {
-                    menuConf.isAction = true;
-                    d3.select(this).style('display', 'block');
-                })
-                .on('mouseleave', function (node, i) {
-                    menuConf.isAction = false;
-                    if (!menuConf.isAction && !nodeCircle.isAction) {
-                        d3.select(this).style('display', 'none');
-                    }
-                });
+                .style('display', 'none');
 
             const wheelMenu = menuWrapper
                 .selectAll('.wheel-menu')
@@ -555,6 +517,53 @@
                 return 'rotate(0)';
             }
         }
+
+        function toggleMenu(menuWrapper, currNode, isHover) {
+            if (isHover) {
+                // 显示节点菜单
+                menuWrapper.filter(node => node.id === currNode.id)
+                    .style('display', 'block');
+            } else {
+                // 隐藏节点菜单
+                menuWrapper.filter(node => node.id === currNode.id)
+                    .style('display', 'none');
+            }
+        }
+
+        function toggleLine(linkLine, currNode, isHover) {
+            if (isHover) {
+                // 加重连线样式
+                linkLine.classed('link-active', link => isLinking(currNode, link));
+            } else {
+                // 连线恢复样式
+                linkLine.classed('link-active', false);
+            }
+        }
+
+        function toggleLineText(lineText, currNode, isHover) {
+            if (isHover) {
+                // 只显示相连连线文字
+                lineText.style('fill-opacity', link => isLinking(currNode, link) ? 1.0 : 0.0);
+            } else {
+                // 显示所有连线文字
+                lineText.style('fill-opacity', '1.0');
+            }
+        }
+
+        function toggleMarker(marker, currNode, isHover) {
+            if (isHover) {
+                // 放大箭头
+                marker.filter(link => isLinking(currNode, link))
+                    .style('transform', 'scale(1.5)')
+                    .attr('refX', 49);                    
+            } else {
+                // 恢复箭头
+                marker.filter(link => isLinking(currNode, link))
+                    .attr('refX', 39)
+                    .style('transform', 'scale(1)');
+            }
+        }
+
 
     </script>
 </body>
