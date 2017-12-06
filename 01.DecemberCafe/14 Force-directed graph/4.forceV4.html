@@ -21,16 +21,12 @@
         }
 
         .node {
-            stroke-width: 1.5px;
-        }
-
-        .node-active {
-            stroke-width: 2px;
+            stroke-width: 0;
         }
 
         .link {
             stroke-opacity: 1;
-            stroke-width: 1;
+            stroke-width: .5;
         }
 
         .link-active {
@@ -53,47 +49,49 @@
         const width = 600;
         const height = 600;
 
-        const styleMap = {
-            node: {
-                fillColor: {
-                    Human: '#F05733',
-                    Company: '#2B95CC'
-                },
-                strokeColor: {
-                    Human: '#BF2B12',
-                    Company: '#0E6DA2'
-                },
-                textFillColor: {
-                    Human: '#ff0',
-                    Company: '#fff'
-                },
-                radius: {
-                    Human: 26,
-                    Company: 36
-                }
+        const nodeConf = {
+            fillColor: {
+                Human: '#F05733',
+                Company: '#2B95CC'
             },
-            line: {
-                strokeColor: {
-                    SERVE: '#9ACEDE',
-                    OWN: '#D5E6AF',
-                    INVEST_C: '#EE7456'
-                }
-            }
+            strokeColor: {
+                Human: '#BF2B12',
+                Company: '#0E6DA2'
+            },
+            textFillColor: {
+                Human: '#ff0',
+                Company: '#fff'
+            },
+            radius: {
+                Human: 26,
+                Company: 36
+            },
+            isAction: false
         };
+
+        const lineConf = {
+            strokeColor: {
+                SERVE: '#9ACEDE',
+                OWN: '#D5E6AF',
+                INVEST_C: '#EE7456'
+            },
+            isAction: false
+        };
+    
         const nodeTextFontSize = 12;
         const lineTextFontSize = 11;
 
-        // const api = 'data/v4.json';
-        const api = 'data/v4.simple.json';
+        const api = 'data/v4.json';
+        // const api = 'data/v4.simple.json';
 
         let nodesMap = {};
         let linkMap = {};
+        let nodeHoverTimer = null;
 
-        const menuMap = {
+        const menuConf = {
 				width: 500,
 				height: 500,
-				innerRadius: 36,
-				outerRadius: 36 + 24,
+                offetRadius: 24,
 				color: '#00B9C4',
 				dataset: [25, 25, 25, 25],
 				iconPath: 'menu-icon/',
@@ -106,8 +104,11 @@
 				iconSize: {
 					width: 15,
 					height: 15
-				}
+				},
+                isAction: false
 			};
+        menuConf.innerRadius = nodeConf.radius.Company;
+        menuConf.outerRadius = menuConf.innerRadius + menuConf.offetRadius;
 
 
         // 力导向图
@@ -211,7 +212,7 @@
                 .attr('stroke-width', 2)
                 .append('svg:path')
                 .attr('d', 'M2,0 L0,-3 L9,0 L0,3 M2,0 L0,-3')
-                .attr('fill', d => styleMap.line.strokeColor[d.type]);
+                .attr('fill', d => lineConf.strokeColor[d.type]);
 
             // 节点连线    
             const linkLine = container.selectAll('.link')
@@ -226,7 +227,7 @@
                     'id': (d, i) => 'link' + i,
                 })
                 // 根据关系的不同设置线条颜色
-                .style('stroke', d => styleMap.line.strokeColor[d.type]);
+                .style('stroke', d => lineConf.strokeColor[d.type]);
 
             // 连线的文字
             const lineText = container.append('g').selectAll('.linetext')
@@ -258,48 +259,57 @@
                 .attr('class', 'node')
                 .attr('cx', d => d.x)
                 .attr('cy', d => d.y)
-                .each(d => d.isActive = true)
                 .call(drag); // 节点可拖动
 
             nodeCircle.append('circle')
                 // .style('fill-opacity', .3)
-                .style('fill', node => styleMap.node.fillColor[node.ntype]) // 节点背景颜色
-                .style('stroke', node => styleMap.node.strokeColor[node.ntype]) // 节点描边颜色
-                .attr('r', node => styleMap.node.radius[node.ntype]) // 设置节点半径
-                .on('mouseover', function (node) {
+                .style('fill', node => nodeConf.fillColor[node.ntype]) // 节点背景颜色
+                .style('stroke', node => nodeConf.strokeColor[node.ntype]) // 节点描边颜色
+                .attr('class', 'node-circle')
+                .attr('id', node => 'node-circle-' + node.index )
+                .attr('r', node => nodeConf.radius[node.ntype]) // 设置节点半径
+                .on('mouseenter', function (node, i) {
+                    nodeConf.isAction = true;
                     // 提升节点层级
                     // this.parentNode.appendChild(this);
                     nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
                     // 加重节点样式
-                    const fillColor = styleMap.node.fillColor[node.ntype];
-                    const hoverColor = d3.rgb(fillColor).brighter(0.33);
-                    d3.select(this).style('fill', hoverColor);
-                    d3.select(this).classed('node-active', true);
+                    d3.select(this).style({
+                        'fill':  d3.rgb(nodeConf.fillColor[node.ntype]).brighter(0.2)
+                    });
                     // 加重连线样式
                     linkLine.classed('link-active', line => isLinking(node, line));
                     // 只显示相连连线文字
                     lineText.style('fill-opacity', line => isLinking(node, line) ? 1.0 : 0.0);
+                    
                     // 显示节点菜单
-                    node.isActive = true;
+                    menuConf.nodeHoverTimer && clearTimeout(menuConf.nodeHoverTimer);
+                    d3.select('#menu-wrapper-' + i).style('display', 'block');
                 })
-                .on('mouseout', function (node, i) {
+                .on('mouseleave', function (node, i) {
+                    nodeConf.isAction = true;
                     // 恢复节点样式
-                    d3.select(this).style('fill', styleMap.node.fillColor[node.ntype]);
-                    d3.select(this).classed('node-active', false);
+                    d3.select(this).style('fill', nodeConf.fillColor[node.ntype]);
                     // 连线恢复样式
                     linkLine.classed('link-active', false);
                     // 显示所有连线文字
                     lineText.style('fill-opacity', '1.0');
                     // 隐藏节点菜单
-                    node.isActive = false;
+                    // menuConf.nodeHoverTimer && clearTimeout(menuConf.nodeHoverTimer);
+                    menuConf.nodeHoverTimer = setTimeout(function () {
+                        if (!menuConf.isAction && !nodeCircle.isAction) {
+                            d3.select('#menu-wrapper-' + i).style('display', 'none');
+                        }
+                    }, 100);
                 });
 
             // 节点文字
             const nodeText = nodeCircle.append('text')
                 .attr('class', 'nodetext')
+                .attr('id', node => 'node-text-' + node.index )
                 .style('font-size', nodeTextFontSize)
                 .style('font-weight', 600)
-                .style('fill', ({ ntype }) => styleMap.node.textFillColor[ntype])
+                .style('fill', ({ ntype }) => nodeConf.textFillColor[ntype])
                 .attr('text-anchor', 'middle')
                 .attr('dy', '.35em')
                 .attr('x', function ({ name }) {
@@ -308,39 +318,46 @@
 
             // 节点菜单
 			const pie = d3.layout.pie();
-
 			const arc = d3.svg.arc()
-				.innerRadius(menuMap.innerRadius)
-				.outerRadius(menuMap.outerRadius);
-
-			const menuContainer = nodeCircle.filter(function ({ntype}) {
-                return ntype === 'Company';
-            })
+				.innerRadius(menuConf.innerRadius)
+				.outerRadius(menuConf.outerRadius);
+			const menuWrapper = nodeCircle.filter(({ntype}) => ntype === 'Company')
                 .append('g')
-                .style('display', d => d.isActive ? 'block' : 'none');
+                .attr('id', node => 'menu-wrapper-' + node.index )
+                .style('display', 'none')
+                .on('mouseenter', function (node, i) {
+                    menuConf.isAction = true;
+                    d3.select(this).style('display', 'block');
+                })
+                .on('mouseleave', function (node, i) {
+                    menuConf.isAction = false;
+                    if (!menuConf.isAction && !nodeCircle.isAction) {
+                        d3.select(this).style('display', 'none');
+                    }
+                });
 	
-			const wheelMenu = menuContainer
+			const wheelMenu = menuWrapper
                 .selectAll('.wheel-menu')
-				.data(pie(menuMap.dataset))
+				.data(pie(menuConf.dataset))
 				.enter()
 				.append('g')
 				.on('click', function (d, i) {
-					console.log(menuMap.handle[i]);
+					console.log(menuConf.handle[i]);
 				});
 
             wheelMenu.append('path')
-				.attr('fill', menuMap.color)
+				.attr('fill', menuConf.color)
 				.attr('stroke', '#fff')
 				.attr('stroke-width', 1)
 				.attr('d', d => arc(d));
 
             wheelMenu.append('image')
-				.attr('width', menuMap.iconSize.width)
-				.attr('height', menuMap.iconSize.height)
-				.attr('x', - (menuMap.iconSize.width / 2))
-				.attr('y', - (menuMap.iconSize.width / 2))
+				.attr('width', menuConf.iconSize.width)
+				.attr('height', menuConf.iconSize.height)
+				.attr('x', - (menuConf.iconSize.width / 2))
+				.attr('y', - (menuConf.iconSize.width / 2))
 				.attr('transform', d => 'translate(' + arc.centroid(d) + ')')
-				.attr('xlink:href', (d, i) => menuMap.iconPath + menuMap.handle[i] + '.png');
+				.attr('xlink:href', (d, i) => menuConf.iconPath + menuConf.handle[i] + '.png');
 
 
             // 更新力导向图
@@ -453,7 +470,7 @@
         }
 
         function isLinking(node, line) {
-            return line.source.id == node.id || line.target.id == node.id
+            return line.source.id == node.id || line.target.id == node.id;
         }
 
         function textBreaking(d3text, text) {
@@ -501,7 +518,7 @@
 
         function getLineTextDx(d) {
 
-            const sr = styleMap.node.radius[d.source.ntype];
+            const sr = nodeConf.radius[d.source.ntype];
             const sx = d.source.x;
             const sy = d.source.y;
             const tx = d.target.x;

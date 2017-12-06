@@ -103,7 +103,7 @@
                 .attr('stroke', '#999');
 
             const dragstart = function (d, i) {
-                _this.force.stop();
+                self.force.stop();
                 d3.event.sourceEvent.stopPropagation();
             };
 
@@ -112,13 +112,13 @@
                 d.py += d3.event.dy;
                 d.x += d3.event.dx;
                 d.y += d3.event.dy;
-                _this.tick();
+                self.tick();
             };
 
             const dragend = function (d, i) {
                 d.fixed = true;
-                _this.tick();
-                _this.force.resume();
+                self.tick();
+                self.force.resume();
             };
 
             this.nodeDrag = d3.behavior.drag()
