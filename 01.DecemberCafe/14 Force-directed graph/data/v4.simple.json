@@ -13,6 +13,7 @@
     ],
     "relations": [
         {
+            "id": 12,
             "startNode": 1,
             "endNode": 4,
             "label": "执行董事",

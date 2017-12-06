@@ -25,13 +25,13 @@
         }
 
         .link {
-            stroke-opacity: 1;
-            stroke-width: .5;
+            stroke-opacity: .8;
+            stroke-width: .8;
         }
 
         .link-active {
             stroke-opacity: 1;
-            stroke-width: 2;
+            stroke-width: 3;
         }
 
         .linetext {
@@ -77,36 +77,36 @@
             },
             isAction: false
         };
-    
+
         const nodeTextFontSize = 11;
         const lineTextFontSize = 11;
 
-        const api = 'data/v4.json';
-        // const api = 'data/v4.simple.json';
+        // const api = 'data/v4.json';
+        const api = 'data/v4.simple.json';
 
         let nodesMap = {};
         let linkMap = {};
         let nodeHoverTimer = null;
 
         const menuConf = {
-				width: 500,
-				height: 500,
-                offetRadius: 24,
-				color: '#00B9C4',
-				dataset: [25, 25, 25, 25],
-				iconPath: 'menu-icon/',
-				handle: [
-					'info',
-					'equity',
-					'tree',
-					'relation'
-				],
-				iconSize: {
-					width: 15,
-					height: 15
-				},
-                isAction: false
-			};
+            width: 500,
+            height: 500,
+            offetRadius: 24,
+            color: '#00B9C4',
+            dataset: [25, 25, 25, 25],
+            iconPath: 'menu-icon/',
+            handle: [
+                'info',
+                'equity',
+                'tree',
+                'relation'
+            ],
+            iconSize: {
+                width: 15,
+                height: 15
+            },
+            isAction: false
+        };
         menuConf.innerRadius = nodeConf.radius.Company;
         menuConf.outerRadius = menuConf.innerRadius + menuConf.offetRadius;
 
@@ -144,7 +144,7 @@
             .style('pointer-events', 'all');
 
         const container = svg.append('g')
-            .attr('transform', 'scale(0.6)')
+            .attr('transform', 'scale(0.7)')
             .attr('class', 'container');
 
         // 请求数据，绘制图表
@@ -153,6 +153,7 @@
                 return console.error(error);
             }
 
+            // 初始化
             initialize(resp);
         });
 
@@ -194,15 +195,15 @@
             force.stop();
 
             // 固定所有节点
-            nodes.forEach(d => {
-                d.fixed = true;
+            nodes.forEach(node => {
+                node.fixed = true;
             });
 
             // 箭头
             const marker = container.append('svg:defs').selectAll('marker')
                 .data(force.links())
                 .enter().append('svg:marker')
-                .attr('id', d => d.type + '-arrow')
+                .attr('id', link => 'marker-' + link.id)
                 .attr('markerUnits', 'userSpaceOnUse')
                 .attr('viewBox', '0 -5 10 10')
                 .attr('refX', 39)
@@ -213,7 +214,7 @@
                 .attr('stroke-width', 2)
                 .append('svg:path')
                 .attr('d', 'M2,0 L0,-3 L9,0 L0,3 M2,0 L0,-3')
-                .attr('fill', d => lineConf.strokeColor[d.type]);
+                .attr('fill', link => lineConf.strokeColor[link.type]);
 
             // 节点连线    
             const linkLine = container.selectAll('.link')
@@ -223,12 +224,12 @@
                 .attr('class', 'link')
                 .attr({
                     // 标记箭头
-                    'marker-end': d => 'url(#' + d.type + '-arrow)',
-                    'd': d => genLinkPath(d),
-                    'id': (d, i) => 'link' + i,
+                    'marker-end': link => 'url(#' + 'marker-' + link.id + ')',
+                    'd': link => genLinkPath(link),
+                    'id': link => 'link-' + link.id,
                 })
                 // 根据关系的不同设置线条颜色
-                .style('stroke', d => lineConf.strokeColor[d.type]);
+                .style('stroke', link => lineConf.strokeColor[link.type]);
 
             // 连线的文字
             const lineText = container.append('g').selectAll('.linetext')
@@ -238,17 +239,17 @@
                 .style('font-size', lineTextFontSize)
                 .attr({
                     'class': 'linetext',
-                    'id': (d, i) => 'link' + i,
-                    'dx': d => getLineTextDx(d),
+                    'id': link => 'linktext' + link.id,
+                    'dx': link => getLineTextDx(link),
                     'dy': 5
                 });
 
             lineText.append('textPath')
                 // .style('letter-spacing', '0pt')
                 // .attr('lengthAdjust', 'spacingAndGlyphs')
-                // .attr('textLength', d => d.alllabel.length * 10)
-                .attr('xlink:href', (d, i) => '#link' + i)
-                .text(d => d.alllabel);
+                // .attr('textLength', link => link.labels.length * 10)
+                .attr('xlink:href', link => '#link-' + link.id)
+                .text(link => link.labels);
 
             // 节点（圆）
             const nodeCircle = container.append('g')
@@ -258,8 +259,8 @@
                 .append('g')
                 .style('cursor', 'pointer')
                 .attr('class', 'node')
-                .attr('cx', d => d.x)
-                .attr('cy', d => d.y)
+                .attr('cx', node => node.x)
+                .attr('cy', node => node.y)
                 .call(drag); // 节点可拖动
 
             nodeCircle.append('circle')
@@ -267,47 +268,55 @@
                 .style('fill', node => nodeConf.fillColor[node.ntype]) // 节点背景颜色
                 .style('stroke', node => nodeConf.strokeColor[node.ntype]) // 节点描边颜色
                 .attr('class', 'node-circle')
-                .attr('id', node => 'node-circle-' + node.index )
+                .attr('id', node => 'node-circle-' + node.id)
                 .attr('r', node => nodeConf.radius[node.ntype]) // 设置节点半径
-                .on('mouseenter', function (node, i) {
+                .on('mouseenter', function (currNode) {
                     nodeConf.isAction = true;
                     // 提升节点层级
                     // this.parentNode.appendChild(this);
-                    nodeCircle.sort((a, b) => a.id === node.id ? 1 : -1);
+                    nodeCircle.sort((a, b) => a.id === currNode.id ? 1 : -1);
                     // 加重节点样式
                     d3.select(this).style({
-                        'fill':  d3.rgb(nodeConf.fillColor[node.ntype]).brighter(0.2)
+                        'fill': d3.rgb(nodeConf.fillColor[currNode.ntype]).brighter(0.2)
                     });
                     // 加重连线样式
-                    linkLine.classed('link-active', line => isLinking(node, line));
+                    linkLine.classed('link-active', link => isLinking(currNode, link));
                     // 只显示相连连线文字
-                    lineText.style('fill-opacity', line => isLinking(node, line) ? 1.0 : 0.0);
-                    
+                    lineText.style('fill-opacity', link => isLinking(currNode, link) ? 1.0 : 0.0);
                     // 显示节点菜单
                     menuConf.nodeHoverTimer && clearTimeout(menuConf.nodeHoverTimer);
-                    d3.select('#menu-wrapper-' + i).style('display', 'block');
+                    menuWrapper.filter(node => node.id === currNode.id)
+                        .attr('refX', 49)
+                        .style('display', 'block');
+                    // 放大箭头
+                    marker.filter(link => isLinking(currNode, link))
+                        .style('transform', 'scale(1.5)');
                 })
-                .on('mouseleave', function (node, i) {
+                .on('mouseleave', function (currNode) {
                     nodeConf.isAction = true;
                     // 恢复节点样式
-                    d3.select(this).style('fill', nodeConf.fillColor[node.ntype]);
+                    d3.select(this).style('fill', nodeConf.fillColor[currNode.ntype]);
                     // 连线恢复样式
                     linkLine.classed('link-active', false);
                     // 显示所有连线文字
                     lineText.style('fill-opacity', '1.0');
                     // 隐藏节点菜单
-                    // menuConf.nodeHoverTimer && clearTimeout(menuConf.nodeHoverTimer);
                     menuConf.nodeHoverTimer = setTimeout(function () {
                         if (!menuConf.isAction && !nodeCircle.isAction) {
-                            d3.select('#menu-wrapper-' + i).style('display', 'none');
+                            menuWrapper.filter(node => node.id === currNode.id)
+                                .style('display', 'none');
                         }
                     }, 100);
+                    // 恢复箭头
+                    marker.filter(link => isLinking(currNode, link))
+                        .attr('refX', 39)
+                        .style('transform', 'scale(1)');
                 });
 
             // 节点文字
             const nodeText = nodeCircle.append('text')
                 .attr('class', 'nodetext')
-                .attr('id', node => 'node-text-' + node.index )
+                .attr('id', node => 'node-text-' + node.id)
                 .style('font-size', nodeTextFontSize)
                 .style('font-weight', 400)
                 .style('fill', ({ ntype }) => nodeConf.textFillColor[ntype])
@@ -318,13 +327,13 @@
                 });
 
             // 节点菜单
-			const pie = d3.layout.pie();
-			const arc = d3.svg.arc()
-				.innerRadius(menuConf.innerRadius)
-				.outerRadius(menuConf.outerRadius);
-			const menuWrapper = nodeCircle.filter(({ntype}) => ntype === 'Company')
+            const pie = d3.layout.pie();
+            const arc = d3.svg.arc()
+                .innerRadius(menuConf.innerRadius)
+                .outerRadius(menuConf.outerRadius);
+            const menuWrapper = nodeCircle.filter(({ ntype }) => ntype === 'Company')
                 .append('g')
-                .attr('id', node => 'menu-wrapper-' + node.index )
+                .attr('id', node => 'menu-wrapper-' + node.id)
                 .style('display', 'none')
                 .on('mouseenter', function (node, i) {
                     menuConf.isAction = true;
@@ -336,42 +345,42 @@
                         d3.select(this).style('display', 'none');
                     }
                 });
-	
-			const wheelMenu = menuWrapper
+
+            const wheelMenu = menuWrapper
                 .selectAll('.wheel-menu')
-				.data(pie(menuConf.dataset))
-				.enter()
-				.append('g')
-				.on('click', function (d, i) {
-					console.log(menuConf.handle[i]);
-				});
+                .data(pie(menuConf.dataset))
+                .enter()
+                .append('g')
+                .on('click', function (d, i) {
+                    console.log(menuConf.handle[i]);
+                });
 
             wheelMenu.append('path')
-				.attr('fill', menuConf.color)
-				.attr('stroke', '#fff')
-				.attr('stroke-width', 1)
-				.attr('d', d => arc(d));
+                .attr('fill', menuConf.color)
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 1)
+                .attr('d', d => arc(d));
 
             wheelMenu.append('image')
-				.attr('width', menuConf.iconSize.width)
-				.attr('height', menuConf.iconSize.height)
-				.attr('x', - (menuConf.iconSize.width / 2))
-				.attr('y', - (menuConf.iconSize.width / 2))
-				.attr('transform', d => 'translate(' + arc.centroid(d) + ')')
-				.attr('xlink:href', (d, i) => menuConf.iconPath + menuConf.handle[i] + '.png');
+                .attr('width', menuConf.iconSize.width)
+                .attr('height', menuConf.iconSize.height)
+                .attr('x', - (menuConf.iconSize.width / 2))
+                .attr('y', - (menuConf.iconSize.width / 2))
+                .attr('transform', d => 'translate(' + arc.centroid(d) + ')')
+                .attr('xlink:href', (d, i) => menuConf.iconPath + menuConf.handle[i] + '.png');
 
 
             // 更新力导向图
             function tick() {
                 // 节点位置
-                nodeCircle.attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
+                nodeCircle.attr('transform', node => 'translate(' + node.x + ',' + node.y + ')');
                 // 连线路径
-                linkLine.attr('d', d => genLinkPath(d));
+                linkLine.attr('d', link => genLinkPath(link));
                 // 连线文字位置
-                lineText.attr('dx', d => getLineTextDx(d));
+                lineText.attr('dx', link => getLineTextDx(link));
                 // 连线文字角度 
-                lineText.attr('transform', function (d) {
-                    return getLineTextAngle(d, this.getBBox());
+                lineText.attr('transform', function (link) {
+                    return getLineTextAngle(link, this.getBBox());
                 });
             }
 
@@ -387,21 +396,23 @@
 
         function genLinks(relations) {
             return relations.map(function ({
+                id,
                 startNode,
                 endNode,
                 label,
                 type
             }) {
                 const mapKey = startNode + '-' + endNode;
-                let lcount = linkMap[startNode + '-' + endNode];
-                let alllabel = linkMap[startNode + '-' + endNode + '-label'];
+                let count = linkMap[startNode + '-' + endNode];
+                let labels = linkMap[startNode + '-' + endNode + '-label'];
                 return {
+                    id,
                     source: nodesMap[startNode],
                     target: nodesMap[endNode],
                     label,
                     type,
-                    alllabel: linkMap[mapKey + '-label'],
-                    lcount: linkMap[mapKey],
+                    labels: linkMap[mapKey + '-label'],
+                    count: linkMap[mapKey],
                 }
             })
         }
@@ -442,11 +453,11 @@
         }
 
         // 生成关系连线路径
-        function genLinkPath(d) {
-            const sx = Math.round(d.source.x);
-            const sy = Math.round(d.source.y);
-            const tx = Math.round(d.target.x);
-            const ty = Math.round(d.target.y);
+        function genLinkPath(link) {
+            const sx = Math.round(link.source.x);
+            const sy = Math.round(link.source.y);
+            const tx = Math.round(link.target.x);
+            const ty = Math.round(link.target.y);
 
             return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
         }
@@ -470,8 +481,8 @@
                 .attr('cy', d.y = d3.event.y);
         }
 
-        function isLinking(node, line) {
-            return line.source.id == node.id || line.target.id == node.id;
+        function isLinking(node, link) {
+            return link.source.id == node.id || link.target.id == node.id;
         }
 
         function textBreaking(d3text, text) {
@@ -527,7 +538,7 @@
 
             const distance = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
 
-            const textLength = d.alllabel.length;
+            const textLength = d.labels.length;
             const deviation = 8; // 调整误差
             const dx = (distance - sr - textLength * lineTextFontSize) / 2 + deviation;
 
