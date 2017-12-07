@@ -42,6 +42,11 @@
 
     <script src='http://d3js.org/d3.v3.min.js' charset='utf-8'></script>
     <script>
+
+        
+        // const api = 'data/v4.json';
+        const api = 'data/v4.simple.json';
+        
         const width = 600;
         const height = 600;
 
@@ -79,9 +84,6 @@
 
         const nodeTextFontSize = 16;
         const lineTextFontSize = 12;
-
-        // const api = 'data/v4.json';
-        const api = 'data/v4.simple.json';
 
         let nodesMap = {};
         let linkMap = {};
@@ -221,12 +223,10 @@
                 .append('path')
                 .attr('class', 'link')
                 .attr({
-                    // 标记箭头
-                    'marker-end': link => 'url(#' + 'marker-' + link.id + ')',
+                    'marker-end': link => 'url(#' + 'marker-' + link.id + ')', // 标记箭头
                     'd': link => genLinkPath(link),
                     'id': link => 'link-' + link.id,
                 })
-                // 根据关系的不同设置线条颜色
                 .style('stroke', link => lineConf.strokeColor[link.type]);
 
             // 连线的文字
@@ -245,9 +245,9 @@
             lineText.append('textPath')
                 // .style('letter-spacing', '0pt')
                 // .attr('lengthAdjust', 'spacingAndGlyphs')
-                // .attr('textLength', link => link.labels.length * 10)
+                // .attr('textLength', link => link.label.length * 10)
                 .attr('xlink:href', link => '#link-' + link.id)
-                .text(link => link.label);
+                .text(link => link.label + ' ' + link.num);
 
             // 节点（圆）
             const nodeCircle = container.append('g')
@@ -364,18 +364,19 @@
                 endNode,
                 label,
                 type
-            }) {
-                const mapKey = startNode + '-' + endNode;
-                let count = linkMap[startNode + '-' + endNode];
-                let labels = linkMap[startNode + '-' + endNode + '-label'];
+            }, i) {
+                const linkKey = startNode + '-' + endNode;
+                let count = linkMap[linkKey];
+                let labels = linkMap[linkKey + '-label'];
                 return {
                     id,
                     source: nodesMap[startNode],
                     target: nodesMap[endNode],
                     label,
                     type,
-                    labels: linkMap[mapKey + '-label'],
-                    count: linkMap[mapKey],
+                    labels: linkMap[linkKey + '-label'],
+                    count: linkMap[linkKey],
+                    num: i
                 }
             })
         }
@@ -417,12 +418,197 @@
 
         // 生成关系连线路径
         function genLinkPath(link) {
-            const sx = Math.round(link.source.x);
-            const sy = Math.round(link.source.y);
-            const tx = Math.round(link.target.x);
-            const ty = Math.round(link.target.y);
+            
+            const sr = nodeConf.radius.Human;
+            const tr = nodeConf.radius.Company;
+
+            const count = link.count;
+            const knum = link.num;
+            const offset = 16;
+
+            let sx = round(link.source.x);
+            let tx = round(link.target.x);
+            let sy = round(link.source.y);
+            let ty = round(link.target.y);
+
+            const angle = getLineAngle(sx, sy, ty, tx);
+            console.log(angle);
+
+            // 0° ~ 90°
+            if (angle >= 0 && angle <= 10) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx += 2;
+                    tx += 2;
+                }
+
+                if (knum === 2) {
+                    sy -= offset;
+                    ty -= offset;
+                    sx += 2;
+                    tx += 2;
+                }
+
+                if (link.num === 3) {
+                    sy += offset * 2;
+                    ty += offset * 2;
+                    
+                    if (sx < tx) {
+                        sx += 10;
+                        tx += 10;
+                    } 
+                    if (sx > tx) {
+                        sx -= 10;
+                        tx -= 10;
+                    }
+                }
+            }
+            if (angle > 10 && angle <= 20) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx -= 2;
+                    tx -= 2;
+                }
+            }
+            if (angle > 20 && angle <= 30) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx -= 4;
+                    tx -= 4;
+                }
+            }
+            if (angle > 30 && angle <= 40) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx -= 8;
+                    tx -= 8;
+                }
+            }
+            if (angle > 40 && angle <= 50) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx -= 12;
+                    tx -= 12;
+                }
+            }
+            if (angle > 50 && angle <= 60) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx -= 16;
+                    tx -= 16;
+                }
+            }
+            if (angle > 60 && angle <= 70) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx -= 20;
+                    tx -= 20;
+                }
+            }
+            if (angle > 70 && angle <= 80) {
+                if (knum === 1) {
+                    // sy += offset;
+                    // ty += offset;
+                    // sx -= 20;
+                    // tx -= 20;
+                }
+            }
+            if (angle > 80 && angle <= 90) {
+                if (knum === 1) {
+                    sy += offset;
+                    ty += offset;
+                    sx -= 20;
+                    tx -= 20;
+                }
+            }
+
+            // 90° ~ 180°
+            if (angle > 90 && angle <= 100) {
+            }
+            if (angle > 100 && angle <= 110) {
+            }
+            if (angle > 110 && angle <= 120) {
+            }
+            if (angle > 120 && angle <= 130) {
+            }
+            if (angle > 130 && angle <= 140) {
+            }
+            if (angle > 140 && angle <= 150) {
+            }
+            if (angle > 150 && angle <= 160) {
+            }
+            if (angle > 160 && angle <= 170) {
+            }
+            if (angle > 170 && angle <= 180) {
+            }
+
+            // -180° ~ -90°
+            if (angle >= -180 && angle < -170) {
+            }
+            if (angle >= -170 && angle < -160) {
+            }
+            if (angle >= -160 && angle < -150) {
+            }
+            if (angle >= -150 && angle < -140) {
+            }
+            if (angle >= -140 && angle < -130) {
+            }
+            if (angle >= -130 && angle < -120) {
+            }
+            if (angle >= -120 && angle < -110) {
+            }
+            if (angle >= -110 && angle < -100) {
+            }
+            if (angle >= -100 && angle < -90) {
+            }
+
+            // -90° ~ 0°
+            if (angle >= -90 && angle < -80) {
+            }
+            if (angle >= -80 && angle < -70) {
+            }
+            if (angle >= -70 && angle < -60) {
+            }
+            if (angle >= -60 && angle < -50) {
+            }
+            if (angle >= -50 && angle < -40) {
+            }
+            if (angle >= -40 && angle < -30) {
+            }
+            if (angle >= -30 && angle < -20) {
+            }
+            if (angle >= -20 && angle < -10) {
+            }
+            if (angle >= -10 && angle < 0) {
+            }
 
             return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
+        }
+
+        function getLineAngle(sx, sy, ty, tx) {
+            // 两点 x, y 坐标偏移值
+            const x = tx - sx;
+            const y = ty - sy;
+            // 斜边长度
+            const hypotenuse = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+            // 求出弧度
+            const cos = x / hypotenuse;
+            const radian = Math.acos(cos);
+            // 用弧度算出角度   
+            let angle = 180 / (Math.PI / radian);
+            if (y < 0) {
+                angle = -angle;
+            } else if ((y == 0) && (x < 0)) {
+                angle = 180;
+            }
+            return round(angle);
         }
 
         function zoomFn() {
@@ -543,6 +729,9 @@
         }
 
         function toggleMenu(menuWrapper, currNode, isHover) {
+
+            return;
+
             if (isHover) {
                 // 显示节点菜单
                 menuWrapper.filter(node => node.id === currNode.id)
@@ -595,6 +784,10 @@
             }
         }
 
+        function round(num, pow = 2) {
+            const multiple = Math.pow(10, pow);
+            return Math.round(num * multiple) / multiple;
+        }
 
     </script>
 </body>
