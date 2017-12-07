@@ -20,10 +20,6 @@
             user-select: none;
         }
 
-        .node {
-            stroke-width: 0;
-        }
-
         .link {
             stroke-opacity: 1;
             stroke-width: .8;
@@ -35,7 +31,7 @@
         }
 
         .linetext {
-            font-size: 12px Microsoft YaHei;
+            font-family: Microsoft YaHei;
             text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
         }
     </style>
@@ -58,14 +54,19 @@
                 Human: 'rgb(244,56,0)',
                 Company: 'rgb(35, 148, 206)'
             },
+            strokeWidth: {
+                Human: 3,
+                Company: 0
+            },
             textFillColor: {
                 Human: '#fff',
                 Company: '#fff'
             },
             radius: {
-                Human: 26,
-                Company: 36
-            }
+                Human: 36,
+                Company: 56
+            },
+            scale: 0.6
         };
 
         const lineConf = {
@@ -76,11 +77,11 @@
             }
         };
 
-        const nodeTextFontSize = 11;
-        const lineTextFontSize = 11;
+        const nodeTextFontSize = 16;
+        const lineTextFontSize = 12;
 
-        const api = 'data/v4.json';
-        // const api = 'data/v4.simple.json';
+        // const api = 'data/v4.json';
+        const api = 'data/v4.simple.json';
 
         let nodesMap = {};
         let linkMap = {};
@@ -88,7 +89,7 @@
         const menuConf = {
             width: 500,
             height: 500,
-            offetRadius: 24,
+            offetRadius: 30,
             color: '#00B9C4',
             dataset: [25, 25, 25, 25],
             iconPath: 'menu-icon/',
@@ -140,7 +141,7 @@
             .style('pointer-events', 'all');
 
         const container = svg.append('g')
-            .attr('transform', 'scale(0.7)')
+            .attr('transform', 'scale(' + nodeConf.scale + ')')
             .attr('class', 'container');
 
         // 请求数据，绘制图表
@@ -202,7 +203,7 @@
                 .attr('id', link => 'marker-' + link.id)
                 .attr('markerUnits', 'userSpaceOnUse')
                 .attr('viewBox', '0 -5 10 10')
-                .attr('refX', 39)
+                .attr('refX', nodeConf.radius.Company)
                 .attr('refY', 0)
                 .attr('markerWidth', 12)
                 .attr('markerHeight', 12)
@@ -210,6 +211,7 @@
                 .attr('stroke-width', 2)
                 .append('svg:path')
                 .attr('d', 'M2,0 L0,-3 L9,0 L0,3 M2,0 L0,-3')
+                .style('transform', 'scale(1.4)')
                 .attr('fill', link => lineConf.strokeColor[link.type]);
 
             // 节点连线    
@@ -245,7 +247,7 @@
                 // .attr('lengthAdjust', 'spacingAndGlyphs')
                 // .attr('textLength', link => link.labels.length * 10)
                 .attr('xlink:href', link => '#link-' + link.id)
-                .text(link => link.labels);
+                .text(link => link.label);
 
             // 节点（圆）
             const nodeCircle = container.append('g')
@@ -261,11 +263,12 @@
 
             nodeCircle.append('circle')
                 // .style('fill-opacity', .3)
-                .style('fill', node => nodeConf.fillColor[node.ntype]) // 节点背景颜色
-                .style('stroke', node => nodeConf.strokeColor[node.ntype]) // 节点描边颜色
+                .style('fill', node => nodeConf.fillColor[node.ntype])
+                .style('stroke', node => nodeConf.strokeColor[node.ntype])
+                .style('stroke-width', node => nodeConf.strokeWidth[node.ntype])
                 .attr('class', 'node-circle')
                 .attr('id', node => 'node-circle-' + node.id)
-                .attr('r', node => nodeConf.radius[node.ntype]); // 设置节点半径
+                .attr('r', node => nodeConf.radius[node.ntype]);
 
             // 鼠标交互
             nodeCircle.on('mouseenter', function (currNode) {
@@ -427,7 +430,7 @@
                 translate,
                 scale
             } = d3.event;
-            container.attr('transform', 'translate(' + translate + ')scale(' + scale + ')');
+            container.attr('transform', 'translate(' + translate + ')scale(' + scale *  nodeConf.scale + ')');
         }
 
         function dragstartFn(d) {
@@ -463,12 +466,12 @@
                 const topText = text.substring(0, 4);
                 const midText = text.substring(4, 9);
                 let botText = text.substring(9, len);
-                let topY = -18;
-                let midY = 4;
-                let botY = 22;
-                if (len <= 9) {
-                    topY += 9;
-                    midY += 9;
+                let topY = -22;
+                let midY = 8;
+                let botY = 34;
+                if (len <= 10) {
+                    topY += 10;
+                    midY += 10;
                 } else {
                     botText = text.substring(9, 11) + '...';
                 }
@@ -505,7 +508,7 @@
 
             const distance = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
 
-            const textLength = d.labels.length;
+            const textLength = d.label.length;
             const deviation = 8; // 调整误差
             const dx = (distance - sr - textLength * lineTextFontSize) / 2 + deviation;
 
@@ -583,12 +586,11 @@
             if (isHover) {
                 // 放大箭头
                 marker.filter(link => isLinkLine(currNode, link))
-                    .style('transform', 'scale(1.5)')
-                    .attr('refX', 49);                    
+                    .style('transform', 'scale(1.5)');              
             } else {
                 // 恢复箭头
                 marker
-                    .attr('refX', 39)
+                    .attr('refX', nodeConf.radius.Company)
                     .style('transform', 'scale(1)');
             }
         }

@@ -13,10 +13,24 @@
     ],
     "relations": [
         {
+            "id": 11, 
+            "startNode": 1,
+            "endNode": 4,
+            "label": "法人",
+            "type": "OWN"
+        },
+        {
             "id": 12,
             "startNode": 1,
             "endNode": 4,
             "label": "执行董事",
+            "type": "SERVE"
+        },
+        {
+            "id": 13, 
+            "startNode": 1,
+            "endNode": 4,
+            "label": "总经理",
             "type": "SERVE"
         }
     ]
