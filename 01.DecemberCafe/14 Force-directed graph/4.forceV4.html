@@ -61,7 +61,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 
         var r = 25;
         var padding = 0;
-        var s = d3.select("#svgBox")
+        var s = d3.select("#svgBox");
 
         // 关系连线 + 文字
         var link = s.selectAll('.lineBox').data(data.links).enter().append('g')
@@ -94,11 +94,12 @@ Released under the MIT license: http://jsbin.mit-license.org
         function tick() {
             node
                 .attr('cx', function (d) {
-                    return d.x
+                    return d.x;
                 })
                 .attr('cy', function (d) {
-                    return d.y
-                })
+                    return d.y;
+                });
+
             link.each(function (d) {
                 var _d = d;
                 var source = [d.source.x, d.source.y];
@@ -116,41 +117,41 @@ Released under the MIT license: http://jsbin.mit-license.org
                 d.sourceY = b2 < 0 ? d.source.y - a : d.source.y + a;
                 d.targetY = b2 < 0 ? d.target.y + a : d.target.y - a;
 
-                var start =  d.relation.length === 1 ? 0 : -r / 2 + padding;
+                var start = d.relation.length === 1 ? 0 : -r / 2 + padding;
                 var space = d.relation.length === 1 ? 0 : Math.abs(start * 2 / (d.relation.length - 1));
                 var index = 0;
                 for (var i in d.relation) {
-                    var s = start + space * index++
+                    var s = start + space * index++;
                     getSubLine(d.relationline[i], d.sourceX, d.sourceY, d.targetX, d.targetY, d.ang, s, r, b2 < 0);
                 }
                 d.relationLineDom
                     .attr("stroke-width", '2')
                     .attr('stroke', 'red')
                     .attr('x1', function (d, i) {
-                        return d.source.x
+                        return d.source.x;
                     })
                     .attr('y1', function (d, i) {
-                        return d.source.y
+                        return d.source.y;
                     })
                     .attr('x2', function (d, i) {
-                        return d.target.x
+                        return d.target.x;
                     })
                     .attr('y2', function (d, i) {
-                        return d.target.y
-                    })
+                        return d.target.y;
+                    });
                 d.relationTextDom
                     .attr('x', function (d) {
-                        return d.source.x + (d.target.x - d.source.x) / 2
+                        return d.source.x + (d.target.x - d.source.x) / 2;
                     })
                     .attr('y', function (d) {
-                        return d.source.y + (d.target.y - d.source.y) / 2
+                        return d.source.y + (d.target.y - d.source.y) / 2;
                     })
                     .attr('transform', function (d) {
                         return 'rotate(' + (_d.textAng) + ' ' +
                             [d.source.x + (d.target.x - d.source.x) / 2,
-                            d.source.y + (d.target.y - d.source.y) / 2] + ')'
-                    })
-            })
+                            d.source.y + (d.target.y - d.source.y) / 2] + ')';
+                    });
+            });
         }
 
         function getSubLine(link, sourceX, sourceY, targetX, targetY, ang, position, r, isY) {
@@ -160,8 +161,10 @@ Released under the MIT license: http://jsbin.mit-license.org
             var s = r - Math.sin(180 * Math.acos(position / r) / Math.PI * Math.PI / 180) * r;
             var _a = Math.cos(ang * Math.PI / 180);
             var _b = Math.sin(ang * Math.PI / 180);
-            var a = _a * position, b = _b * position;
-            var rx = _b * s, ry = _a * s;
+            var a = _a * position;
+            var b = _b * position;
+            var rx = _b * s;
+            var ry = _a * s;
 
             link.source.x = (isY ? sourceX + a : sourceX - a) - rx;
             link.source.y = (isY ? sourceY + ry : sourceY - ry) + b;
