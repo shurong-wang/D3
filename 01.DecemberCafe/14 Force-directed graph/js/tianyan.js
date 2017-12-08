@@ -1,5 +1,5 @@
 // const api = 'data/v5.json';
-const api = 'data/v5.simple3.json';
+const api = 'data/v5.simple4.json';
 
 const width = 600;
 const height = 600;
@@ -391,7 +391,7 @@ function genLinkPath(link) {
     let ty = link.target.y;
 
     const angle = getLineAngle(sx, sy, ty, tx);
-    console.log(angle);
+    // console.log(angle);
 
     let xOffset = 0;
     let yOffset = 0;
@@ -407,16 +407,19 @@ function genLinkPath(link) {
     if (angle >= -45 && angle < 45) {
         // console.log('-45° ~ 45°');
         if (knum === 1) {
-            xOffset += 3;
+            // xOffset += 3;
+            xOffset = 0;
             yOffset += offset;
             update();
         }
         if (knum === 2) {
+            xOffset += 3;
             xOffset = 0;
             yOffset -= offset;
             update();
         }
         if (knum === 3) {
+            // xOffset += 12;
             xOffset = 0;
             yOffset -= offset * 2;
             update();
@@ -428,16 +431,19 @@ function genLinkPath(link) {
         // console.log('45° ~ 135°');
         if (knum === 1) {
             xOffset -= offset;
-            yOffset += 3;
+            // yOffset += 3;
+            yOffset = 0;
             update();
         }
         if (knum === 2) {
             xOffset += offset;
+            // yOffset += 3;
             yOffset = 0;
             update();
         }
         if (knum === 3) {
             xOffset += offset * 2;
+            // yOffset += 12;
             yOffset = 0;
             update();
         }
@@ -447,16 +453,19 @@ function genLinkPath(link) {
     if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle <= -135)) {
         // console.log('135°~-135°');
         if (knum === 1) {
+            // xOffset -= 3;
             xOffset = 0;
             yOffset -= offset;
             update();
         }
         if (knum === 2) {
+            // xOffset -= 3;
             xOffset = 0;
             yOffset += offset;
             update();
         }
         if (knum === 3) {
+            // xOffset -= 12;
             xOffset = 0;
             yOffset += offset * 2;
             update();
@@ -468,17 +477,20 @@ function genLinkPath(link) {
         // console.log('135°~-135°');
         if (knum === 1) {
             xOffset += offset;
+            // yOffset -= 3;
             yOffset = 0;
             update();
         }
         if (knum === 2) {
             xOffset -= offset;
+            // yOffset -= 3;
             yOffset = 0;
             update();
         }
         if (knum === 3) {
             xOffset -= offset * 2;
             yOffset = 0;
+            // yOffset -= 12;
             update();
         }
     }

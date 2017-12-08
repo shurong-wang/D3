@@ -407,6 +407,7 @@ function genLinkPath(link) {
     if (angle >= -45 && angle < 45) {
         // console.log('-45° ~ 45°');
         if (knum === 1) {
+            // xOffset += 3;
             xOffset = 0;
             // if (angle >= 30) {
             //     xOffset -= 9;
@@ -424,11 +425,13 @@ function genLinkPath(link) {
             update();
         }
         if (knum === 2) {
+            xOffset += 3;
             xOffset = 0;
             yOffset -= offset;
             update();
         }
         if (knum === 3) {
+            // xOffset += 12;
             xOffset = 0;
             yOffset -= offset * 2;
             update();
@@ -440,16 +443,19 @@ function genLinkPath(link) {
         // console.log('45° ~ 135°');
         if (knum === 1) {
             xOffset -= offset;
+            // yOffset += 3;
             yOffset = 0;
             update();
         }
         if (knum === 2) {
             xOffset += offset;
+            // yOffset += 3;
             yOffset = 0;
             update();
         }
         if (knum === 3) {
             xOffset += offset * 2;
+            // yOffset += 12;
             yOffset = 0;
             update();
         }
@@ -459,16 +465,19 @@ function genLinkPath(link) {
     if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle <= -135)) {
         // console.log('135°~-135°');
         if (knum === 1) {
+            // xOffset -= 3;
             xOffset = 0;
             yOffset -= offset;
             update();
         }
         if (knum === 2) {
+            // xOffset -= 3;
             xOffset = 0;
             yOffset += offset;
             update();
         }
         if (knum === 3) {
+            // xOffset -= 12;
             xOffset = 0;
             yOffset += offset * 2;
             update();
@@ -480,17 +489,20 @@ function genLinkPath(link) {
         // console.log('135°~-135°');
         if (knum === 1) {
             xOffset += offset;
+            // yOffset -= 3;
             yOffset = 0;
             update();
         }
         if (knum === 2) {
             xOffset -= offset;
+            // yOffset -= 3;
             yOffset = 0;
             update();
         }
         if (knum === 3) {
             xOffset -= offset * 2;
             yOffset = 0;
+            // yOffset -= 12;
             update();
         }
     }

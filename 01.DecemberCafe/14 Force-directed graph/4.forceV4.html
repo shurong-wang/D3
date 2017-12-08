@@ -90,7 +90,6 @@ Released under the MIT license: http://jsbin.mit-license.org
                 tick();
             }));
 
-        // 力导向图布局计算
         function tick() {
             node
                 .attr('cx', function (d) {
@@ -172,6 +171,7 @@ Released under the MIT license: http://jsbin.mit-license.org
             link.target.y = (isY ? targetY - ry : targetY + ry) + b;
         }
 
+        // 重新布局力导向图
         tick();
 
     </script>
