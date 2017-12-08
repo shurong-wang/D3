@@ -14,7 +14,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <script src="./js/d3.v3.min.js"></script>
-    <title>关系图多平行外切线</title>
+    <title>多平行外切线-关系图</title>
 </head>
 
 <body>
@@ -22,15 +22,15 @@ Released under the MIT license: http://jsbin.mit-license.org
     <script id="jsbin-javascript">
         var data = {
             nodes: [{
-                x: 300, y: 300
+                x: 300, y: 300, r: 25
             }, {
-                x: 150, y: 250
+                x: 150, y: 250, r: 40
             }, {
-                x: 200, y: 450
+                x: 200, y: 450, r: 40
             }, {
-                x: 350, y: 450
+                x: 350, y: 450, r: 40
             }, {
-                x: 220, y: 100
+                x: 220, y: 100, r: 40
             }],
             links: [{
                 source: 0, target: 1,
@@ -51,7 +51,7 @@ Released under the MIT license: http://jsbin.mit-license.org
             data.links[i].target = data.nodes[data.links[i].target]
         }
 
-        //  // data.links 数据格式（布局力导向图前）
+        //  // data.links 数据格式
         // [
         //     { "source": { "x": 300, "y": 300 }, "target": { "x": 150, "y": 250 }, "relation": ["关系1"] },
         //     { "source": { "x": 300, "y": 300 }, "target": { "x": 200, "y": 450 }, "relation": ["关系1", "关系2"] },
@@ -59,8 +59,9 @@ Released under the MIT license: http://jsbin.mit-license.org
         //     { "source": { "x": 300, "y": 300 }, "target": { "x": 220, "y": 100 }, "relation":['关系1', '关系2', '关系3', '关系4'] }
         // ]
 
-        var r = 25;
-        var padding = 0;
+        // console.log(data.links);
+        
+        var padding = -6;
         var s = d3.select("#svgBox");
 
         // 关系连线 + 文字
@@ -83,7 +84,9 @@ Released under the MIT license: http://jsbin.mit-license.org
 
         // 关系节点
         var node = s.selectAll('circle').data(data.nodes).enter().append('circle')
-            .attr('r', r)
+            .attr('r', function (d) {
+                return d.r;
+            })
             .call(d3.behavior.drag().on("drag", function (d) {
                 d.x += d3.event.dx;
                 d.y += d3.event.dy;
@@ -100,6 +103,7 @@ Released under the MIT license: http://jsbin.mit-license.org
                 });
 
             link.each(function (d) {
+                var r = d.source.r;
                 var _d = d;
                 var source = [d.source.x, d.source.y];
                 var target = [d.target.x, d.target.y];
