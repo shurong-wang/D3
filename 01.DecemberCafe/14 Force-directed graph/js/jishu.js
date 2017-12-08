@@ -426,7 +426,7 @@ function genLinkPath(link) {
     return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
 }
 
-function getLineAngle(sx, sy, ty, tx) {
+function getLineAngle(sx, sy, tx, ty) {
     // 两点 x, y 坐标偏移值
     const x = tx - sx;
     const y = ty - sy;

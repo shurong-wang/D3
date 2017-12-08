@@ -390,7 +390,7 @@ function genLinkPath(link) {
     let sy = link.source.y;
     let ty = link.target.y;
 
-    const angle = getLineAngle(sx, sy, ty, tx);
+    const angle = getLineAngle(sx, sy, tx, ty);
     // console.log(angle);
 
     let xOffset = 0;
@@ -409,23 +409,11 @@ function genLinkPath(link) {
         if (knum === 1) {
             // xOffset += 3;
             xOffset = 0;
-            // if (angle >= 30) {
-            //     xOffset -= 9;
-            // }
-            // if (angle > 15) {
-            //     xOffset -= 3;
-            // }
-            // if (angle <= -15) {
-            //     xOffset += 3;
-            // }
-            // if (angle <= -30) {
-            //     xOffset += 9;
-            // }
             yOffset += offset;
             update();
         }
         if (knum === 2) {
-            xOffset += 3;
+            // xOffset += 3;
             xOffset = 0;
             yOffset -= offset;
             update();
@@ -510,7 +498,7 @@ function genLinkPath(link) {
     return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
 }
 
-function getLineAngle(sx, sy, ty, tx) {
+function getLineAngle(sx, sy, tx, ty) {
     // 两点 x, y 坐标偏移值
     const x = tx - sx;
     const y = ty - sy;
