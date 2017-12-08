@@ -65,7 +65,10 @@ Released under the MIT license: http://jsbin.mit-license.org
         var s = d3.select("#svgBox");
 
         // 关系连线 + 文字
-        var link = s.selectAll('.lineBox').data(data.links).enter().append('g')
+        var link = s.selectAll('.lineBox')
+            .data(data.links)
+            .enter()
+            .append('g')
             .each(function (d) {
                 var _d = d;
                 d.relationline = [];
@@ -75,19 +78,30 @@ Released under the MIT license: http://jsbin.mit-license.org
                         target: {}
                     });
                 }
-                d.relationLineDom = d3.select(this).selectAll().data(d.relationline).enter().append('line');
-                d.relationTextDom = d3.select(this).selectAll().data(d.relationline).enter().append('text')
+                d.relationLineDom = d3.select(this).selectAll()
+                .data(d.relationline)
+                .enter()
+                .append('line');
+
+                d.relationTextDom = d3.select(this).selectAll()
+                    .data(d.relationline)
+                    .enter()
+                    .append('text')
                     .text(function (d, i) {
                         return _d.relation[i]
                     })
             });
 
         // 关系节点
-        var node = s.selectAll('circle').data(data.nodes).enter().append('circle')
+        var node = s.selectAll('circle')
+            .data(data.nodes)
+            .enter()
+            .append('circle')
             .attr('r', function (d) {
                 return d.r;
             })
-            .call(d3.behavior.drag().on("drag", function (d) {
+            .call(d3.behavior.drag()
+            .on("drag", function (d) {
                 d.x += d3.event.dx;
                 d.y += d3.event.dy;
                 tick();
@@ -126,7 +140,17 @@ Released under the MIT license: http://jsbin.mit-license.org
 
                 for (var i in d.relation) {
                     var s = start + space * index++;
-                    setLinePath(d.relationline[i], d.sourceX, d.sourceY, d.targetX, d.targetY, d.ang, s, r, b2 < 0);
+                    setLinePath(
+                        d.relationline[i], 
+                        d.sourceX, 
+                        d.sourceY, 
+                        d.targetX, 
+                        d.targetY, 
+                        d.ang, 
+                        s, 
+                        r, 
+                        b2 < 0
+                    );
                 }
 
                 d.relationLineDom
@@ -160,7 +184,17 @@ Released under the MIT license: http://jsbin.mit-license.org
             });
         }
 
-        function setLinePath(link, sourceX, sourceY, targetX, targetY, ang, position, r, isY) {
+        function setLinePath(
+            link, 
+            sourceX, 
+            sourceY, 
+            targetX, 
+            targetY, 
+            ang, 
+            position, 
+            r, 
+            isY
+        ) {
             if (position > r) {
                 return;
             }
