@@ -22,28 +22,58 @@ Released under the MIT license: http://jsbin.mit-license.org
     <script id="jsbin-javascript">
         var data = {
             nodes: [{
-                x: 300, y: 300, r: 25
+                x: 300,
+                y: 300,
+                r: 25
             }, {
-                x: 150, y: 250, r: 40
+                x: 150,
+                y: 250,
+                r: 40
             }, {
-                x: 200, y: 450, r: 40
+                x: 200,
+                y: 450,
+                r: 40
             }, {
-                x: 350, y: 450, r: 40
+                x: 350,
+                y: 450,
+                r: 40
             }, {
-                x: 220, y: 100, r: 40
+                x: 220,
+                y: 100,
+                r: 40
+            },  {
+                x: 400,
+                y: 200,
+                r: 25
             }],
             links: [{
-                source: 0, target: 1,
+                source: 0,
+                target: 1,
                 relation: ['关系1']
             }, {
-                source: 0, target: 2,
+                source: 0,
+                target: 2,
                 relation: ['关系1', '关系2']
             }, {
-                source: 0, target: 3,
+                source: 0,
+                target: 3,
                 relation: ['关系1', '关系2', '关系3']
             }, {
-                source: 0, target: 4,
+                source: 5,
+                target: 2,
+                relation: ['关系1', '关系2', '关系3']
+            }, {
+                source: 0,
+                target: 4,
                 relation: ['关系1', '关系2', '关系3', '关系4']
+            }, {
+                source: 2,
+                target: 3,
+                relation: ['关系1', '关系2']
+            }, {
+                source: 1,
+                target: 2,
+                relation: ['关系1', '关系3', '关系4']
             }]
         }
         for (var i in data.links) {
@@ -51,16 +81,6 @@ Released under the MIT license: http://jsbin.mit-license.org
             data.links[i].target = data.nodes[data.links[i].target]
         }
 
-        //  // data.links 初始格式
-        // [
-        //     { "source": { "x": 300, "y": 300, "r": 25 }, "target": { "x": 150, "y": 250, "r": 40 }, "relation": ["关系1"] },
-        //     { "source": { "x": 300, "y": 300, "r": 25 }, "target": { "x": 200, "y": 450, "r": 40 }, "relation": ["关系1", "关系2"] },
-        //     { "source": { "x": 300, "y": 300, "r": 25 }, "target": { "x": 350, "y": 450, "r": 40 }, "relation": ["关系1", "关系2", "关系3"] },
-        //     { "source": { "x": 300, "y": 300, "r": 25 }, "target": { "x": 220, "y": 100, "r": 40 }, "relation":['关系1', '关系2', '关系3', '关系4'] }
-        // ]
-
-        // console.log(data.links);
-        
         var padding = -6;
         var container = d3.select("#svgBox");
 
@@ -103,11 +123,11 @@ Released under the MIT license: http://jsbin.mit-license.org
                 return d.r;
             })
             .call(d3.behavior.drag()
-            .on("drag", function (d) {
-                d.x += d3.event.dx;
-                d.y += d3.event.dy;
-                tick();
-            }));
+                .on("drag", function (d) {
+                    d.x += d3.event.dx;
+                    d.y += d3.event.dy;
+                    tick();
+                }));
 
         function tick() {
             node
@@ -141,14 +161,14 @@ Released under the MIT license: http://jsbin.mit-license.org
                 for (var i in d.relation) {
                     var s = start + space * index++;
                     setLinePath(
-                        d.relationline[i], 
-                        d.sourceX, 
-                        d.sourceY, 
-                        d.targetX, 
-                        d.targetY, 
-                        d.angle, 
-                        s, 
-                        r, 
+                        d.relationline[i],
+                        d.sourceX,
+                        d.sourceY,
+                        d.targetX,
+                        d.targetY,
+                        d.angle,
+                        s,
+                        r,
                         b2 < 0
                     );
                 }
@@ -177,24 +197,25 @@ Released under the MIT license: http://jsbin.mit-license.org
                         return d.source.y + (d.target.y - d.source.y) / 2;
                     })
                     .attr('transform', function (d) {
-                        return 'rotate(' + (_d.textAngle) + ' ' +
-                            [d.source.x + (d.target.x - d.source.x) / 2,
-                            d.source.y + (d.target.y - d.source.y) / 2] + 
-                        ')';
+                        return 'rotate(' + (_d.textAngle) + ' ' + [d.source.x + (d.target.x - d.source.x) /
+                                2,
+                                d.source.y + (d.target.y - d.source.y) / 2
+                            ] +
+                            ')';
                     });
             });
         }
 
         // 设置平行线坐标
         function setLinePath(
-            link, 
-            sourceX, 
-            sourceY, 
-            targetX, 
-            targetY, 
-            angle, 
-            position, 
-            r, 
+            link,
+            sourceX,
+            sourceY,
+            targetX,
+            targetY,
+            angle,
+            position,
+            r,
             isY
         ) {
             if (position > r) {
@@ -216,7 +237,6 @@ Released under the MIT license: http://jsbin.mit-license.org
 
         // 计算布局
         tick();
-
     </script>
 </body>
 
