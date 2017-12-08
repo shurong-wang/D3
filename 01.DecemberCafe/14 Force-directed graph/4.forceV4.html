@@ -1,47 +1,175 @@
 <!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2017 by anonymous (http://jsbin.com/rogeyiwuyu/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
 <html>
 
 <head>
-    <meta charset='utf-8'>
-    <title>力导向图 V4</title>
-    <!-- <script src='http://d3js.org/d3.v3.min.js' charset='utf-8'></script> -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
     <script src="./js/d3.v3.min.js"></script>
-    <style>
-        #canvas {
-            width: 600px;
-            height: 600px;
-        }
-
-        svg {
-            border: 2px dashed #666;
-        }
-
-        text {
-            font: Microsoft YaHei;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .link {
-            stroke-opacity: 1;
-            stroke-width: .8;
-        }
-
-        .link-active {
-            stroke-opacity: 1;
-            stroke-width: 3;
-        }
-
-        .linetext {
-            font-family: Microsoft YaHei;
-            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-        }
-    </style>
+    <title>关系图多平行外切线</title>
 </head>
 
 <body>
-    <div id='canvas'></div>
-    <script src="./js/tianyan.js"></script>
+    <svg id="svgBox" width="500" height="500"></svg>
+    <script id="jsbin-javascript">
+        var data = {
+            nodes: [{
+                x: 300, y: 300
+            }, {
+                x: 150, y: 250
+            }, {
+                x: 200, y: 450
+            }, {
+                x: 350, y: 450
+            }, {
+                x: 220, y: 100
+            }],
+            links: [{
+                source: 0, target: 1,
+                relation: ['关系1', '关系2', '关系3']
+            }, {
+                source: 0, target: 2,
+                relation: ['关系1', '关系2', '关系3']
+            }, {
+                source: 0, target: 3,
+                relation: ['关系1', '关系2', '关系3']
+            }, {
+                source: 0, target: 4,
+                relation: ['关系1', '关系2', '关系3']
+            }]
+        }
+        for (var i in data.links) {
+            data.links[i].source = data.nodes[data.links[i].source]
+            data.links[i].target = data.nodes[data.links[i].target]
+        }
+
+        //  // data.links 数据格式（布局力导向图前）
+        // [
+        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 150, "y": 250 }, "relation": ["关系1", "关系2", "关系3"] },
+        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 200, "y": 450 }, "relation": ["关系1", "关系2", "关系3"] },
+        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 350, "y": 450 }, "relation": ["关系1", "关系2", "关系3"] },
+        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 220, "y": 100 }, "relation": ["关系1", "关系2", "关系3"] }
+        // ]
+
+        var r = 25;
+        var padding = 0;
+        var s = d3.select("#svgBox")
+
+        // 关系连线 + 文字
+        var link = s.selectAll('.lineBox').data(data.links).enter().append('g')
+            .each(function (d) {
+                var _d = d;
+                d.relationline = [];
+                for (var i in d.relation) d.relationline.push({
+                    source: {},
+                    target: {}
+                })
+                d.relationLineDom = d3.select(this).selectAll().data(d.relationline).enter().append('line')
+                d.relationTextDom = d3.select(this).selectAll().data(d.relationline).enter().append('text')
+                    .text(function (d, i) {
+                        return _d.relation[i]
+                    })
+            });
+
+        // 关系节点
+        var node = s.selectAll('circle').data(data.nodes).enter().append('circle')
+            .attr('r', r)
+            .call(d3.behavior.drag().on("drag", function (d) {
+                d.x += d3.event.dx;
+                d.y += d3.event.dy;
+                tick();
+            }));
+
+        // 力导向图布局计算
+        function tick() {
+            node
+                .attr('cx', function (d) {
+                    return d.x
+                })
+                .attr('cy', function (d) {
+                    return d.y
+                })
+            link.each(function (d) {
+                var _d = d;
+                var source = [d.source.x, d.source.y];
+                var target = [d.target.x, d.target.y];
+                var b1 = target[0] - source[0];
+                var b2 = target[1] - source[1];
+                var b3 = Math.sqrt(b1 * b1 + b2 * b2);
+                d.ang = 180 * Math.asin(b1 / b3) / Math.PI;
+                d.textAng = b2 > 0 ? 90 - d.ang : d.ang - 90;
+
+                var a = Math.cos(d.ang * Math.PI / 180) * r;
+                var b = Math.sin(d.ang * Math.PI / 180) * r;
+                d.sourceX = d.source.x + b;
+                d.targetX = d.target.x - b;
+                d.sourceY = b2 < 0 ? d.source.y - a : d.source.y + a;
+                d.targetY = b2 < 0 ? d.target.y + a : d.target.y - a;
+
+                var start = -r / 2 + padding;
+                var space = Math.abs(start * 2 / (d.relation.length - 1));
+                var index = 0;
+                for (var i in d.relation) {
+                    var s = start + space * index++
+                    getSubLine(d.relationline[i], d.sourceX, d.sourceY, d.targetX, d.targetY, d.ang, s, r, b2 < 0);
+                }
+                d.relationLineDom
+                    .attr("stroke-width", '2')
+                    .attr('stroke', 'red')
+                    .attr('x1', function (d, i) {
+                        return d.source.x
+                    })
+                    .attr('y1', function (d, i) {
+                        return d.source.y
+                    })
+                    .attr('x2', function (d, i) {
+                        return d.target.x
+                    })
+                    .attr('y2', function (d, i) {
+                        return d.target.y
+                    })
+                d.relationTextDom
+                    .attr('x', function (d) {
+                        return d.source.x + (d.target.x - d.source.x) / 2
+                    })
+                    .attr('y', function (d) {
+                        return d.source.y + (d.target.y - d.source.y) / 2
+                    })
+                    .attr('transform', function (d) {
+                        return 'rotate(' + (_d.textAng) + ' ' +
+                            [d.source.x + (d.target.x - d.source.x) / 2,
+                            d.source.y + (d.target.y - d.source.y) / 2] + ')'
+                    })
+            })
+        }
+
+        function getSubLine(link, sourceX, sourceY, targetX, targetY, ang, position, r, isY) {
+            if (position > r) {
+                return;
+            }
+            var s = r - Math.sin(180 * Math.acos(position / r) / Math.PI * Math.PI / 180) * r;
+            var _a = Math.cos(ang * Math.PI / 180);
+            var _b = Math.sin(ang * Math.PI / 180);
+            var a = _a * position, b = _b * position;
+            var rx = _b * s, ry = _a * s;
+
+            link.source.x = (isY ? sourceX + a : sourceX - a) - rx;
+            link.source.y = (isY ? sourceY + ry : sourceY - ry) + b;
+            link.target.x = (isY ? targetX + a : targetX - a) + rx;
+            link.target.y = (isY ? targetY - ry : targetY + ry) + b;
+        }
+
+        tick();
+
+    </script>
 </body>
 
 </html>

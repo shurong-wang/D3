@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>力导向图 V5</title>
+    <!-- <script src='http://d3js.org/d3.v3.min.js' charset='utf-8'></script> -->
+    <script src="./js/d3.v3.min.js"></script>
+    <style>
+        #canvas {
+            width: 600px;
+            height: 600px;
+        }
+
+        svg {
+            border: 2px dashed #666;
+        }
+
+        text {
+            font: Microsoft YaHei;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .link {
+            stroke-opacity: 1;
+            stroke-width: .8;
+        }
+
+        .link-active {
+            stroke-opacity: 1;
+            stroke-width: 3;
+        }
+
+        .linetext {
+            font-family: Microsoft YaHei;
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='canvas'></div>
+    <script src="./js/tianyan.js"></script>
+</body>
+
+</html>
