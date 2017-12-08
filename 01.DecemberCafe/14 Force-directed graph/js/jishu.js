@@ -3,7 +3,7 @@ const api = 'data/v5.simple3.json';
 
 const width = 600;
 const height = 600;
-const initScale = 0.6;
+const initScale = 1;
 
 const nodeConf = {
     fillColor: {
@@ -159,7 +159,7 @@ function initialize(resp) {
         .attr('id', link => 'marker-' + link.id)
         .attr('markerUnits', 'userSpaceOnUse')
         .attr('viewBox', '0 -5 10 10')
-        .attr('refX', nodeConf.radius.Company)
+        .attr('refX', d => d.num === 1 ? 25 : 28)
         .attr('refY', 0)
         .attr('markerWidth', 12)
         .attr('markerHeight', 12)
@@ -197,11 +197,8 @@ function initialize(resp) {
         });
 
     lineText.append('textPath')
-        // .style('letter-spacing', '0pt')
-        // .attr('lengthAdjust', 'spacingAndGlyphs')
-        // .attr('textLength', link => link.label.length * 10)
         .attr('xlink:href', link => '#link-' + link.id)
-        .text(link => link.label + ' ' + link.num);
+        .text(link => link.label);
 
     // 节点（圆）
     const nodeCircle = container.append('g')
@@ -216,7 +213,7 @@ function initialize(resp) {
         .call(drag); // 节点可拖动
 
     nodeCircle.append('circle')
-        // .style('fill-opacity', .3)
+        // .style('fill-opacity', .3) // debug
         .style('fill', node => nodeConf.fillColor[node.ntype])
         .style('stroke', node => nodeConf.strokeColor[node.ntype])
         .style('stroke-width', node => nodeConf.strokeWidth[node.ntype])
@@ -346,13 +343,7 @@ function genLinkMap(relations) {
         label
     }) {
         const key = startNode + '-' + endNode;
-        if (hash[key]) {
-            hash[key] += 1;
-            hash[key + '-label'] += '、' + label;
-        } else {
-            hash[key] = 1;
-            hash[key + '-label'] = label;
-        }
+        hash[key] = hash[key] ? hash[key] + 1 : 1;
     });
     return hash;
 }
@@ -387,43 +378,49 @@ function genLinkPath(link) {
     let ty = link.target.y;
 
     /* ---------  */
-    const _link = link;
+    const extLine = {};
 
     const dx = tx - sx;
     const dy = ty - sy;
     const hypotenuse = Math.sqrt(dx * dx + dy * dy);
 
-    link.angle = 180 * Math.asin(dx / hypotenuse) / Math.PI;
-    link.textAngle = dy > 0 ? 90 - link.angle : link.angle - 90;
+    extLine.angle = 180 * Math.asin(dx / hypotenuse) / Math.PI;
+    extLine.textAngle = dy > 0 ? 90 - extLine.angle : extLine.angle - 90;
 
-    const a = Math.cos(link.angle * Math.PI / 180) * r;
-    const b = Math.sin(link.angle * Math.PI / 180) * r;
+    const a = Math.cos(extLine.angle * Math.PI / 180) * r;
+    const b = Math.sin(extLine.angle * Math.PI / 180) * r;
 
-    link.sourceX = sx + b;
-    link.targetX = tx - b;
-    link.sourceY = dy < 0 ? sy - a : sy + a;
-    link.targetY = dy < 0 ? ty + a : ty - a;
+    extLine.sourceX = sx + b;
+    extLine.targetX = tx - b;
+    extLine.sourceY = dy < 0 ? sy - a : sy + a;
+    extLine.targetY = dy < 0 ? ty + a : ty - a;
 
     const start = count === 1 ? 0 : -r / 2 + padding;
     const space = count === 1 ? 0 : Math.abs(start * 2 / (count - 1));
     const s = start + space * knum;
+    const isY = dy < 0;
 
     /* ---------  */
 
-    setLinePath(
-        link, 
-        link.sourceX, 
-        link.sourceY, 
-        link.targetX, 
-        link.targetY, 
-        link.angle,
-        s, 
-        r, 
-        dx < 0
-    );
+    const {
+        parallelSx,
+        parallelSy,
+        parallelTx,
+        parallelTy
+    } = getParallelLine(
+            link, 
+            extLine.sourceX, 
+            extLine.sourceY, 
+            extLine.targetX, 
+            extLine.targetY, 
+            extLine.angle,
+            s, 
+            r, 
+            isY
+        );
 
 
-    return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
+    return 'M' + parallelSx + ',' + parallelSy + ' L' + parallelTx + ',' + parallelTy;
 }
 
 function getLineAngle(sx, sy, tx, ty) {
@@ -519,18 +516,17 @@ function textBreaking(d3text, text) {
 }
 
 function getLineTextDx(d) {
-
-    const sr = nodeConf.radius[d.source.ntype];
     const sx = d.source.x;
     const sy = d.source.y;
     const tx = d.target.x;
     const ty = d.target.y;
 
     const distance = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
-
     const textLength = d.label.length;
-    const deviation = 8; // 调整误差
-    const dx = (distance - sr - textLength * lineTextFontSize) / 2 + deviation;
+    const sr = nodeConf.radius[d.source.ntype];
+    const tr = nodeConf.radius[d.target.ntype];
+
+    const dx = (distance - sr - tr - textLength * lineTextFontSize) / 2;
 
     return dx;
 }
@@ -626,8 +622,8 @@ function round(num, pow = 2) {
 }
 
 // 设置平行线坐标
-function setLinePath(
-    link, 
+function  getParallelLine(
+    extLink, 
     sourceX, 
     sourceY, 
     targetX, 
@@ -648,8 +644,10 @@ function setLinePath(
     var rx = _b * s;
     var ry = _a * s;
 
-    link.source.x = (isY ? sourceX + a : sourceX - a) - rx;
-    link.source.y = (isY ? sourceY + ry : sourceY - ry) + b;
-    link.target.x = (isY ? targetX + a : targetX - a) + rx;
-    link.target.y = (isY ? targetY - ry : targetY + ry) + b;
+    return {
+        parallelSx: (isY ? sourceX + a : sourceX - a) - rx,
+        parallelSy: (isY ? sourceY + ry : sourceY - ry) + b,
+        parallelTx: (isY ? targetX + a : targetX - a) + rx,
+        parallelTy: (isY ? targetY - ry : targetY + ry) + b
+    };
 }
