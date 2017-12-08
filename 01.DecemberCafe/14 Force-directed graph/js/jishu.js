@@ -159,7 +159,7 @@ function initialize(resp) {
         .attr('id', link => 'marker-' + link.id)
         .attr('markerUnits', 'userSpaceOnUse')
         .attr('viewBox', '0 -5 10 10')
-        .attr('refX', d => d.num === 1 ? 25 : 28)
+        .attr('refX', d => d.index === 1 ? 25 : 28)
         .attr('refY', 0)
         .attr('markerWidth', 12)
         .attr('markerHeight', 12)
@@ -223,11 +223,11 @@ function initialize(resp) {
 
     // 鼠标交互
     nodeCircle.on('mouseenter', function (currNode) {
-            toggleNode(nodeCircle, currNode, true);
+            // toggleNode(nodeCircle, currNode, true);
             // toggleMenu(menuWrapper, currNode, true);
             // toggleLine(linkLine, currNode, true);
             // toggleMarker(marker, currNode, true);
-            toggleLineText(lineText, currNode, true);
+            // toggleLineText(lineText, currNode, true);
         })
         .on('mouseleave', function (currNode) {
             toggleNode(nodeCircle, currNode, false);
@@ -330,7 +330,7 @@ function genLinks(relations) {
             label,
             type,
             count: linkMap[linkKey],
-            num: i
+            index: i
         }
     })
 }
@@ -367,40 +367,15 @@ function genNodesMap(nodes) {
 // 生成关系连线路径
 function genLinkPath(link) {
 
-    const padding = -6;
+    const offet = -6;
     const count = link.count;
-    const knum = link.num;
+    const index = link.index;
     const r = nodeConf.radius[link.source.ntype];
 
-    let sx = link.source.x;
-    let sy = link.source.y;
-    let tx = link.target.x;
-    let ty = link.target.y;
-
-    /* ---------  */
-    const extLine = {};
-
-    const dx = tx - sx;
-    const dy = ty - sy;
-    const hypotenuse = Math.sqrt(dx * dx + dy * dy);
-
-    extLine.angle = 180 * Math.asin(dx / hypotenuse) / Math.PI;
-    extLine.textAngle = dy > 0 ? 90 - extLine.angle : extLine.angle - 90;
-
-    const a = Math.cos(extLine.angle * Math.PI / 180) * r;
-    const b = Math.sin(extLine.angle * Math.PI / 180) * r;
-
-    extLine.sourceX = sx + b;
-    extLine.targetX = tx - b;
-    extLine.sourceY = dy < 0 ? sy - a : sy + a;
-    extLine.targetY = dy < 0 ? ty + a : ty - a;
-
-    const start = count === 1 ? 0 : -r / 2 + padding;
-    const space = count === 1 ? 0 : Math.abs(start * 2 / (count - 1));
-    const s = start + space * knum;
-    const isY = dy < 0;
-
-    /* ---------  */
+    const sx = link.source.x;
+    const sy = link.source.y;
+    const tx = link.target.x;
+    const ty = link.target.y;
 
     const {
         parallelSx,
@@ -408,17 +383,15 @@ function genLinkPath(link) {
         parallelTx,
         parallelTy
     } = getParallelLine(
-            link, 
-            extLine.sourceX, 
-            extLine.sourceY, 
-            extLine.targetX, 
-            extLine.targetY, 
-            extLine.angle,
-            s, 
-            r, 
-            isY
+            offet,
+            count,
+            index,
+            r,
+            sx,
+            sy,
+            tx,
+            ty
         );
-
 
     return 'M' + parallelSx + ',' + parallelSy + ' L' + parallelTx + ',' + parallelTy;
 }
@@ -616,38 +589,61 @@ function toggleMarker(marker, currNode, isHover) {
     }
 }
 
-function round(num, pow = 2) {
+function round(index, pow = 2) {
     const multiple = Math.pow(10, pow);
-    return Math.round(num * multiple) / multiple;
+    return Math.round(index * multiple) / multiple;
 }
 
 // 设置平行线坐标
-function  getParallelLine(
-    extLink, 
-    sourceX, 
-    sourceY, 
-    targetX, 
-    targetY, 
-    angle, 
-    position, 
-    r, 
-    isY
+function getParallelLine(
+    offet,
+    count,
+    index,
+    r,
+    sx,
+    sy,
+    tx,
+    ty
 ) {
-    if (position > r) {
-        return;
-    }
-    var s = r - Math.sin(180 * Math.acos(position / r) / Math.PI * Math.PI / 180) * r;
-    var _a = Math.cos(angle * Math.PI / 180);
-    var _b = Math.sin(angle * Math.PI / 180);
-    var a = _a * position;
-    var b = _b * position;
-    var rx = _b * s;
-    var ry = _a * s;
+    const dx = tx - sx;
+    const dy = ty - sy;
+    const hypotenuse = Math.sqrt(dx * dx + dy * dy);
+    const angle = 180 * Math.asin(dx / hypotenuse) / Math.PI;
 
-    return {
-        parallelSx: (isY ? sourceX + a : sourceX - a) - rx,
-        parallelSy: (isY ? sourceY + ry : sourceY - ry) + b,
-        parallelTx: (isY ? targetX + a : targetX - a) + rx,
-        parallelTy: (isY ? targetY - ry : targetY + ry) + b
-    };
+    const a = Math.cos(angle * Math.PI / 180) * r;
+    const b = Math.sin(angle * Math.PI / 180) * r;
+
+    const sourceX = sx + b;
+    const targetX = tx - b;
+    const sourceY = dy < 0 ? sy - a : sy + a;
+    const targetY = dy < 0 ? ty + a : ty - a;
+
+    const start = count === 1 ? 0 : -r / 2 + offet;
+    const space = count === 1 ? 0 : Math.abs(start * 2 / (count - 1));
+    const position = start + space * index;
+    const isY = dy < 0;
+
+    if (position > r) {
+        return {
+            parallelSx: sx,
+            parallelSy: sy,
+            parallelTx: tx,
+            parallelTy: ty
+        }
+    } else {
+        const s = r - Math.sin(180 * Math.acos(position / r) / Math.PI * Math.PI / 180) * r;
+        const _a = Math.cos(angle * Math.PI / 180);
+        const _b = Math.sin(angle * Math.PI / 180);
+        const a = _a * position;
+        const b = _b * position;
+        const rx = _b * s;
+        const ry = _a * s;
+
+        return {
+            parallelSx: (isY ? sourceX + a : sourceX - a) - rx,
+            parallelSy: (isY ? sourceY + ry : sourceY - ry) + b,
+            parallelTx: (isY ? targetX + a : targetX - a) + rx,
+            parallelTy: (isY ? targetY - ry : targetY + ry) + b
+        };
+    }
 }
