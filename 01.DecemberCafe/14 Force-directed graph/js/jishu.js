@@ -1,5 +1,5 @@
 const api = 'data/v5.json';
-// const api = 'data/v5.simple5.json';
+// const api = 'data/v5.simple3.json';
 
 const width = 600;
 const height = 600;
@@ -367,7 +367,6 @@ function genNodesMap(nodes) {
 // 生成关系连线路径
 function genLinkPath(link) {
 
-    const offet = -6;
     const count = link.count;
     const index = link.index;
     const r = nodeConf.radius[link.source.ntype];
@@ -383,7 +382,6 @@ function genLinkPath(link) {
         parallelTx,
         parallelTy
     } = getParallelLine(
-            offet,
             count,
             index,
             r,
@@ -596,7 +594,6 @@ function round(index, pow = 2) {
 
 // 设置平行线坐标
 function getParallelLine(
-    offet,
     count,
     index,
     r,
@@ -605,6 +602,7 @@ function getParallelLine(
     tx,
     ty
 ) {
+    const offet = -6;
     const dx = tx - sx;
     const dy = ty - sy;
     const hypotenuse = Math.sqrt(dx * dx + dy * dy);
