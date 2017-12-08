@@ -391,7 +391,7 @@ function genLinkPath(link) {
     let ty = link.target.y;
 
     const angle = getLineAngle(sx, sy, ty, tx);
-    console.log(angle);
+    // console.log(angle);
 
     let xOffset = 0;
     let yOffset = 0;
@@ -407,19 +407,19 @@ function genLinkPath(link) {
     if (angle >= -45 && angle < 45) {
         // console.log('-45° ~ 45°');
         if (knum === 1) {
-            xOffset += 3;
-            if (angle >= 30) {
-                xOffset -= 9;
-            }
-            if (angle > 15) {
-                xOffset -= 3;
-            }
-            if (angle <= -15) {
-                xOffset += 3;
-            }
-            if (angle <= -30) {
-                xOffset += 9;
-            }
+            xOffset = 0;
+            // if (angle >= 30) {
+            //     xOffset -= 9;
+            // }
+            // if (angle > 15) {
+            //     xOffset -= 3;
+            // }
+            // if (angle <= -15) {
+            //     xOffset += 3;
+            // }
+            // if (angle <= -30) {
+            //     xOffset += 9;
+            // }
             yOffset += offset;
             update();
         }
@@ -440,16 +440,7 @@ function genLinkPath(link) {
         // console.log('45° ~ 135°');
         if (knum === 1) {
             xOffset -= offset;
-            yOffset += 3;
-            if (angle > 15) {
-                yOffset -= 3;
-            }
-            if (angle <= -15) {
-                yOffset += 3;
-            }
-            if (angle <= -30) {
-                yOffset += 9;
-            }
+            yOffset = 0;
             update();
         }
         if (knum === 2) {
