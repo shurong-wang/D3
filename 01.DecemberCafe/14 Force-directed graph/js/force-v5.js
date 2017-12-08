@@ -1,5 +1,5 @@
-// const api = 'data/v5.json';
-const api = 'data/v5.simple3.json';
+const api = 'data/v5.json';
+// const api = 'data/v5.simple3.json';
 
 const width = 600;
 const height = 600;
@@ -201,7 +201,7 @@ function initialize(resp) {
         // .attr('lengthAdjust', 'spacingAndGlyphs')
         // .attr('textLength', link => link.label.length * 10)
         .attr('xlink:href', link => '#link-' + link.id)
-        .text(link => link.label + ' ' + link.num);
+        .text(link => link.label);
 
     // 节点（圆）
     const nodeCircle = container.append('g')
@@ -227,9 +227,9 @@ function initialize(resp) {
     // 鼠标交互
     nodeCircle.on('mouseenter', function (currNode) {
             toggleNode(nodeCircle, currNode, true);
-            // toggleMenu(menuWrapper, currNode, true);
-            // toggleLine(linkLine, currNode, true);
-            // toggleMarker(marker, currNode, true);
+            toggleMenu(menuWrapper, currNode, true);
+            toggleLine(linkLine, currNode, true);
+            toggleMarker(marker, currNode, true);
             toggleLineText(lineText, currNode, true);
         })
         .on('mouseleave', function (currNode) {

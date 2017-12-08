@@ -326,15 +326,12 @@ function genLinks(relations) {
         type
     }, i) {
         const linkKey = startNode + '-' + endNode;
-        let count = linkMap[linkKey];
-        let labels = linkMap[linkKey + '-label'];
         return {
             id,
             source: nodesMap[startNode],
             target: nodesMap[endNode],
             label,
             type,
-            labels: linkMap[linkKey + '-label'],
             count: linkMap[linkKey],
             num: i
         }
@@ -379,121 +376,52 @@ function genNodesMap(nodes) {
 // 生成关系连线路径
 function genLinkPath(link) {
 
-    const sr = nodeConf.radius.Human;
-    const tr = nodeConf.radius.Company;
-
+    const padding = -6;
     const count = link.count;
     const knum = link.num;
+    const r = nodeConf.radius[link.source.ntype];
 
     let sx = link.source.x;
-    let tx = link.target.x;
     let sy = link.source.y;
+    let tx = link.target.x;
     let ty = link.target.y;
 
-    const angle = getLineAngle(sx, sy, ty, tx);
-    // console.log(angle);
+    /* ---------  */
+    const _link = link;
 
-    let xOffset = 0;
-    let yOffset = 0;
-    const offset = 16;
-    const update = () => {
-        sx += xOffset;
-        sy += yOffset;
-        tx += xOffset;
-        ty += yOffset;
-    };
+    const dx = tx - sx;
+    const dy = ty - sy;
+    const hypotenuse = Math.sqrt(dx * dx + dy * dy);
 
-    // -45° ~ 45°
-    if (angle >= -45 && angle < 45) {
-        // console.log('-45° ~ 45°');
-        if (knum === 1) {
-            // xOffset += 3;
-            xOffset = 0;
-            yOffset += offset;
-            update();
-        }
-        if (knum === 2) {
-            xOffset += 3;
-            xOffset = 0;
-            yOffset -= offset;
-            update();
-        }
-        if (knum === 3) {
-            // xOffset += 12;
-            xOffset = 0;
-            yOffset -= offset * 2;
-            update();
-        }
-    }
+    link.angle = 180 * Math.asin(dx / hypotenuse) / Math.PI;
+    link.textAngle = dy > 0 ? 90 - link.angle : link.angle - 90;
 
-    // 45° ~ 135°
-    if (angle >= 45 && angle < 135) {
-        // console.log('45° ~ 135°');
-        if (knum === 1) {
-            xOffset -= offset;
-            // yOffset += 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 2) {
-            xOffset += offset;
-            // yOffset += 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 3) {
-            xOffset += offset * 2;
-            // yOffset += 12;
-            yOffset = 0;
-            update();
-        }
-    }
+    const a = Math.cos(link.angle * Math.PI / 180) * r;
+    const b = Math.sin(link.angle * Math.PI / 180) * r;
 
-    // 135° ~ -135°
-    if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle <= -135)) {
-        // console.log('135°~-135°');
-        if (knum === 1) {
-            // xOffset -= 3;
-            xOffset = 0;
-            yOffset -= offset;
-            update();
-        }
-        if (knum === 2) {
-            // xOffset -= 3;
-            xOffset = 0;
-            yOffset += offset;
-            update();
-        }
-        if (knum === 3) {
-            // xOffset -= 12;
-            xOffset = 0;
-            yOffset += offset * 2;
-            update();
-        }
-    }
+    link.sourceX = sx + b;
+    link.targetX = tx - b;
+    link.sourceY = dy < 0 ? sy - a : sy + a;
+    link.targetY = dy < 0 ? ty + a : ty - a;
 
-    // -135° ~ 45°
-    if (angle >= -135 && angle <= -45) {
-        // console.log('135°~-135°');
-        if (knum === 1) {
-            xOffset += offset;
-            // yOffset -= 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 2) {
-            xOffset -= offset;
-            // yOffset -= 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 3) {
-            xOffset -= offset * 2;
-            yOffset = 0;
-            // yOffset -= 12;
-            update();
-        }
-    }
+    const start = count === 1 ? 0 : -r / 2 + padding;
+    const space = count === 1 ? 0 : Math.abs(start * 2 / (count - 1));
+    const s = start + space * knum;
+
+    /* ---------  */
+
+    setLinePath(
+        link, 
+        link.sourceX, 
+        link.sourceY, 
+        link.targetX, 
+        link.targetY, 
+        link.angle,
+        s, 
+        r, 
+        dx < 0
+    );
+
 
     return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
 }
@@ -695,4 +623,33 @@ function toggleMarker(marker, currNode, isHover) {
 function round(num, pow = 2) {
     const multiple = Math.pow(10, pow);
     return Math.round(num * multiple) / multiple;
+}
+
+// 设置平行线坐标
+function setLinePath(
+    link, 
+    sourceX, 
+    sourceY, 
+    targetX, 
+    targetY, 
+    angle, 
+    position, 
+    r, 
+    isY
+) {
+    if (position > r) {
+        return;
+    }
+    var s = r - Math.sin(180 * Math.acos(position / r) / Math.PI * Math.PI / 180) * r;
+    var _a = Math.cos(angle * Math.PI / 180);
+    var _b = Math.sin(angle * Math.PI / 180);
+    var a = _a * position;
+    var b = _b * position;
+    var rx = _b * s;
+    var ry = _a * s;
+
+    link.source.x = (isY ? sourceX + a : sourceX - a) - rx;
+    link.source.y = (isY ? sourceY + ry : sourceY - ry) + b;
+    link.target.x = (isY ? targetX + a : targetX - a) + rx;
+    link.target.y = (isY ? targetY - ry : targetY + ry) + b;
 }

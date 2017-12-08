@@ -1,5 +1,6 @@
 {
-    "nodes": [{
+    "nodes": [
+        {
             "id": 1,
             "name": "刘琪",
             "ntype": "Human"
@@ -10,7 +11,8 @@
             "ntype": "Company"
         }
     ],
-    "relations": [{
+    "relations": [
+        {
             "id": 11,
             "startNode": 1,
             "endNode": 4,
