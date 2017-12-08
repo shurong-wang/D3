@@ -1,5 +1,5 @@
-// const api = 'data/v4.json';
-const api = 'data/v4.simple.json';
+// const api = 'data/v5.json';
+const api = 'data/v5.simple3.json';
 
 const width = 600;
 const height = 600;
