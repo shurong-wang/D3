@@ -121,10 +121,8 @@ Released under the MIT license: http://jsbin.mit-license.org
             link.each(function (d) {
                 var r = d.source.r;
                 var _d = d;
-                var source = [d.source.x, d.source.y];
-                var target = [d.target.x, d.target.y];
-                var b1 = target[0] - source[0];
-                var b2 = target[1] - source[1];
+                var b1 = d.target.x - d.source.x;
+                var b2 = d.target.y - d.source.y;
                 var b3 = Math.sqrt(b1 * b1 + b2 * b2);
                 d.angle = 180 * Math.asin(b1 / b3) / Math.PI;
                 d.textAngle = b2 > 0 ? 90 - d.angle : d.angle - 90;
