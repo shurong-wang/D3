@@ -197,11 +197,9 @@ function initialize(resp) {
         });
 
     lineText.append('textPath')
-        // .style('letter-spacing', '0pt')
-        // .attr('lengthAdjust', 'spacingAndGlyphs')
-        // .attr('textLength', link => link.label.length * 10)
         .attr('xlink:href', link => '#link-' + link.id)
-        .text(link => link.label);
+        // .text(link => link.label);
+        .text(link => link.labels);
 
     // 节点（圆）
     const nodeCircle = container.append('g')
@@ -326,8 +324,6 @@ function genLinks(relations) {
         type
     }, i) {
         const linkKey = startNode + '-' + endNode;
-        let count = linkMap[linkKey];
-        let labels = linkMap[linkKey + '-label'];
         return {
             id,
             source: nodesMap[startNode],
@@ -389,111 +385,6 @@ function genLinkPath(link) {
     let tx = link.target.x;
     let sy = link.source.y;
     let ty = link.target.y;
-
-    const angle = getLineAngle(sx, sy, tx, ty);
-    // console.log(angle);
-
-    let xOffset = 0;
-    let yOffset = 0;
-    const offset = 16;
-    const update = () => {
-        sx += xOffset;
-        sy += yOffset;
-        tx += xOffset;
-        ty += yOffset;
-    };
-
-    // -45° ~ 45°
-    if (angle >= -45 && angle < 45) {
-        // console.log('-45° ~ 45°');
-        if (knum === 1) {
-            // xOffset += 3;
-            xOffset = 0;
-            yOffset += offset;
-            update();
-        }
-        if (knum === 2) {
-            // xOffset += 3;
-            xOffset = 0;
-            yOffset -= offset;
-            update();
-        }
-        if (knum === 3) {
-            // xOffset += 12;
-            xOffset = 0;
-            yOffset -= offset * 2;
-            update();
-        }
-    }
-
-    // 45° ~ 135°
-    if (angle >= 45 && angle < 135) {
-        // console.log('45° ~ 135°');
-        if (knum === 1) {
-            xOffset -= offset;
-            // yOffset += 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 2) {
-            xOffset += offset;
-            // yOffset += 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 3) {
-            xOffset += offset * 2;
-            // yOffset += 12;
-            yOffset = 0;
-            update();
-        }
-    }
-
-    // 135° ~ -135°
-    if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle <= -135)) {
-        // console.log('135°~-135°');
-        if (knum === 1) {
-            // xOffset -= 3;
-            xOffset = 0;
-            yOffset -= offset;
-            update();
-        }
-        if (knum === 2) {
-            // xOffset -= 3;
-            xOffset = 0;
-            yOffset += offset;
-            update();
-        }
-        if (knum === 3) {
-            // xOffset -= 12;
-            xOffset = 0;
-            yOffset += offset * 2;
-            update();
-        }
-    }
-
-    // -135° ~ 45°
-    if (angle >= -135 && angle <= -45) {
-        // console.log('135°~-135°');
-        if (knum === 1) {
-            xOffset += offset;
-            // yOffset -= 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 2) {
-            xOffset -= offset;
-            // yOffset -= 3;
-            yOffset = 0;
-            update();
-        }
-        if (knum === 3) {
-            xOffset -= offset * 2;
-            yOffset = 0;
-            // yOffset -= 12;
-            update();
-        }
-    }
 
     return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
 }
@@ -600,7 +491,8 @@ function getLineTextDx(d) {
 
     const distance = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
 
-    const textLength = d.label.length;
+    // const textLength = d.label.length;
+    const textLength = d.labels.length;
     const deviation = 8; // 调整误差
     const dx = (distance - sr - textLength * lineTextFontSize) / 2 + deviation;
 
