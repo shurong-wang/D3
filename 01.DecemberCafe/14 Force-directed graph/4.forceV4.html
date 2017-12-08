@@ -34,16 +34,16 @@ Released under the MIT license: http://jsbin.mit-license.org
             }],
             links: [{
                 source: 0, target: 1,
-                relation: ['关系1', '关系2', '关系3']
+                relation: ['关系1']
             }, {
                 source: 0, target: 2,
-                relation: ['关系1', '关系2', '关系3']
+                relation: ['关系1', '关系2']
             }, {
                 source: 0, target: 3,
                 relation: ['关系1', '关系2', '关系3']
             }, {
                 source: 0, target: 4,
-                relation: ['关系1', '关系2', '关系3']
+                relation: ['关系1', '关系2', '关系3', '关系4']
             }]
         }
         for (var i in data.links) {
@@ -53,10 +53,10 @@ Released under the MIT license: http://jsbin.mit-license.org
 
         //  // data.links 数据格式（布局力导向图前）
         // [
-        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 150, "y": 250 }, "relation": ["关系1", "关系2", "关系3"] },
-        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 200, "y": 450 }, "relation": ["关系1", "关系2", "关系3"] },
+        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 150, "y": 250 }, "relation": ["关系1"] },
+        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 200, "y": 450 }, "relation": ["关系1", "关系2"] },
         //     { "source": { "x": 300, "y": 300 }, "target": { "x": 350, "y": 450 }, "relation": ["关系1", "关系2", "关系3"] },
-        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 220, "y": 100 }, "relation": ["关系1", "关系2", "关系3"] }
+        //     { "source": { "x": 300, "y": 300 }, "target": { "x": 220, "y": 100 }, "relation":['关系1', '关系2', '关系3', '关系4'] }
         // ]
 
         var r = 25;
@@ -68,11 +68,13 @@ Released under the MIT license: http://jsbin.mit-license.org
             .each(function (d) {
                 var _d = d;
                 d.relationline = [];
-                for (var i in d.relation) d.relationline.push({
-                    source: {},
-                    target: {}
-                })
-                d.relationLineDom = d3.select(this).selectAll().data(d.relationline).enter().append('line')
+                for (var i in d.relation) {
+                    d.relationline.push({
+                        source: {},
+                        target: {}
+                    });
+                }
+                d.relationLineDom = d3.select(this).selectAll().data(d.relationline).enter().append('line');
                 d.relationTextDom = d3.select(this).selectAll().data(d.relationline).enter().append('text')
                     .text(function (d, i) {
                         return _d.relation[i]
@@ -114,8 +116,8 @@ Released under the MIT license: http://jsbin.mit-license.org
                 d.sourceY = b2 < 0 ? d.source.y - a : d.source.y + a;
                 d.targetY = b2 < 0 ? d.target.y + a : d.target.y - a;
 
-                var start = -r / 2 + padding;
-                var space = Math.abs(start * 2 / (d.relation.length - 1));
+                var start =  d.relation.length === 1 ? 0 : -r / 2 + padding;
+                var space = d.relation.length === 1 ? 0 : Math.abs(start * 2 / (d.relation.length - 1));
                 var index = 0;
                 for (var i in d.relation) {
                     var s = start + space * index++
