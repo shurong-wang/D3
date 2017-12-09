@@ -38,10 +38,6 @@ Released under the MIT license: http://jsbin.mit-license.org
                 y: 450,
                 r: 40
             }, {
-                x: 220,
-                y: 100,
-                r: 40
-            },  {
                 x: 400,
                 y: 200,
                 r: 25
@@ -49,31 +45,23 @@ Released under the MIT license: http://jsbin.mit-license.org
             links: [{
                 source: 0,
                 target: 1,
-                relation: ['关系1']
+                relation: ['A']
             }, {
                 source: 0,
                 target: 2,
-                relation: ['关系1', '关系2']
-            }, {
-                source: 0,
-                target: 3,
-                relation: ['关系1', '关系2', '关系3']
-            }, {
-                source: 5,
-                target: 2,
-                relation: ['关系1', '关系2', '关系3']
-            }, {
-                source: 0,
-                target: 4,
-                relation: ['关系1', '关系2', '关系3', '关系4']
-            }, {
-                source: 2,
-                target: 3,
-                relation: ['关系1', '关系2']
+                relation: ['B', 'C']
             }, {
                 source: 1,
-                target: 2,
-                relation: ['关系1', '关系3', '关系4']
+                target: 3,
+                relation: ['D']
+            }, {
+                source: 0,
+                target: 3,
+                relation: ['E', 'F', 'G']
+            }, {
+                source: 4,
+                target: 1,
+                relation: ['H', 'I', 'J', 'K']
             }]
         }
         for (var i in data.links) {
@@ -81,10 +69,13 @@ Released under the MIT license: http://jsbin.mit-license.org
             data.links[i].target = data.nodes[data.links[i].target];
         }
 
+        // padding 控制内边距，取值范围是 0 到 r/2
+        // 把圆理解为一个盒子，平行线是装在盒子里
         var padding = -10;
+
         var container = d3.select("#svgBox");
 
-        // 关系连线 + 文字
+        // 连线 + 文字
         var link = container.selectAll('.lineBox')
             .data(data.links)
             .enter()
@@ -138,9 +129,8 @@ Released under the MIT license: http://jsbin.mit-license.org
                     return d.y;
                 });
 
-            link.each(function (link) {
+            link.each(function (link, k) {
                 var r = link.source.r;
-                var _link = link;
                 var b1 = link.target.x - link.source.x;
                 var b2 = link.target.y - link.source.y;
                 var b3 = Math.sqrt(b1 * b1 + b2 * b2);
@@ -154,17 +144,22 @@ Released under the MIT license: http://jsbin.mit-license.org
                 link.sourceY = b2 < 0 ? link.source.y - a : link.source.y + a;
                 link.targetY = b2 < 0 ? link.target.y + a : link.target.y - a;
 
-                // padding 控制内边距，取值范围是 0 到 r/2
-                // 把圆理解为一个盒子，平行线是装在盒子里
-                var start = link.relation.length === 1 ? 0 : -r / 2 + padding;
-                var space = link.relation.length === 1 ? 0 : Math.abs(start * 2 / (link.relation.length - 1));
+                var maxCount = 4; // 最大连线数
+                var count = link.relation.length; // 连线条数
+                var minStart = count === 1 ? 0 : -r / 2 + padding;
+                var start = minStart * (count / maxCount); // 连线线开始位置
+                var space = count === 1 ? 0 : Math.abs(minStart * 2 / (maxCount - 1)); // 连线间隔
+
+        
                 var index = 0;
+                console.log('\r\n');
 
                 for (var i in link.relation) {
 
+                    console.log(link.relation[i] + ' - start, space: ', start, space);
+
                     // 生成 20 0 -20 的 position 模式
                     var position = start + space * index++;
-
                     // 可以按间隔为 10 去生成 0 10 -10 20 -20 模式
 
                     setLinePath(
@@ -204,7 +199,7 @@ Released under the MIT license: http://jsbin.mit-license.org
                         return d.source.y + (d.target.y - d.source.y) / 2;
                     })
                     .attr('transform', function (d) {
-                        return 'rotate(' + _link.textAngle + ' ' + [d.source.x + (d.target.x - d.source.x) / 2, d.source.y + (d.target.y - d.source.y) / 2 ] + ')';
+                        return 'rotate(' + link.textAngle + ' ' + [d.source.x + (d.target.x - d.source.x) / 2, d.source.y + (d.target.y - d.source.y) / 2 ] + ')';
                     });
             });
         }
