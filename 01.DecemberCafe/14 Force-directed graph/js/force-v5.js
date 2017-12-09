@@ -79,7 +79,8 @@ const zoom = d3.behavior.zoom()
 const drag = force.drag()
     .origin(d => d)
     .on('dragstart', dragstartFn)
-    .on('drag', dragFn);
+    .on('drag', dragFn)
+    .on('dragend', dragendFn);
 
 // SVG
 const svg = d3.select('#canvas').append('svg')
@@ -432,6 +433,10 @@ function dragFn(d) {
     d3.select(this)
         .attr('cx', d.x = d3.event.x)
         .attr('cy', d.y = d3.event.y);
+}
+
+function dragendFn(d) {
+    force.stop();  
 }
 
 function isLinkLine(node, link) {
