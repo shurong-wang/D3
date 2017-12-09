@@ -1,5 +1,5 @@
-const api = 'data/v5.json';
-// const api = 'data/v5.simple3.json';
+// const api = 'data/v5.json';
+const api = 'data/v5.simple5.json';
 
 const width = 600;
 const height = 600;
@@ -315,6 +315,8 @@ function initialize(resp) {
 }
 
 function genLinks(relations) {
+    const indexHash = {};
+
     return relations.map(function ({
         id,
         startNode,
@@ -323,6 +325,12 @@ function genLinks(relations) {
         type
     }, i) {
         const linkKey = startNode + '-' + endNode;
+        if (indexHash[linkKey]) {
+            indexHash[linkKey] -= 1;
+        } else {
+            indexHash[linkKey] = linkMap[linkKey] - 1;
+        }
+        
         return {
             id,
             source: nodesMap[startNode],
@@ -330,7 +338,7 @@ function genLinks(relations) {
             label,
             type,
             count: linkMap[linkKey],
-            index: i
+            index: indexHash[linkKey]
         }
     })
 }
@@ -367,6 +375,8 @@ function genNodesMap(nodes) {
 // 生成关系连线路径
 function genLinkPath(link) {
 
+    console.log(link);
+
     const count = link.count;
     const index = link.index;
     const r = nodeConf.radius[link.source.ntype];
@@ -375,6 +385,8 @@ function genLinkPath(link) {
     const sy = link.source.y;
     const tx = link.target.x;
     const ty = link.target.y;
+
+    //  return 'M' + parallelSx + ',' + parallelSy + ' L' + parallelTx + ',' + parallelTy;
 
     const {
         parallelSx,
@@ -602,6 +614,12 @@ function getParallelLine(
     tx,
     ty
 ) {
+
+    // console.log(
+    //     count,
+    //     index
+    // );
+
     const offet = -6;
     const dx = tx - sx;
     const dy = ty - sy;
@@ -620,6 +638,11 @@ function getParallelLine(
     const space = count === 1 ? 0 : Math.abs(start * 2 / (count - 1));
     const position = start + space * index;
     const isY = dy < 0;
+
+    // console.log(
+    //     position,
+    //     r
+    // );
 
     if (position > r) {
         return {

@@ -81,7 +81,7 @@ Released under the MIT license: http://jsbin.mit-license.org
             data.links[i].target = data.nodes[data.links[i].target]
         }
 
-        var padding = -6;
+        var padding = -10;
         var container = d3.select("#svgBox");
 
         // 关系连线 + 文字
@@ -154,6 +154,13 @@ Released under the MIT license: http://jsbin.mit-license.org
                 d.sourceY = b2 < 0 ? d.source.y - a : d.source.y + a;
                 d.targetY = b2 < 0 ? d.target.y + a : d.target.y - a;
 
+                // padding 控制内边距
+                // 把圆理解为一个盒子，平行线是装在盒子里
+                // padding 的取值范围是 0 到 r/2
+                // 模式是生成 20 0 -20 的 position
+
+                // 可以按间隔为10去生成0 10 -10 20 -20这种结构
+
                 var start = d.relation.length === 1 ? 0 : -r / 2 + padding;
                 var space = d.relation.length === 1 ? 0 : Math.abs(start * 2 / (d.relation.length - 1));
                 var index = 0;
@@ -197,7 +204,8 @@ Released under the MIT license: http://jsbin.mit-license.org
                         return d.source.y + (d.target.y - d.source.y) / 2;
                     })
                     .attr('transform', function (d) {
-                        return 'rotate(' + (_d.textAngle) + ' ' + [d.source.x + (d.target.x - d.source.x) /
+                        return 'rotate(' + 
+                            (_d.textAngle) + ' ' + [d.source.x + (d.target.x - d.source.x) /
                                 2,
                                 d.source.y + (d.target.y - d.source.y) / 2
                             ] +
@@ -221,9 +229,14 @@ Released under the MIT license: http://jsbin.mit-license.org
             if (position > r) {
                 return;
             }
+            // s 两次三角函数计算的值
             var s = r - Math.sin(180 * Math.acos(position / r) / Math.PI * Math.PI / 180) * r;
+
+            // _a 和 _b 是拿到 ang 角度的基准值
             var _a = Math.cos(angle * Math.PI / 180);
             var _b = Math.sin(angle * Math.PI / 180);
+
+            // a 和 b 是得到垂直于原点平行 position 长度的偏移量。 两个偏移量按照下面的逻辑相加就是平行线的位置了
             var a = _a * position;
             var b = _b * position;
             var rx = _b * s;

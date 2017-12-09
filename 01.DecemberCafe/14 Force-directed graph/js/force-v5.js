@@ -1,5 +1,5 @@
-const api = 'data/v5.json';
-// const api = 'data/v5.simple3.json';
+// const api = 'data/v5.json';
+const api = 'data/v5.simple5.json';
 
 const width = 600;
 const height = 600;
@@ -316,6 +316,8 @@ function initialize(resp) {
 }
 
 function genLinks(relations) {
+    const indexHash = {};
+    
     return relations.map(function ({
         id,
         startNode,
@@ -324,6 +326,13 @@ function genLinks(relations) {
         type
     }, i) {
         const linkKey = startNode + '-' + endNode;
+        const count = linkMap[linkKey];
+        if (indexHash[linkKey]) {
+            indexHash[linkKey] -= 1;
+        } else {
+            indexHash[linkKey] = count - 1;
+        }
+        
         return {
             id,
             source: nodesMap[startNode],
@@ -332,7 +341,7 @@ function genLinks(relations) {
             type,
             labels: linkMap[linkKey + '-label'],
             count: linkMap[linkKey],
-            num: i
+            index: indexHash[linkKey]
         }
     })
 }
@@ -374,18 +383,17 @@ function genNodesMap(nodes) {
 
 // 生成关系连线路径
 function genLinkPath(link) {
-
     const sr = nodeConf.radius.Human;
     const tr = nodeConf.radius.Company;
 
     const count = link.count;
-    const knum = link.num;
+    const index = link.index;
 
     let sx = link.source.x;
     let tx = link.target.x;
     let sy = link.source.y;
     let ty = link.target.y;
-
+    
     return 'M' + sx + ',' + sy + ' L' + tx + ',' + ty;
 }
 
