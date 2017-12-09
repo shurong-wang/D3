@@ -634,7 +634,7 @@ function getParallelLine(
     ty
 ) {
 
-    const offet = -4;
+    const offet = -2;
     const dx = tx - sx;
     const dy = ty - sy;
     const hypotenuse = Math.sqrt(dx * dx + dy * dy);
