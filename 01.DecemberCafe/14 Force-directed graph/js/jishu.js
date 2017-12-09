@@ -67,8 +67,8 @@ menuConf.outerRadius = menuConf.innerRadius + menuConf.offetRadius;
 // 力导向图
 const force = d3.layout.force()
     .size([width, height]) // 画布的大小
-    .linkDistance(200) // 连线长度
-    .charge(-2000); // 排斥/吸引，值越小越排斥
+    .linkDistance(220) // 连线长度
+    .charge(-3000); // 排斥/吸引，值越小越排斥
 
 // 全图缩放器
 const zoom = d3.behavior.zoom()
@@ -634,7 +634,10 @@ function getParallelLine(
     ty
 ) {
 
-    const offet = -2;
+    // 把圆理解为一个盒子，平行线是装在盒子里
+    // offet 控制内边距，取值范围是 -r/2 到 r/2
+    const offet = -6; 
+
     const dx = tx - sx;
     const dy = ty - sy;
     const hypotenuse = Math.sqrt(dx * dx + dy * dy);
@@ -648,9 +651,11 @@ function getParallelLine(
     const sourceY = dy < 0 ? sy - a : sy + a;
     const targetY = dy < 0 ? ty + a : ty - a;
 
-    const start = count === 1 ? 0 : -r / 2 + offet;
-    const space = count === 1 ? 0 : Math.abs(start * 2 / (count - 1));
-    const position = start + space * index;
+    const maxCount = 4; // 最大连线数
+    const minStart = count === 1 ? 0 : -r / 2 + offet;
+    const start = minStart * (count / maxCount); // 连线线开始位置
+    const space = count === 1 ? 0 : Math.abs(minStart * 2 / (maxCount - 1)); // 连线间隔
+    const position = start + space * index; // 位置分布
     const isY = dy < 0;
 
     if (position > r) {
