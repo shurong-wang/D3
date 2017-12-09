@@ -77,8 +77,8 @@ Released under the MIT license: http://jsbin.mit-license.org
             }]
         }
         for (var i in data.links) {
-            data.links[i].source = data.nodes[data.links[i].source]
-            data.links[i].target = data.nodes[data.links[i].target]
+            data.links[i].source = data.nodes[data.links[i].source];
+            data.links[i].target = data.nodes[data.links[i].target];
         }
 
         var padding = -10;
@@ -110,7 +110,7 @@ Released under the MIT license: http://jsbin.mit-license.org
                     .enter()
                     .append('text')
                     .text(function (d, i) {
-                        return _d.relation[i]
+                        return _d.relation[i];
                     })
             });
 
@@ -138,21 +138,21 @@ Released under the MIT license: http://jsbin.mit-license.org
                     return d.y;
                 });
 
-            link.each(function (d) {
-                var r = d.source.r;
-                var _d = d;
-                var b1 = d.target.x - d.source.x;
-                var b2 = d.target.y - d.source.y;
+            link.each(function (link) {
+                var r = link.source.r;
+                var _link = link;
+                var b1 = link.target.x - link.source.x;
+                var b2 = link.target.y - link.source.y;
                 var b3 = Math.sqrt(b1 * b1 + b2 * b2);
-                d.angle = 180 * Math.asin(b1 / b3) / Math.PI;
-                d.textAngle = b2 > 0 ? 90 - d.angle : d.angle - 90;
+                link.angle = 180 * Math.asin(b1 / b3) / Math.PI;
+                link.textAngle = b2 > 0 ? 90 - link.angle : link.angle - 90;
 
-                var a = Math.cos(d.angle * Math.PI / 180) * r;
-                var b = Math.sin(d.angle * Math.PI / 180) * r;
-                d.sourceX = d.source.x + b;
-                d.targetX = d.target.x - b;
-                d.sourceY = b2 < 0 ? d.source.y - a : d.source.y + a;
-                d.targetY = b2 < 0 ? d.target.y + a : d.target.y - a;
+                var a = Math.cos(link.angle * Math.PI / 180) * r;
+                var b = Math.sin(link.angle * Math.PI / 180) * r;
+                link.sourceX = link.source.x + b;
+                link.targetX = link.target.x - b;
+                link.sourceY = b2 < 0 ? link.source.y - a : link.source.y + a;
+                link.targetY = b2 < 0 ? link.target.y + a : link.target.y - a;
 
                 // padding 控制内边距
                 // 把圆理解为一个盒子，平行线是装在盒子里
@@ -161,26 +161,26 @@ Released under the MIT license: http://jsbin.mit-license.org
 
                 // 可以按间隔为10去生成0 10 -10 20 -20这种结构
 
-                var start = d.relation.length === 1 ? 0 : -r / 2 + padding;
-                var space = d.relation.length === 1 ? 0 : Math.abs(start * 2 / (d.relation.length - 1));
+                var start = link.relation.length === 1 ? 0 : -r / 2 + padding;
+                var space = link.relation.length === 1 ? 0 : Math.abs(start * 2 / (link.relation.length - 1));
                 var index = 0;
 
-                for (var i in d.relation) {
+                for (var i in link.relation) {
                     var s = start + space * index++;
                     setLinePath(
-                        d.relationline[i],
-                        d.sourceX,
-                        d.sourceY,
-                        d.targetX,
-                        d.targetY,
-                        d.angle,
+                        link.relationline[i],
+                        link.sourceX,
+                        link.sourceY,
+                        link.targetX,
+                        link.targetY,
+                        link.angle,
                         s,
                         r,
                         b2 < 0
                     );
                 }
 
-                d.relationLineDom
+                link.relationLineDom
                     .attr("stroke-width", '2')
                     .attr('stroke', 'red')
                     .attr('x1', function (d, i) {
@@ -196,7 +196,7 @@ Released under the MIT license: http://jsbin.mit-license.org
                         return d.target.y;
                     });
 
-                d.relationTextDom
+                link.relationTextDom
                     .attr('x', function (d) {
                         return d.source.x + (d.target.x - d.source.x) / 2;
                     })
@@ -204,12 +204,7 @@ Released under the MIT license: http://jsbin.mit-license.org
                         return d.source.y + (d.target.y - d.source.y) / 2;
                     })
                     .attr('transform', function (d) {
-                        return 'rotate(' + 
-                            (_d.textAngle) + ' ' + [d.source.x + (d.target.x - d.source.x) /
-                                2,
-                                d.source.y + (d.target.y - d.source.y) / 2
-                            ] +
-                            ')';
+                        return 'rotate(' + _link.textAngle + ' ' + [d.source.x + (d.target.x - d.source.x) / 2, d.source.y + (d.target.y - d.source.y) / 2 ] + ')';
                     });
             });
         }
@@ -229,7 +224,7 @@ Released under the MIT license: http://jsbin.mit-license.org
             if (position > r) {
                 return;
             }
-            // s 两次三角函数计算的值
+            // s 两次三角函数计算的值 -- 参考 doc/两次三角函数计算的值.jpg 标识的红色部分
             var s = r - Math.sin(180 * Math.acos(position / r) / Math.PI * Math.PI / 180) * r;
 
             // _a 和 _b 是拿到 ang 角度的基准值
