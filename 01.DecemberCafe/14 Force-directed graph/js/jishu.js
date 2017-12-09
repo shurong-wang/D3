@@ -1,9 +1,9 @@
-// const api = 'data/v5.json';
-const api = 'data/v5.simple5.json';
+const api = 'data/v5.json';
+// const api = 'data/v5.simple5.json';
 
 const width = 600;
 const height = 600;
-const initScale = 1;
+const initScale = .7;
 
 const nodeConf = {
     fillColor: {
@@ -159,7 +159,31 @@ function initialize(resp) {
         .attr('id', link => 'marker-' + link.id)
         .attr('markerUnits', 'userSpaceOnUse')
         .attr('viewBox', '0 -5 10 10')
-        .attr('refX', d => d.index === 1 ? 25 : 28)
+        .attr('refX', link => {
+            const nodeType = link.source.ntype;
+            if (nodeType === 'Company') {
+                return 9;
+            }
+            if (nodeType === 'Human') {
+                if (link.count === 1) {
+                    return 25;
+                }
+                else if (link.count === 2) {
+
+                }
+                else if (link.count === 3) {
+                    if (link.index === 1) {
+                        return 25;
+                    }
+                }
+                else if (link.count === 4) {
+                    if (link.index === 1 || link.index === 2) {
+                        return 25;
+                    }
+                }
+            }
+            return 28;
+        })
         .attr('refY', 0)
         .attr('markerWidth', 12)
         .attr('markerHeight', 12)
@@ -167,7 +191,6 @@ function initialize(resp) {
         .attr('stroke-width', 2)
         .append('svg:path')
         .attr('d', 'M2,0 L0,-3 L9,0 L0,3 M2,0 L0,-3')
-        .style('transform', 'scale(1.4)')
         .attr('fill', link => lineConf.strokeColor[link.type]);
 
     // 节点连线    
@@ -223,11 +246,11 @@ function initialize(resp) {
 
     // 鼠标交互
     nodeCircle.on('mouseenter', function (currNode) {
-            // toggleNode(nodeCircle, currNode, true);
-            // toggleMenu(menuWrapper, currNode, true);
-            // toggleLine(linkLine, currNode, true);
-            // toggleMarker(marker, currNode, true);
-            // toggleLineText(lineText, currNode, true);
+            toggleNode(nodeCircle, currNode, true);
+            toggleMenu(menuWrapper, currNode, true);
+            toggleLine(linkLine, currNode, true);
+            toggleMarker(marker, currNode, true);
+            toggleLineText(lineText, currNode, true);
         })
         .on('mouseleave', function (currNode) {
             toggleNode(nodeCircle, currNode, false);
@@ -375,8 +398,6 @@ function genNodesMap(nodes) {
 // 生成关系连线路径
 function genLinkPath(link) {
 
-    console.log(link);
-
     const count = link.count;
     const index = link.index;
     const r = nodeConf.radius[link.source.ntype];
@@ -385,8 +406,6 @@ function genLinkPath(link) {
     const sy = link.source.y;
     const tx = link.target.x;
     const ty = link.target.y;
-
-    //  return 'M' + parallelSx + ',' + parallelSy + ' L' + parallelTx + ',' + parallelTy;
 
     const {
         parallelSx,
@@ -615,12 +634,7 @@ function getParallelLine(
     ty
 ) {
 
-    // console.log(
-    //     count,
-    //     index
-    // );
-
-    const offet = -6;
+    const offet = -4;
     const dx = tx - sx;
     const dy = ty - sy;
     const hypotenuse = Math.sqrt(dx * dx + dy * dy);
@@ -638,11 +652,6 @@ function getParallelLine(
     const space = count === 1 ? 0 : Math.abs(start * 2 / (count - 1));
     const position = start + space * index;
     const isY = dy < 0;
-
-    // console.log(
-    //     position,
-    //     r
-    // );
 
     if (position > r) {
         return {

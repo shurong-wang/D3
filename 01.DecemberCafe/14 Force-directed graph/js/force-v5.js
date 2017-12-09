@@ -167,7 +167,6 @@ function initialize(resp) {
         .attr('stroke-width', 2)
         .append('svg:path')
         .attr('d', 'M2,0 L0,-3 L9,0 L0,3 M2,0 L0,-3')
-        .style('transform', 'scale(1.4)')
         .attr('fill', link => lineConf.strokeColor[link.type]);
 
     // 节点连线    
