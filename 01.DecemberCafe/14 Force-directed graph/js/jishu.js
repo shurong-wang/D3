@@ -98,7 +98,7 @@ const zoomOverlay = svg.append('rect')
     .style('pointer-events', 'all');
 
 const container = svg.append('g')
-    .attr('transform', 'scale(' + initScale + ')')
+    .attr('transform', 'translate(' + nodeConf.radius.Company + ',' + nodeConf.radius.Company + ')scale(' + initScale + ')')
     .attr('class', 'container');
 
 // 请求数据，绘制图表
