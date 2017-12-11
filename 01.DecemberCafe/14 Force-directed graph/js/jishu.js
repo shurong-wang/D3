@@ -50,7 +50,7 @@ const menuConf = {
     height: 500,
     offetRadius: 30,
     color: '#00B9C4',
-    dataset:  [
+    dataset: [
         {
             per: 25,
             action: 'info',
@@ -132,7 +132,7 @@ d3.json(HAP_MAP, (error, resp) => {
     initialize(resp);
 });
 
-document.querySelector('body').addEventListener('click', function() {
+document.querySelector('body').addEventListener('click', function () {
     toggleNodeInfo(false, null);
 });
 
@@ -272,12 +272,12 @@ function initialize(resp) {
 
     // 鼠标交互
     nodeCircle.on('mouseenter', function (currNode) {
-            toggleNode(nodeCircle, currNode, true);
-            toggleMenu(menuWrapper, currNode, true);
-            toggleLine(linkLine, currNode, true);
-            toggleMarker(marker, currNode, true);
-            toggleLineText(lineText, currNode, true);
-        })
+        toggleNode(nodeCircle, currNode, true);
+        toggleMenu(menuWrapper, currNode, true);
+        toggleLine(linkLine, currNode, true);
+        toggleMarker(marker, currNode, true);
+        toggleLineText(lineText, currNode, true);
+    })
         .on('mouseleave', function (currNode) {
             toggleNode(nodeCircle, currNode, false);
             toggleMenu(menuWrapper, currNode, false);
@@ -326,10 +326,15 @@ function initialize(resp) {
             if (d.data.action === 'info') {
                 // hoverNodeId
                 d3.json(NODE_INFO, (error, resp) => {
+                    toggleMask(true);
                     if (error) {
+                        toggleMask(false);
                         return console.error(error);
                     }
-                    toggleNodeInfo(true, resp);
+                    setTimeout(function() {
+                        toggleMask(false);
+                        toggleNodeInfo(true, resp);
+                    }, 2000);
                 });
                 return;
             }
@@ -391,7 +396,7 @@ function genLinks(relations) {
         } else {
             indexHash[linkKey] = linkMap[linkKey] - 1;
         }
-        
+
         return {
             id,
             source: nodesMap[startNode],
@@ -680,7 +685,7 @@ function getParallelLine(
 
     // 把圆理解为一个盒子，平行线是装在盒子里
     // offet 控制内边距，取值范围是 -r/2 到 r/2
-    const offet = -6; 
+    const offet = -6;
 
     const dx = tx - sx;
     const dy = ty - sy;
@@ -728,7 +733,7 @@ function getParallelLine(
 }
 
 function toggleNodeInfo(flag, data) {
-    
+
     let nodeInfoWarp = document.querySelector('.node-info-warp');
 
     if (flag && data) {
@@ -772,6 +777,41 @@ function toggleNodeInfo(flag, data) {
             nodeInfoWarp.style.cssText = 'display: none';
         }
     }
+}
+
+function toggleMask(flag) {
+    let loadingMask = document.querySelector('#loading-mask');
+
+    if (flag) {
+        if (!loadingMask) {
+            const canvas = document.querySelector('#canvas');
+            loadingMask = document.createElement('div');
+            loadingMask.setAttribute('id', 'loading-mask');
+            canvas.appendChild(loadingMask);
+        }
+        const html = `
+            <div class="loader">
+                <div class="ball-spin-fade-loader">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        `;
+        loadingMask.innerHTML = html;
+        loadingMask.style.cssText = 'display: flex';
+    } else {
+        if (loadingMask) {
+            loadingMask.innerHTML = '';
+            loadingMask.style.cssText = 'display: none';
+        }
+    }
+
 
 }
 
