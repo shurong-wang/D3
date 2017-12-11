@@ -1,0 +1,73 @@
+{
+    "invest": null,
+    "holder": {
+        "total": 1,
+        "result": [
+            {
+                "id": 3043297808,
+                "amount": 0.0,
+                "toco": 2,
+                "name": "Blibee Investment （HK） Limited",
+                "base": "hk",
+                "type": 1,
+                "capital": [
+                    {
+                        "amomon": "5000万美元",
+                        "percent": "100%"
+                    }
+                ],
+                "pencertileScore": 7000
+            }
+        ]
+    },
+    "staff": {
+        "total": 2,
+        "result": [
+            {
+                "toco": 6,
+                "id": 1814753978,
+                "typeJoin": [
+                    "执行董事",
+                    "总经理"
+                ],
+                "type": 2,
+                "name": "刘琪"
+            },
+            {
+                "toco": 9,
+                "id": 2170830756,
+                "typeJoin": [
+                    "监事"
+                ],
+                "logo": "http://img.tianyancha.com/logo/human2/9066ccc26f9c00331fbb76682fe65396.png@!watermark01",
+                "type": 2,
+                "name": "许开辰"
+            }
+        ]
+    },
+    "properties": {
+        "businessScope": "日用品、服装鞋帽、化妆品、工艺品、文具用品、家用电器、计算机、软件及辅助设备、机械设备、电子产品、五金交电、建筑材料、食品、针织品、I类医疗器械、花卉、水果、蔬菜、文化用品、照相器材、电话卡、鲜花、邮票的批发、零售、进出口；票务代理服务；办公服务；彩扩服务；经济贸易咨询（不含市场调查）；组织文化艺术交流活动（不含演出及演出经纪）；会议服务；承办展览展示活动；设计、制作、代理、发布广告；计算机系统服务；洗衣服务；出版物零售；房屋租赁（依法须经批准的项目，经相关部门批准后方可开展经营活动）",
+        "updatetime": "1511556236511",
+        "orgNumber": "MA05LLTH7",
+        "categoryCode": "零售业",
+        "regStatus": "存续", // 状态标识
+        "estiblishTime": "1479744000000", // 成立日期
+        "fromTime": "1479744000000",
+        "legalPersonName": "刘琪",  // 法人
+        "toTime": "2426342400000",
+        "legalPersonId": "111211",
+        "crawledtime": "1511556235000",
+        "id": "100973426", // 企业 ID
+        "parentId": "0",
+        "flag": "1",
+        "regNumber": "120118400013658",
+        "regCapital": "5000万美元",  // 注册资本
+        "companyOrgType": "有限责任公司(台港澳法人独资)",  // 企业类型
+        "regInstitute": "天津市自由贸易试验区市场和质量监督管理局",
+        "name": "便利蜂商贸有限公司",  // 公司名
+        "base": "天津",
+        "regLocation": "天津自贸试验区空港国际物流区第二大街1号310室",  // 注册地址
+        "creditCode": "91120118MA05LLTH71",
+        "approvedTime": "1498060800000"
+    }
+}
