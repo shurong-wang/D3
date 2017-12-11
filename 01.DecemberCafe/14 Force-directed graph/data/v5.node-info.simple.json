@@ -1,10 +1,10 @@
 {
-    "id": "100973426", // 企业 ID
-    "name": "便利蜂商贸有限公司", // 公司名称
-    "legalPersonName": "刘琪", // 法人
-    "regStatus": "存续", // 状态标识
-    "companyOrgType": "有限责任公司(台港澳法人独资)", // 企业类型
-    "regCapital": "5000万美元", // 注册资本
-    "estiblishTime": "1479744000000", // 成立日期
-    "regLocation": "天津自贸试验区空港国际物流区第二大街1号310室"// 注册地址
+    "id": "100973426",
+    "name": "便利蜂商贸有限公司",
+    "legalPersonName": "刘琪",
+    "regStatus": "存续",
+    "companyOrgType": "有限责任公司(台港澳法人独资)",
+    "regCapital": "5000万美元",
+    "estiblishTime": "1479744000000",
+    "regLocation": "天津自贸试验区空港国际物流区第二大街1号310室"
 }

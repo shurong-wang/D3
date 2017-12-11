@@ -1,0 +1,87 @@
+
+#canvas {
+    width: 600px;
+    height: 600px;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+svg {
+    border: 2px dashed #666;
+}
+
+text {
+    font: Microsoft YaHei;
+    pointer-events: none;
+    user-select: none;
+}
+
+.link {
+    stroke-opacity: 1;
+    stroke-width: .8;
+}
+
+.link-active {
+    stroke-opacity: 1;
+    stroke-width: 3;
+}
+
+.linetext {
+    font-family: Microsoft YaHei;
+    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+
+.node-info-warp {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 230px;
+    margin: 0;
+    background: #fff;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px solid #ececec;
+}
+
+.node-info-warp .company-title {
+    height: 45px;
+    line-height: 45px;
+    vertical-align: middle;
+    color: #171717
+}
+
+.node-info-warp .company-title .company-name {
+    float: left;
+    width: 180px;
+    overflow: hidden;
+    display: inline-block;
+    word-break: keep-all;
+    white-space: nowrap;
+    text-overflow: ellipsis
+}
+
+.node-info-warp .company-title .company-reg-status {
+    border: 1px solid #00aae2;
+    color: #00aae2;
+    float: right;
+    height: 20px;
+    padding: 0;
+    margin: 10px 0 0;
+    line-height: 20px
+}
+
+.node-info-warp .company-info>div {
+    font-size: 13px;
+    color: #777;
+    position: relative
+}
+
+.node-info-warp .company-info>div:before {
+    width: 5px;
+    height: 5px;
+    background: #e4e4e4;
+    position: absolute;
+    left: 0;
+    top: 10px
+}

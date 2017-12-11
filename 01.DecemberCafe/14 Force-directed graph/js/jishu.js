@@ -1,9 +1,12 @@
-const api = 'data/v5.json';
-// const api = 'data/v5.simple5.json';
+const HAP_MAP = 'data/v5.json';
+// const HAP_MAP = 'data/v5.simple5.json';
+
+const NODE_INFO = 'data/v5.node-info.simple.json';
 
 const width = 600;
 const height = 600;
 const initScale = .7;
+let hoverNodeId = 0;
 
 const nodeConf = {
     fillColor: {
@@ -47,14 +50,33 @@ const menuConf = {
     height: 500,
     offetRadius: 30,
     color: '#00B9C4',
-    dataset: [25, 25, 25, 25],
-    iconPath: 'menu-icon/',
-    handle: [
-        'info',
-        'equity',
-        'tree',
-        'relation'
+    dataset:  [
+        {
+            per: 25,
+            action: 'info',
+            lable: '企业信息',
+            url: '#'
+        },
+        {
+            per: 25,
+            action: 'equity',
+            lable: '股权结构',
+            url: 'http://www.qq.com/'
+        },
+        {
+            per: 25,
+            action: 'tree',
+            lable: '投资族谱',
+            url: 'http://www.sohu.com'
+        },
+        {
+            per: 25,
+            action: 'relation',
+            lable: '企业族谱',
+            url: 'http://www.163.com'
+        },
     ],
+    iconPath: 'menu-icon/',
     iconSize: {
         width: 15,
         height: 15
@@ -62,7 +84,6 @@ const menuConf = {
 };
 menuConf.innerRadius = nodeConf.radius.Company;
 menuConf.outerRadius = menuConf.innerRadius + menuConf.offetRadius;
-
 
 // 力导向图
 const force = d3.layout.force()
@@ -102,13 +123,17 @@ const container = svg.append('g')
     .attr('class', 'container');
 
 // 请求数据，绘制图表
-d3.json(api, (error, resp) => {
+d3.json(HAP_MAP, (error, resp) => {
     if (error) {
         return console.error(error);
     }
 
     // 初始化
     initialize(resp);
+});
+
+document.querySelector('body').addEventListener('click', function() {
+    toggleNodeInfo(false, null);
 });
 
 // 初始化
@@ -123,7 +148,7 @@ function initialize(resp) {
     // 生成 nodes map
     nodesMap = genNodesMap(nodes);
 
-    // 构建 nodes（不能直接使用 api 中的 nodes）
+    // 构建 nodes（不能直接使用请求数据中的 nodes）
     nodes = d3.values(nodesMap);
 
     // 起点和终点相同的关系映射
@@ -279,10 +304,7 @@ function initialize(resp) {
         });
 
     // 节点菜单
-    const pie = d3.layout.pie();
-    const arc = d3.svg.arc()
-        .innerRadius(menuConf.innerRadius)
-        .outerRadius(menuConf.outerRadius);
+    const pie = d3.layout.pie().value(d => d.per);
     const menuWrapper = nodeCircle.filter(({
             ntype
         }) => ntype === 'Company')
@@ -290,13 +312,28 @@ function initialize(resp) {
         .attr('id', node => 'menu-wrapper-' + node.id)
         .style('display', 'none');
 
+    const piedata = pie(menuConf.dataset);
+    const arc = d3.svg.arc()
+        .innerRadius(menuConf.innerRadius)
+        .outerRadius(menuConf.outerRadius);
+
     const wheelMenu = menuWrapper
         .selectAll('.wheel-menu')
-        .data(pie(menuConf.dataset))
+        .data(piedata)
         .enter()
         .append('g')
         .on('click', function (d, i) {
-            console.log(menuConf.handle[i]);
+            if (d.data.action === 'info') {
+                // hoverNodeId
+                d3.json(NODE_INFO, (error, resp) => {
+                    if (error) {
+                        return console.error(error);
+                    }
+                    toggleNodeInfo(true, resp);
+                });
+                return;
+            }
+            location = d.data.url + '?id=' + hoverNodeId;
         });
 
     wheelMenu.append('path')
@@ -311,7 +348,7 @@ function initialize(resp) {
         .attr('x', -(menuConf.iconSize.width / 2))
         .attr('y', -(menuConf.iconSize.width / 2))
         .attr('transform', d => 'translate(' + arc.centroid(d) + ')')
-        .attr('xlink:href', (d, i) => menuConf.iconPath + menuConf.handle[i] + '.png');
+        .attr('xlink:href', (d, i) => menuConf.iconPath + d.data.action + '.png');
 
 
     // 更新力导向图
@@ -572,10 +609,12 @@ function toggleNode(nodeCircle, currNode, isHover) {
 
 function toggleMenu(menuWrapper, currNode, isHover) {
     if (isHover) {
+        hoverNodeId = currNode.id;
         // 显示节点菜单
         menuWrapper.filter(node => node.id === currNode.id)
             .style('display', 'block');
     } else {
+        hoverNodeId = 0;
         // 隐藏节点菜单
         menuWrapper.filter(node => node.id === currNode.id)
             .style('display', 'none');
@@ -687,3 +726,52 @@ function getParallelLine(
         };
     }
 }
+
+function toggleNodeInfo(flag, data) {
+    
+    let nodeInfoWarp = document.querySelector('.node-info-warp');
+
+    if (flag && data) {
+        if (!nodeInfoWarp) {
+            const canvas = document.querySelector('#canvas');
+            nodeInfoWarp = document.createElement('div');
+            nodeInfoWarp.setAttribute('class', 'node-info-warp');
+            canvas.appendChild(nodeInfoWarp);
+        }
+
+        const {
+            id, // 企业 ID
+            name, // 公司名称
+            regStatus, // 状态标识
+            legalPersonName, // 法人
+            companyOrgType, // 企业类型
+            regCapital, // 注册资本
+            estiblishTime, // 成立日期
+            regLocation// 注册地址
+        } = data;
+
+        const html = `
+            <div class="company-title">
+                <span class="company-name">${name}</span>
+                <span class="company-reg-status">${legalPersonName}</span>
+            </div>
+            <div class="node-title-split"></div>
+            <div class="company-info">
+                <div>法人：${legalPersonName}</div>
+                <div>企业类型：${companyOrgType}</div>
+                <div>注册资本：${regCapital}</div>
+                <div>成立日期：${estiblishTime}</div>
+                <div>注册地址：${regLocation}</div>
+            </div>
+        `;
+        nodeInfoWarp.innerHTML = html;
+        nodeInfoWarp.style.cssText = 'display: block';
+    } else {
+        if (nodeInfoWarp) {
+            nodeInfoWarp.innerHTML = '';
+            nodeInfoWarp.style.cssText = 'display: none';
+        }
+    }
+
+}
+
