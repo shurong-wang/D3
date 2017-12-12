@@ -132,10 +132,6 @@ d3.json(HAP_MAP, (error, resp) => {
     initialize(resp);
 });
 
-document.querySelector('body').addEventListener('click', function () {
-    toggleNodeInfo(false, null);
-});
-
 // 初始化
 function initialize(resp) {
     let {
@@ -331,10 +327,10 @@ function initialize(resp) {
                         toggleMask(false);
                         return console.error(error);
                     }
-                    setTimeout(function() {
+                    setTimeout(function () {
                         toggleMask(false);
                         toggleNodeInfo(true, resp);
-                    }, 2000);
+                    }, 500);
                 });
                 return;
             }
@@ -757,19 +753,23 @@ function toggleNodeInfo(flag, data) {
 
         const html = `
             <div class="company-title">
+                <span class="close-info">×</span>
                 <span class="company-name">${name}</span>
-                <span class="company-reg-status">${legalPersonName}</span>
+                <span class="company-reg-status">${regStatus}</span>
             </div>
             <div class="node-title-split"></div>
             <div class="company-info">
                 <div>法人：${legalPersonName}</div>
                 <div>企业类型：${companyOrgType}</div>
                 <div>注册资本：${regCapital}</div>
-                <div>成立日期：${estiblishTime}</div>
+                <div>成立日期：${formatDate(estiblishTime)}</div>
                 <div>注册地址：${regLocation}</div>
             </div>
         `;
         nodeInfoWarp.innerHTML = html;
+        document.querySelector('.close-info').addEventListener('click', function () {
+            toggleNodeInfo(false, null);
+        });
         nodeInfoWarp.style.cssText = 'display: block';
     } else {
         if (nodeInfoWarp) {
@@ -811,7 +811,15 @@ function toggleMask(flag) {
             loadingMask.style.cssText = 'display: none';
         }
     }
-
-
 }
 
+
+function  formatDate(timestamp)  {
+    const date  =  new Date(+timestamp);
+    let y  =  date.getFullYear();
+    let m  =  date.getMonth()  +  1;
+    m  =  m  <  10  ?  ('0'  +  m)  :  m;
+    let d  =  date.getDate();
+    d  =  d  <  10  ?  ('0'  +  d)  :  d;
+    return  y  +  '-'  +  m  +  '-'  +  d;
+}

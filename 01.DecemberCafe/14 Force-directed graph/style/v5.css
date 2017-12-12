@@ -44,11 +44,27 @@ text {
 }
 
 .node-info-warp .company-title {
+    display: flex;
+    align-items: center;
     height: 45px;
     line-height: 45px;
-    vertical-align: middle;
-    color: #171717
+    color: #171717;
 }
+
+.node-info-warp .close-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 0;
+    right: 5px;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
 
 .node-info-warp .company-title .company-name {
     float: left;
@@ -57,17 +73,19 @@ text {
     display: inline-block;
     word-break: keep-all;
     white-space: nowrap;
-    text-overflow: ellipsis
+    text-overflow: ellipsis;
+    font-size: 18px;
 }
 
 .node-info-warp .company-title .company-reg-status {
     border: 1px solid #00aae2;
     color: #00aae2;
     float: right;
-    height: 20px;
-    padding: 0;
-    margin: 10px 0 0;
-    line-height: 20px
+    height: 12px;
+    padding: 2px;
+    line-height: 12px;
+    font-size: 12px;
+    border-radius: 2px;
 }
 
 .node-info-warp .company-info>div {
@@ -94,11 +112,10 @@ text {
     left: 0%;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,.6);
+    background-color: rgba(0, 0, 0, .6);
     z-index: 999;
     filter: alpha(opacity=60);
 }
-
 
 .loader {
     box-sizing: border-box;
