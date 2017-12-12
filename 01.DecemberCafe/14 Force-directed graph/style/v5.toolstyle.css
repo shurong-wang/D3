@@ -299,27 +299,28 @@ main {
 }
 
 nav#optionsArea {
-    position: relative;
-    display: flex;
-    justify-content: center;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    z-index: 99999;
     width: 85%;
     min-width: 800px;
     height: 40px;
     margin: 0 auto;
     padding: 0;
     background: rgb(24, 32, 42);
-    bottom: 2px;
 }
 
 ul#optionsMenu {
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    color: #fff;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: block;
     height: 40px;
-    margin: 0px auto;
+    margin: 0 auto;
     padding: 0;
+    color: #fff;
 }
 
 ul#optionsMenu>li {

@@ -4,7 +4,7 @@ const HAP_MAP = 'data/v5.json';
 const NODE_INFO = 'data/v5.node-info.simple.json';
 
 const width = Math.max(window.innerWidth - (window.innerWidth * 0.15), 800);
-const height = window.innerHeight - 40;
+const height = window.innerHeight;
 
 const initScale = .7;
 const focusNodeId = 8;
