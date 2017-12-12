@@ -53,8 +53,7 @@ const menuConf = {
     height: 500,
     offetRadius: 30,
     color: '#00B9C4',
-    dataset: [
-        {
+    dataset: [{
             per: 25,
             action: 'info',
             lable: '企业信息',
@@ -216,16 +215,13 @@ function initialize(resp) {
             if (nodeType === 'Human') {
                 if (link.count === 1) {
                     return 25;
-                }
-                else if (link.count === 2) {
+                } else if (link.count === 2) {
 
-                }
-                else if (link.count === 3) {
+                } else if (link.count === 3) {
                     if (link.index === 1) {
                         return 25;
                     }
-                }
-                else if (link.count === 4) {
+                } else if (link.count === 4) {
                     if (link.index === 1 || link.index === 2) {
                         return 25;
                     }
@@ -296,12 +292,12 @@ function initialize(resp) {
 
     // 鼠标交互
     nodeCircle.on('mouseenter', function (currNode) {
-        toggleNode(nodeCircle, currNode, true);
-        toggleMenu(menuWrapper, currNode, true);
-        toggleLine(linkLine, currNode, true);
-        toggleMarker(marker, currNode, true);
-        toggleLineText(lineText, currNode, true);
-    })
+            toggleNode(nodeCircle, currNode, true);
+            toggleMenu(menuWrapper, currNode, true);
+            toggleLine(linkLine, currNode, true);
+            toggleMarker(marker, currNode, true);
+            toggleLineText(lineText, currNode, true);
+        })
         .on('mouseleave', function (currNode) {
             toggleNode(nodeCircle, currNode, false);
             toggleMenu(menuWrapper, currNode, false);
@@ -503,14 +499,14 @@ function genLinkPath(link) {
         parallelTx,
         parallelTy
     } = getParallelLine(
-            count,
-            index,
-            r,
-            sx,
-            sy,
-            tx,
-            ty
-        );
+        count,
+        index,
+        r,
+        sx,
+        sy,
+        tx,
+        ty
+    );
 
     return 'M' + parallelSx + ',' + parallelSy + ' L' + parallelTx + ',' + parallelTy;
 }
@@ -803,7 +799,7 @@ function toggleNodeInfo(flag, data) {
             companyOrgType, // 企业类型
             regCapital, // 注册资本
             estiblishTime, // 成立日期
-            regLocation// 注册地址
+            regLocation // 注册地址
         } = data;
 
         const html = `
