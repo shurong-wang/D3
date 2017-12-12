@@ -3,8 +3,9 @@ const HAP_MAP = 'data/v5.json';
 
 const NODE_INFO = 'data/v5.node-info.simple.json';
 
-const width = 600;
-const height = 600;
+const width = Math.max(window.innerWidth - (window.innerWidth * 0.15), 800);
+const height = window.innerHeight - 40;
+
 const initScale = .7;
 const focusNodeId = 8;
 let hoverNodeId = 0;
@@ -108,7 +109,7 @@ const drag = force.drag()
     .on('dragend', dragendFn);
 
 // SVG
-const svg = d3.select('#canvas').append('svg')
+const svg = d3.select('#graph').append('svg')
     .attr('width', width)
     .attr('height', height)
     .append('g')
@@ -376,7 +377,7 @@ function initialize(resp) {
                     setTimeout(function () {
                         toggleMask(false);
                         toggleNodeInfo(true, resp);
-                    }, 1000000);
+                    }, 1000);
                 });
                 return;
             }
@@ -788,10 +789,10 @@ function toggleNodeInfo(flag, data) {
 
     if (flag && data) {
         if (!nodeInfoWarp) {
-            const canvas = document.querySelector('#canvas');
+            const graph = document.querySelector('#graph');
             nodeInfoWarp = document.createElement('div');
             nodeInfoWarp.setAttribute('class', 'node-info-warp');
-            canvas.appendChild(nodeInfoWarp);
+            graph.appendChild(nodeInfoWarp);
         }
 
         const {
@@ -838,10 +839,10 @@ function toggleMask(flag) {
 
     if (flag) {
         if (!loadingMask) {
-            const canvas = document.querySelector('#canvas');
+            const graph = document.querySelector('#graph');
             loadingMask = document.createElement('div');
             loadingMask.setAttribute('id', 'loading-mask');
-            canvas.appendChild(loadingMask);
+            graph.appendChild(loadingMask);
         }
         const html = `
             <div class="loader">

@@ -7,11 +7,51 @@
     <!-- <script src='http://d3js.org/d3.v3.min.js' charset='utf-8'></script> -->
     <script src="./js/d3.v3.min.js"></script>
     <link rel="stylesheet" href="./style/v5.css">
+    <link rel="stylesheet" href="./style/v5.toolstyle.css">
 </head>
 
 <body>
-    <div id='canvas'>
-    </div>
+    <main>
+        <section id="canvasArea">
+            <div id="graph">
+                <!-- svg 画布 -->
+            </div>
+        </section>
+
+        <!-- 底部功能栏 -->
+        <nav id="optionsArea">
+            <ul id="optionsMenu">
+                <li class="searchMenu" id="searchMenuId">
+                    <input class="searchInputText" type="text" id="search-input-text" placeholder="Search">
+                    <ul class="searchMenuEntry" id="searchEntryContainer">
+                    </ul>
+                </li>
+                <li id="filterOption">
+                    <a href="#">Filter</a>
+                    <ul class="toolTipMenu filter">
+                        <li class="toggleOption" id="datatypeFilteringOption"></li>
+                        <li class="toggleOption" id="objectPropertyFilteringOption"></li>
+                        <li class="toggleOption" id="subclassFilteringOption"></li>
+                        <li class="toggleOption" id="disjointFilteringOption"></li>
+                        <li class="toggleOption" id="setOperatorFilteringOption"></li>
+                        <li class="slideOption" id="nodeDegreeFilteringOption"></li>
+                    </ul>
+                </li>
+                <li id="export">
+                    <a href="#">Export</a>
+                    <ul class="toolTipMenu export">
+                        <li>
+                            <a href="#" download id="exportJson">Export as JSON</a>
+                        </li>
+                        <li>
+                            <a href="#" download id="exportSvg">Export as SVG</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </main>
+
     <script src="./js/jishu.js"></script>
 </body>
 
