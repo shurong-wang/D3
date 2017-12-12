@@ -6,7 +6,9 @@ const NODE_INFO = 'data/v5.node-info.simple.json';
 const width = 600;
 const height = 600;
 const initScale = .7;
+const focusNodeId = 8;
 let hoverNodeId = 0;
+
 
 const nodeConf = {
     fillColor: {
@@ -85,6 +87,8 @@ const menuConf = {
 menuConf.innerRadius = nodeConf.radius.Company;
 menuConf.outerRadius = menuConf.innerRadius + menuConf.offetRadius;
 
+const initTranslate = [menuConf.outerRadius, menuConf.outerRadius];
+
 // 力导向图
 const force = d3.layout.force()
     .size([width, height]) // 画布的大小
@@ -119,8 +123,30 @@ const zoomOverlay = svg.append('rect')
     .style('pointer-events', 'all');
 
 const container = svg.append('g')
-    .attr('transform', 'translate(' + nodeConf.radius.Company + ',' + nodeConf.radius.Company + ')scale(' + initScale + ')')
+    .attr('transform', 'translate(' + initTranslate + ')scale(' + initScale + ')')
     .attr('class', 'container');
+
+// 阴影
+const shadow = svg.append('defs').append('filter')
+    .attr('id', 'drop-shadow')
+    .attr("width", "150%")
+    .attr("height", "150%");
+shadow.append('feGaussianBlur')
+    .attr('in', 'SourceAlpha')
+    .attr('stdDeviation', 3)
+    .attr('result', 'blur');
+shadow.append('feOffset')
+    .attr('in', 'blur')
+    .attr('dx', 1)
+    .attr('dy', 1)
+    .attr('result', 'offsetBlur');
+
+const feMerge = shadow.append('feMerge');
+feMerge.append('feMergeNode')
+    .attr('in', 'offsetBlur')
+feMerge.append('feMergeNode')
+    .attr('in', 'SourceGraphic');
+
 
 // 请求数据，绘制图表
 d3.json(HAP_MAP, (error, resp) => {
@@ -264,7 +290,8 @@ function initialize(resp) {
         .style('stroke-width', node => nodeConf.strokeWidth[node.ntype])
         .attr('class', 'node-circle')
         .attr('id', node => 'node-circle-' + node.id)
-        .attr('r', node => nodeConf.radius[node.ntype]);
+        .attr('r', node => nodeConf.radius[node.ntype])
+        .style('filter', 'url(#drop-shadow)');
 
     // 鼠标交互
     nodeCircle.on('mouseenter', function (currNode) {
@@ -301,17 +328,36 @@ function initialize(resp) {
 
     // 节点菜单
     const pie = d3.layout.pie().value(d => d.per);
+    const piedata = pie(menuConf.dataset);
+
+    // 聚焦节点
+    const focusNode = nodeCircle.filter(({
+        ntype,
+        id
+    }) => ntype === 'Company' && id === focusNodeId);
+
+    focusNode.append('circle')
+        .attr('r', node => nodeConf.radius[node.ntype] + 8)
+        .style('fill', 'rgba(0,0,0,.0)')
+        .style('stroke', 'rgb(0,209,218)')
+        .style('stroke-width', 5)
+        .style('stroke-dasharray', node => 2 * Math.PI * (nodeConf.radius[node.ntype] + 8) / 8);
+
+    focusNode.append('circle')
+        .attr('r', node => nodeConf.radius[node.ntype] + 8)
+        .style('fill', 'rgba(0,0,0,.0)')
+        .style('stroke', 'rgb(0,209,218)')
+        .style('stroke-width', 5)
+        .style('stroke-dasharray', node => 2 * Math.PI * (nodeConf.radius[node.ntype] + 8) / 8)
+        .style('stroke-dashoffset', -45);
+
+    // 环形菜单
     const menuWrapper = nodeCircle.filter(({
             ntype
         }) => ntype === 'Company')
         .append('g')
         .attr('id', node => 'menu-wrapper-' + node.id)
         .style('display', 'none');
-
-    const piedata = pie(menuConf.dataset);
-    const arc = d3.svg.arc()
-        .innerRadius(menuConf.innerRadius)
-        .outerRadius(menuConf.outerRadius);
 
     const wheelMenu = menuWrapper
         .selectAll('.wheel-menu')
@@ -320,9 +366,9 @@ function initialize(resp) {
         .append('g')
         .on('click', function (d, i) {
             if (d.data.action === 'info') {
-                // hoverNodeId
+                toggleMask(true);
+                toggleNodeInfo(false, null);
                 d3.json(NODE_INFO, (error, resp) => {
-                    toggleMask(true);
                     if (error) {
                         toggleMask(false);
                         return console.error(error);
@@ -330,25 +376,29 @@ function initialize(resp) {
                     setTimeout(function () {
                         toggleMask(false);
                         toggleNodeInfo(true, resp);
-                    }, 500);
+                    }, 1000000);
                 });
                 return;
             }
             location = d.data.url + '?id=' + hoverNodeId;
         });
 
+    const menuArc = d3.svg.arc()
+        .innerRadius(menuConf.innerRadius)
+        .outerRadius(menuConf.outerRadius);
+
     wheelMenu.append('path')
         .attr('fill', menuConf.color)
         .attr('stroke', '#fff')
         .attr('stroke-width', 1)
-        .attr('d', d => arc(d));
+        .attr('d', d => menuArc(d));
 
     wheelMenu.append('image')
         .attr('width', menuConf.iconSize.width)
         .attr('height', menuConf.iconSize.height)
         .attr('x', -(menuConf.iconSize.width / 2))
         .attr('y', -(menuConf.iconSize.width / 2))
-        .attr('transform', d => 'translate(' + arc.centroid(d) + ')')
+        .attr('transform', d => 'translate(' + menuArc.centroid(d) + ')')
         .attr('xlink:href', (d, i) => menuConf.iconPath + d.data.action + '.png');
 
 
@@ -488,7 +538,11 @@ function zoomFn() {
         translate,
         scale
     } = d3.event;
-    container.attr('transform', 'translate(' + translate + ')scale(' + scale * initScale + ')');
+    const [x, y] = translate;
+    const [dx, dy] = initTranslate;
+    const zoomTranslate = [x + dx, y + dy];
+
+    container.attr('transform', 'translate(' + zoomTranslate + ')scale(' + scale * initScale + ')');
 }
 
 function dragstartFn(d) {
@@ -814,12 +868,12 @@ function toggleMask(flag) {
 }
 
 
-function  formatDate(timestamp)  {
-    const date  =  new Date(+timestamp);
-    let y  =  date.getFullYear();
-    let m  =  date.getMonth()  +  1;
-    m  =  m  <  10  ?  ('0'  +  m)  :  m;
-    let d  =  date.getDate();
-    d  =  d  <  10  ?  ('0'  +  d)  :  d;
-    return  y  +  '-'  +  m  +  '-'  +  d;
+function formatDate(timestamp) {
+    const date = new Date(+timestamp);
+    let y = date.getFullYear();
+    let m = date.getMonth() + 1;
+    m = m < 10 ? ('0' + m) : m;
+    let d = date.getDate();
+    d = d < 10 ? ('0' + d) : d;
+    return y + '-' + m + '-' + d;
 }
