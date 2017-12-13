@@ -1,4 +1,6 @@
-const HAP_MAP = 'data/v5.json';
+// const HAP_MAP = 'data/huawei.json';
+const HAP_MAP = 'data/baidu.json';
+
 // const HAP_MAP = 'data/v5.simple5.json';
 
 const NODE_INFO = 'data/v5.node-info.simple.json';
@@ -163,7 +165,7 @@ d3.json(HAP_MAP, (error, resp) => {
 function initialize(resp) {
     let {
         nodes,
-        relations
+        relationships: relations
     } = resp;
 
     const nodesLength = nodes.length;
@@ -431,9 +433,10 @@ function genLinks(relations) {
         id,
         startNode,
         endNode,
-        label,
+        properties: {labels},
         type
     }, i) {
+        const label = labels + '';
         const linkKey = startNode + '-' + endNode;
         if (indexHash[linkKey]) {
             indexHash[linkKey] -= 1;
@@ -457,8 +460,7 @@ function genLinkMap(relations) {
     const hash = {};
     relations.map(function ({
         startNode,
-        endNode,
-        label
+        endNode
     }) {
         const key = startNode + '-' + endNode;
         hash[key] = hash[key] ? hash[key] + 1 : 1;
@@ -468,11 +470,14 @@ function genLinkMap(relations) {
 
 function genNodesMap(nodes) {
     const hash = {};
-    nodes.map(function ({
-        id,
-        name,
-        ntype
-    }) {
+    nodes.map(function (node) {
+        const {
+            id,
+            labels,
+            properties: {name}
+        } = node;
+        const ntype = labels + '';
+
         hash[id] = {
             id,
             name,
