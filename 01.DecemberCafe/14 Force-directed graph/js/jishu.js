@@ -112,16 +112,8 @@ const drag = force.drag()
 const svg = d3.select('#graph').append('svg')
     .attr('width', width)
     .attr('height', height)
-    .append('g')
     .call(zoom)
     .on('dblclick.zoom', null);
-
-// 缩放层（位置必须在 container 之前）
-const zoomOverlay = svg.append('rect')
-    .attr('width', width)
-    .attr('height', height)
-    .style('fill', 'none')
-    .style('pointer-events', 'all');
 
 const container = svg.append('g')
     .attr('transform', 'translate(' + initTranslate + ')scale(' + initScale + ')')
