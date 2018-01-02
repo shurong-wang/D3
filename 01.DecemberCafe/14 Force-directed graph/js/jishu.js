@@ -9,6 +9,7 @@ const height = window.innerHeight;
 const initScale = .7;
 const focusNodeId = 8;
 let hoverNodeId = 0;
+let draging = false;
 
 
 const nodeConf = {
@@ -285,6 +286,9 @@ function initialize(resp) {
 
     // 鼠标交互
     nodeCircle.on('mouseenter', function (currNode) {
+            if (draging) {
+                return;
+            }
             toggleNode(nodeCircle, currNode, true);
             toggleMenu(menuWrapper, currNode, true);
             toggleLine(linkLine, currNode, true);
@@ -292,6 +296,9 @@ function initialize(resp) {
             toggleLineText(lineText, currNode, true);
         })
         .on('mouseleave', function (currNode) {
+            if (draging) {
+                return;
+            }
             toggleNode(nodeCircle, currNode, false);
             toggleMenu(menuWrapper, currNode, false);
             toggleLine(linkLine, currNode, false);
@@ -536,17 +543,20 @@ function zoomFn() {
 }
 
 function dragstartFn(d) {
+    draging = true;
     d3.event.sourceEvent.stopPropagation();
     force.start();
 }
 
 function dragFn(d) {
+    draging = true;
     d3.select(this)
         .attr('cx', d.x = d3.event.x)
         .attr('cy', d.y = d3.event.y);
 }
 
 function dragendFn(d) {
+    draging = false;
     force.stop();
 }
 
