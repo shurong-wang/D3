@@ -64,6 +64,7 @@ Released under the MIT license: http://jsbin.mit-license.org
                 relation: ['H', 'I', 'J', 'K']
             }]
         }
+
         for (var i in data.links) {
             data.links[i].source = data.nodes[data.links[i].source];
             data.links[i].target = data.nodes[data.links[i].target];
@@ -152,11 +153,8 @@ Released under the MIT license: http://jsbin.mit-license.org
 
         
                 var index = 0;
-                console.log('\r\n');
 
                 for (var i in link.relation) {
-
-                    console.log(link.relation[i] + ' - start, space: ', start, space);
 
                     // 生成 20 0 -20 的 position 模式
                     var position = start + space * index++;

@@ -315,7 +315,9 @@ function initialize(resp) {
     // 更新力导向图
     // 注意1：必须调用一次 tick （否则，节点会堆积在左上角）
     // 注意2：调用位置必须在 nodeCircle, nodeText, linkLine, lineText 后
-    tick();
+    setTimeout(function() {
+        tick();
+    }, 10);
 
     // 监听力学图运动事件，更新坐标
     force.on('tick', tick);
