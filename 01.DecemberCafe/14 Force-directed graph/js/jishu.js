@@ -149,7 +149,9 @@ d3.json(HAP_MAP, (error, resp) => {
     }
 
     // 初始化
-    initialize(resp);
+	setTimeout(function() {
+		initialize(resp);
+	}, 10);
 });
 
 // 初始化

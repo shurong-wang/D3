@@ -109,7 +109,9 @@ d3.json(api, (error, resp) => {
     }
 
     // 初始化
-    initialize(resp);
+	setTimeout(function() {
+		initialize(resp);
+	}, 10);
 });
 
 // 初始化
