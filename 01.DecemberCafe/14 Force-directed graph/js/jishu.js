@@ -520,7 +520,7 @@ function getLineAngle(sx, sy, tx, ty) {
     const x = tx - sx;
     const y = ty - sy;
     // 斜边长度
-    const hypotenuse = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    const hypotenuse = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) | 1;
     // 求出弧度
     const cos = x / hypotenuse;
     const radian = Math.acos(cos);
@@ -743,7 +743,7 @@ function getParallelLine(
 
     const dx = tx - sx;
     const dy = ty - sy;
-    const hypotenuse = Math.sqrt(dx * dx + dy * dy);
+    const hypotenuse = Math.sqrt(dx * dx + dy * dy) | 1;
     const angle = 180 * Math.asin(dx / hypotenuse) / Math.PI;
 
     const a = Math.cos(angle * Math.PI / 180) * r;

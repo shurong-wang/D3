@@ -413,7 +413,7 @@ function getLineAngle(sx, sy, tx, ty) {
     const x = tx - sx;
     const y = ty - sy;
     // 斜边长度
-    const hypotenuse = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    const hypotenuse = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) | 1;
     // 求出弧度
     const cos = x / hypotenuse;
     const radian = Math.acos(cos);
