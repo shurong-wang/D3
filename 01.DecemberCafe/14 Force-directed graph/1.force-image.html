@@ -4,6 +4,11 @@
 	<meta charset="utf-8">
 	<title>力导向图 V2</title>
 	<style>
+		svg {
+			user-select: none;
+			cursor: pointer;
+		}
+
 		.nodetext {
 			font-size: 12px;
 			font-family: Microsoft YaHei;
@@ -27,10 +32,9 @@
 
 <body>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<script>           
-
-		var width = 900;
-		var height = 800;
+	<script>
+		var width = document.body.clientWidth;
+		var height = document.body.clientHeight;
 		var img_w = 77;
 		var img_h = 80;
 		var radius = 30;    //圆形半径
@@ -116,14 +120,31 @@
 						if (edge.source === d || edge.target === d) {
 							return 1.0;
 						}
+						return 0.0;
+					});
+					edges_line.style("stroke-width", function (edge) {
+						if (edge.source === d || edge.target === d) {
+							return 3;
+						}
+						return 1;
+					});
+					edges_line.style("stroke", function (edge) {
+						if (edge.source === d || edge.target === d) {
+							return '#f00';
+						}
+						return '#ccc';
 					});
 				})
 				.on("mouseout", function (d, i) {
 					//隐去连接线上的文字
 					edges_text.style("fill-opacity", function (edge) {
-						if (edge.source === d || edge.target === d) {
-							return 0.0;
-						}
+						return 0.0;
+					});
+					edges_line.style("stroke-width", function (edge) {
+						return 1;
+					});
+					edges_line.style("stroke", function (edge) {
+						return '#ccc';
 					});
 				})
 				.call(drag)
@@ -144,7 +165,6 @@
 				.text(function (d) {
 					return d.name;
 				});
-
 
 			force.on("tick", function () {
 
