@@ -17,8 +17,8 @@
 			font-size: 11px;
 		}
 
-		.MyCircle {
-			fill: black;
+		.point {
+			fill: blue;
 		}
 	</style>
 
@@ -38,24 +38,9 @@
 			.attr("width", 400)
 			.attr("height", 400);
 
-		// 1. 过渡效果
-
-		/*var circle = svg.append("circle")
-						.attr("class","MyCircle")
-						.attr("cx", 70)
-						.attr("cy", 200)
-						.attr("r", 60);
-
-		circle.transition()
-			.duration(1000)
-			.ease("bounce")
-			.attr("cx", 230)
-			.attr("r", 100);*/
-
-		// 2. 散点图
+		// 1. 生成散点图数据
 
 		var dataset = [];
-
 		for (var i = 0; i < 10; i++) {
 			dataset.push({
 				x: Math.random() * 100,
@@ -64,7 +49,6 @@
 		}
 
 		// 比例尺
-
 		var xScale = d3.scale.linear()
 			.domain([0, 100])
 			.range([0, 300]);
@@ -72,8 +56,8 @@
 		var yScale = d3.scale.linear()
 			.domain([100, 0])
 			.range([0, 250]);
-		// 坐标轴
 
+		// 坐标轴
 		var xAxis = d3.svg.axis()
 			.scale(xScale)
 			.orient("bottom");
@@ -93,12 +77,11 @@
 			.call(yAxis);
 
 		// 散点
-
-		var points = svg.selectAll(".MyCircle")
+		var points = svg.selectAll(".point")
 			.data(dataset)
-			.enter()
+			.enter() // 初始构图，只需要 enter
 			.append("circle")
-			.attr("class", "MyCircle")
+			.attr("class", "point")
 			.attr("transform", "translate(30,50)")
 			.attr("r", 10)
 			.attr("cx", function (d) {
@@ -108,45 +91,22 @@
 				return yScale(d.y);
 			});
 
-		// 3. 数据更新
 
-		function update() {
-			for (var i = 0; i < dataset.length; i++) {
-				dataset[i].x = Math.random() * 100;
-				dataset[i].y = Math.random() * 100;
-			}
+		// 2. 动态更新散点图
 
-			updatePoints();
-		}
+		function redraw() {
 
-
-		function add() {
-			dataset.push({
-				x: Math.random() * 100,
-				y: Math.random() * 100
-			});
-
-			updatePoints();
-		}
-
-		function sub() {
-			dataset.pop();
-
-			updatePoints();
-		}
-
-
-		function updatePoints() {
-
-			var update = svg.selectAll(".MyCircle")
+			// 重绘需要 update, enter, exit
+			var update = svg.selectAll(".point")
 				.data(dataset);
 
 			var enter = update.enter();
 
 			var exit = update.exit();
 
+			// 新增散点
 			enter.append("circle")
-				.attr("class", "MyCircle")
+				.attr("class", "point")
 				.attr("transform", "translate(30,50)")
 				.attr("r", 10)
 				.attr("cx", function (d) {
@@ -165,6 +125,7 @@
 					return yScale(d.y);
 				});
 
+			// 更新散点
 			update.transition()
 				.duration(1000)
 				.attr("cx", function (d) {
@@ -174,11 +135,38 @@
 					return yScale(d.y);
 				});
 
+			// 删除散点
 			exit.attr("fill-opacity", 1.0)
 				.transition()
 				.duration(1000)
 				.attr("fill-opacity", 0.0)
 				.remove();
+		}
+
+		// 数据变化
+		function update() {
+			for (var i = 0; i < dataset.length; i++) {
+				dataset[i].x = Math.random() * 100;
+				dataset[i].y = Math.random() * 100;
+			}
+
+			redraw();
+		}
+
+
+		function add() {
+			dataset.push({
+				x: Math.random() * 100,
+				y: Math.random() * 100
+			});
+
+			redraw();
+		}
+
+		function sub() {
+			dataset.pop();
+
+			redraw();
 		}
 	</script>
 
