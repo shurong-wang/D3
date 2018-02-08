@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta name="author" content="leslie">
+    <title>径向树图</title>
+    <link rel="stylesheet" href="css/app.css" type="text/css">
+    <!--[if lt IE 9]>
+    <script src="https://mos.meituan.com/media/lib/html5shiv.js"></script>
+    <script src="https://mos.meituan.com/media/lib/respond.js"></script>
+    <![endif]-->
+    <!--[if IE 6]>
+    <style>* html, * html body {
+        background-image: url(about:blank);
+        background-attachment: fixed;
+    }
+
+    .lay_top {
+        position: absolute;
+        bottom: auto;
+        top: expression(eval(document.documentElement.scrollTop));
+    }</style><![endif]-->
+</head>
+<body class="body-common">
+<div class="container-ds common">
+    <!--导航-->
+    <div class="nav">
+        <div class="w1200">
+            <div class="nav-left">
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            background-color: #fff;
+        }
+
+        .link {
+            fill: none;
+            stroke-opacity: 1;
+            stroke-width: 1.5px;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        .mao-title {
+            color: #364f6b;
+            position: absolute;
+            left: 35px;
+            top: 60px;
+            -webkit-user-select: none;
+            user-select: none;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .mao-circle {
+            display: inline-block;
+            background: #7BA7F4;
+            width: 15px;
+            height: 15px;
+            background: url("material/theme/chacha/cms/v2/images/plus_point_icon.png");
+            background-size: 15px 15px;
+            position: relative;
+            top: 3px;
+        }
+
+        .mao-tip {
+            color: #333333;
+            position: absolute;
+            right: 5%;
+            top: 60px;
+            z-index: 999;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .mao-select-wrap {
+            color: #666666;
+            margin-left: 20px;
+        }
+
+        .mao-divider {
+            display: inline-block;
+            height: 14px;
+            border: 1px solid #0093E7;
+            position: relative;
+            top: 2px;
+        }
+
+        #company-detail {
+            background: #ffffff;
+            width: 300px;
+            position: absolute;
+            left: 20px;
+            top: 100px;
+            padding: 10px 20px;
+            -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            -moz-box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            height: 650px;
+            display: none;
+        }
+
+        .mao-detail-item {
+            margin-top: 15px;
+        }
+
+        .mao-detail-item div {
+            margin-top: 5px;
+        }
+
+        .mao-light-grey {
+            color: #999999;
+        }
+
+        .mao-grey {
+            color: #333333;
+        }
+
+        #company-name {
+            font-size: 18px;
+            color: #333333;
+        }
+
+        .mao-center {
+            text-align: center;
+        }
+
+        .mao-link {
+            border: 1px solid #DBDBDB;
+            border-radius: 2px;
+            padding: 5px 20px;
+            text-decoration: none;
+        }
+
+        .mao-link:hover {
+            text-decoration: none;
+        }
+
+        .mao-table {
+            font-size: 12px;
+        }
+
+        .mao-table thead {
+            background: #F0F7FD;
+            color: #999999;
+        }
+
+        .mao-table tbody {
+            color: #666666;
+        }
+
+        .mao-table-pane {
+            height: 300px;
+            overflow: auto;
+        }
+
+        .mao-noresult {
+            text-align: center;
+            padding: 70px 0 80px 0;
+        }
+
+        .mao-noresult p {
+            text-align: center;
+        }
+
+        .mao-noresult p img {
+            width: 80px;
+        }
+        .kind li{height: 20px;line-height:20px;padding: 2px 10px;margin-bottom:1px;font-size: 16px;color: #666666;cursor: pointer }
+        .kind li:hover{color: #364f6b;}
+    </style>
+    <div class="mao-title">
+        行业层级
+    </div>
+
+    <div class="mao-tip">
+        <div>
+        <span class="mao-select-wrap">
+                行业层级
+                <select id="mao-select">
+                    <option value="0">一层</option>
+                    <option value="1">二层</option>
+                    <option value="2">三层</option>
+                </select>
+        </span>
+        </div>
+    </div>
+    <svg></svg>
+
+</div>
+<div style="display: none; position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; cursor: move; opacity: 0; background: rgb(255, 255, 255);"></div>
+</body>
+</html>
+<script src="lib/jquery-1.11.3.min.js"></script>
+<script src="lib/d3.js"></script>
+
+<script type="text/javascript">
+    var level = 1;
+    var gudongLevel = 1;
+    var width = $(document).width() - 20;
+    var height = $(document).height() - 20;
+    var tree;
+    var container;
+    var linkContainer;
+    var zoom;
+    var diagonal;
+
+    var rootData;
+    var nodes;
+    var links;
+    var isExtent = false;
+    var id = 0;
+
+    $(document).ready(function () {
+        $('.all').css('color','#ec6760');
+        getNongData();
+        selectChange();
+        /*$("#company-detail-close-button").on("click", function () {
+         $("#company-detail").fadeOut();
+         });*/
+    });
+    //一二三层
+    function selectChange() {
+        $("#mao-select").on("change", function () {
+            level = $(this).val();
+            traverseLevel(rootData, level, 2);
+            console.log(rootData);
+            drawTree(rootData);
+        });
+
+        /*        $("#mao-select-gudong").on("change", function () {
+         gudongLevel = $(this).val();
+         console.log(gudongLevel);
+         traverseLevel(rootData, gudongLevel, 3);
+         console.log(rootData);
+         drawTree(rootData);
+         });*/
+    }
+    //获取数据
+    function getNongData() {
+        $.ajax({
+            url: 'json/tax_nonglin.json',
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.Status === 200) {
+                    rootData = data.Result.Node;
+                    traverseTreeId(rootData);
+                    draw(rootData);
+                }
+            }
+        });
+    }
+
+
+    function draw(root) {
+        console.log(root);
+        tree = d3.layout.cluster()
+                .size([360, 500])
+                .separation(function (a, b) {
+                    return (a.parent == b.parent ? 1 : 2) / a.depth;
+                });
+
+        var svg = d3.select("svg");
+        $("svg").empty();
+
+        svg.attr("width", width);
+        svg.attr("height", height);
+
+//        drawLegend(svg);
+        drawWaterMark(svg);
+
+        container = svg.append("g");
+        linkContainer = container.append("g");
+        zoom = d3.behavior.zoom()
+                .scaleExtent([0.4, 5])
+                .on("zoom", zoomed);
+        diagonal = d3.svg.diagonal.radial()/*************************************/
+                .projection(function (d) {
+                    return [d.y, d.x / 180 * Math.PI];
+                });
+        svg.call(zoom);
+
+        initLocation();
+
+        function zoomed() {
+            container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        }
+
+        function initLocation() {
+            zoom.translate([width / 2, height / 2]);
+            zoom.scale(0.9);
+            container.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")scale(" + zoom.scale() + ")");
+        }
+
+        nodes = tree.nodes(root);
+        links = tree.links(nodes);
+
+        nodes.forEach(function (d) {
+            if (d.depth > 0) {
+                if (d.children) {
+                    d._children = d.children;
+                    d.children = null;
+                }
+            }
+        });
+
+        root.x0 = 0;
+        root.y0 = 0;
+        drawTree(root);
+    }
+
+    function drawTree(data) {
+        nodes = tree.nodes(rootData);
+        links = tree.links(nodes);
+
+        console.log(nodes);
+        nodes.forEach(function (d) {
+            if (d.depth > 2) {
+                d.y = d.depth * (d.depth / 2) * 150;
+            } else {
+                d.y = d.depth * 150;
+            }
+        });
+        var maxDepth = 1;
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].depth > maxDepth) {
+                maxDepth = nodes[i].depth;
+            }
+        }
+
+        var linkUpdate = linkContainer.selectAll(".link")
+                .data(links, function (d) {
+                    return d.target.id;
+                });
+        var linkEnter = linkUpdate.enter();
+        var linkExit = linkUpdate.exit();
+
+        linkEnter.append("path")
+                .attr("class", "link")
+                .attr("d", function (d) {
+                    var o = {x: data.x0, y: data.y0};
+                    return diagonal({source: o, target: o});
+                })
+                .transition()
+                .duration(500)
+                .attr("d", diagonal);
+
+        //线的颜色
+        linkUpdate.attr("stroke", function (d) {
+                    if (d.target.Level == 1) {
+                        return "#ec6760";
+                    }
+                    if (d.target.Level == 2) {
+                        return "#ffaf19";
+                    }
+                    if (d.target.Level == 3) {
+                        return "#00ad7c";
+                    }
+                    return "#364f6b";
+                })
+                .transition()
+                .duration(500)
+                .attr("d", diagonal);
+
+
+        linkExit.transition()
+                .duration(500)
+                .attr("d", function (d) {
+                    var o = {x: data.x, y: data.y};
+                    return diagonal({source: o, target: o});
+                })
+                .remove();
+
+        var nodeUpdate = container.selectAll(".node")
+                .data(nodes, function (d) {
+                    return d.id;
+                });
+        var nodeEnter = nodeUpdate.enter();
+        var nodeExit = nodeUpdate.exit();
+
+        var enterNodes = nodeEnter.append("g")
+                .attr("class", function (d) {
+                    return "node";
+                })
+                .attr("transform", function (d) {
+                    return "translate(" + project(data.x0, data.y0) + ")";
+                });
+
+        //节点的颜色
+        enterNodes.append("circle")
+                .attr("r", 0)
+                //内填充
+                .attr("fill", function (d) {
+                    if (d.Level == 0) {
+                        return "#ec6760";
+                    }
+                    if (d.Level == 1) {
+                        return "#ffaf19";
+                    }
+                    if (d.Level == 2) {
+                        return "#00ad7c";
+                    }
+                    if (d.Level == 3) {
+                        return "#364f6b";
+                    }
+                    return "purple";
+                })
+                //外边
+                .attr("stroke", function (d) {
+                    if (d.depth == 0) {
+                        return "#eb463d";
+                    }
+
+                    if (d.depth == 1) {
+                        if (d.Level == 1) {
+                            return "#eea700";
+                        }
+
+                        if (d.Level == 2) {
+                            return "#00956b"
+                        }
+                    }
+                    return null;
+                })
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke-width", function (d) {
+                    if (d.depth == 0) {
+                        return 10;
+                    }
+                    if (d.depth == 1) {
+                        return 6;
+                    }
+                    return 0;
+                })
+                .on("click", function (d) {
+                    if (d.depth > 0) {
+                        toggle(d);
+                        drawTree(d);
+                    }
+                });
+
+        enterNodes.append("path")
+                .attr("d", function (d) {
+                    if (d.depth > 0 && d._children) {
+                        return "M-6 -1 H-1 V-6 H1 V-1 H6 V1 H1 V6 H-1 V1 H-6 Z"
+                    } else if (d.depth > 0 && d.children) {
+                        return "M-6 -1 H6 V1 H-6 Z"
+                    }
+                })
+                .attr("fill", "#ffffff")
+                .attr("stroke", "#ffffff")
+                .attr("stroke-width", "0.2")
+                .on("click", function (d) {
+                    if (d.depth > 0) {
+                        toggle(d);
+                        drawTree(d);
+                    }
+                });
+        enterNodes.append("text")
+                .attr("dy", function (d) {
+                    if (d.depth == 0) {
+                        return "-1.5em";
+                    }
+                    return "0.31em";
+                })
+                .attr("x", function (d) {
+                    if (d.depth == 0) {
+                        return d.name.length * 8
+                    }
+                    return d.x < 180 ? 15 : -15;
+                })
+                .text(function (d) {
+                    return d.name;
+                })
+                .style("text-anchor", function (d) {
+                    if (d.depth == 0) {
+                        return "end";
+                    }
+                    return d.x < 180 ? "start" : "end";
+                })
+                .style("fill-opacity", 0)
+                .attr("transform", function (d) {
+                    if (d.depth > 0) {
+                        return "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")";
+                    } else {
+                        return "rotate(0)";
+                    }
+                })
+                .style("font-size", function (d) {
+                    if (d.depth == 0) {
+                        return "16px";
+                    }
+                    return "14px";
+                })
+                .attr("fill", function (d) {
+                    if (d.depth == 0) {
+                        return "#2c91e8";
+                    }
+                    if (d.depth == 1) {
+                        if (d.Category == 2) {
+                            return "#2db092";
+                        }
+
+                        if (d.Category == 3) {
+                            return "#3d4cd4";
+                        }
+                    }
+                    return "#333";
+                });
+        /*.on("click", function (d) {
+         console.log(d);
+         if (d.KeyNo && d.depth > 0) {
+         if (d.KeyNo.indexOf("_") < 0) {
+         showDetail(d.KeyNo);
+         }
+         }
+         });*/
+
+        var updateNodes = nodeUpdate.transition()
+                .duration(500)
+                .attr("transform", function (d) {
+                    return "translate(" + project(d.x, d.y) + ")";
+                });
+        updateNodes.select("text")
+                .style("fill-opacity", 1)
+                .attr("transform", function (d) {
+                    if (d.depth > 0) {
+                        return "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")";
+                    } else {
+                        return "rotate(0)";
+                    }
+                })
+                .attr("x", function (d) {
+                    if (d.depth == 0) {
+                        return d.name.length * 8
+                    }
+                    return d.x < 180 ? 15 : -15;
+                })
+                /*字的颜色*/
+                .attr("fill", function (d) {
+                    if (d.depth == 0) {
+                        return "#ec6760";
+                    }
+                    if (d.depth == 1) {
+                        if (d.Level == 1) {
+                            return "#ffaf19";
+                        }
+                    }
+                    if (d.depth == 2) {
+                        if (d.Level == 2) {
+                            return "#00ad7c";
+                        }
+                    }
+                    if (d.depth == 3) {
+                        if (d.Level == 3) {
+                            return "#364f6b";
+                        }
+                    }
+                    return "purple";
+                })
+                .style("text-anchor", function (d) {
+                    if (d.depth == 0) {
+                        return "end";
+                    }
+                    return d.x < 180 ? "start" : "end";
+                });
+        updateNodes.select("circle")
+                .attr("r", function (d) {
+                    if (d.depth == 0) {
+                        return 12;
+                    }
+
+                    if (d.depth == 1) {
+                        return 10;
+                    }
+
+                    return 9;
+                });
+        updateNodes.select("path")
+                .attr("d", function (d) {
+                    if (d.depth > 0 && d._children) {
+                        return "M-6 -1 H-1 V-6 H1 V-1 H6 V1 H1 V6 H-1 V1 H-6 Z"
+                    } else if (d.depth > 0 && d.children) {
+                        return "M-6 -1 H6 V1 H-6 Z"
+                    }
+                });
+
+        var exitNodes = nodeExit.transition()
+                .duration(500)
+                .attr("transform", function (d) {
+                    return "translate(" + project(data.x, data.y) + ")";
+                })
+                .remove();
+        exitNodes.select("circle")
+                .attr("r", 0);
+
+        exitNodes.select("text")
+                .style("fill-opacity", 0);
+
+        nodes.forEach(function (d) {
+            d.x0 = d.x;
+            d.y0 = d.y;
+        });
+
+    }
+    //展开收起
+    function toggle(d) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
+        }
+    }
+
+    function project(x, y) {
+        var angle = (x - 90) / 180 * Math.PI, radius = y;
+        return [radius * Math.cos(angle), radius * Math.sin(angle)];
+    }
+    //水印
+    function drawWaterMark(svg) {
+        var declare_text = "行业查询示例";
+        var text_width = $(window).width() - 20;
+        var row = Math.ceil(declare_text.length / (Math.floor(text_width / 12)));
+        var declare = svg.append("g")
+                .attr("transform", "translate(" + ($(window).width() - declare_text.length * 12) / 2 + "," + ($(window).height() - 100) + ")");
+        for (var i = 0; i < row; i++) {
+            declare.append("text")
+                    .text(function () {
+                        return declare_text.substr(i * Math.floor(text_width / 12), Math.floor(text_width / 12));
+                    })
+                    .attr("fill", "#bbbbbb")
+                    .attr("font-size", "12px")
+                    .attr("y", function () {
+                        return i * 15;
+                    });
+        }
+    }
+
+    function traverseTree(node) {
+        if (node._children) {
+            node.children = node._children;
+            node._children = null;
+        }
+
+        if (node.children) {
+            for (var i = 0; i < node.children.length; i++) {
+                traverseTree(node.children[i]);
+            }
+        }
+    }
+
+    function traverseTreeId(node) {
+        if (!node.id) {
+            node.id = id;
+            id++;
+        }
+
+        if (node.children) {
+            for (var i = 0; i < node.children.length; i++) {
+                traverseTreeId(node.children[i]);
+            }
+        }
+    }
+
+    function traverseLevel(node, level, type) {
+        // type=2投资, =3股东
+        if (node.depth <= level) {
+            console.log(node);
+            if (node.Category == type) {
+                console.log(type);
+                if (node._children) {
+                    node.children = node._children;
+                    node._children = null;
+                }
+            }
+        } else {
+            if (node.Category == type) {
+                if (node.children) {
+                    node._children = node.children;
+                    node.children = null;
+                }
+            }
+        }
+
+        if (node.children) {
+            for (var i = 0; i < node.children.length; i++) {
+                traverseLevel(node.children[i], level, type);
+            }
+        }
+
+        if (node._children) {
+            for (var i = 0; i < node._children.length; i++) {
+                traverseLevel(node._children[i], level, type);
+            }
+        }
+    }
+
+</script>

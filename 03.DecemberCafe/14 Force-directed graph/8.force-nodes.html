@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            background-color: #fff;
+        }
+
+        body {
+            font-family: Microsoft YaHei, Arial, Helvetica, sans-serif;
+        }
+
+        .nodetext {
+            font-size: 12px;
+            fill: #fff;
+        }
+
+        .linetext {
+            font-size: 12px;
+        }
+
+        #main {
+            height: 100%;
+        }
+
+        #company-detail {
+            background: #ffffff;
+            width: 300px;
+            position: absolute;
+            left: 20px;
+            top: 100px;
+            padding: 10px 20px;
+            -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            -moz-box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            height: 600px;
+            display: none;
+        }
+
+        .mao-detail-item {
+            margin-top: 15px;
+        }
+
+        .mao-detail-item div {
+            margin-top: 5px;
+        }
+
+        .mao-light-grey {
+            color: #999999;
+        }
+
+        .mao-grey {
+            color: #333333;
+        }
+
+        #company-name {
+            font-size: 18px;
+            color: #333333;
+        }
+
+        .mao-center {
+            text-align: center;
+        }
+
+        .mao-link {
+            border: 1px solid #DBDBDB;
+            border-radius: 2px;
+            padding: 5px 20px;
+            text-decoration: none;
+        }
+
+        .mao-link:hover {
+            text-decoration: none;
+        }
+
+        .mao-table {
+            font-size: 12px;
+        }
+
+        .mao-table thead {
+            background: #F0F7FD;
+            color: #999999;
+        }
+
+        .mao-table tbody {
+            color: #666666;
+        }
+
+        .mao-table-pane {
+            height: 200px;
+        }
+
+        .mao-title {
+            color: #3c4144;
+            position: absolute;
+            left: 35px;
+            top: 95px;
+            -webkit-user-select: none;
+            user-select: none;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .mao-title em {
+            color: #e33244;
+            font-style: normal;
+        }
+
+        #find-company-wrap {
+            padding-top: 0px;
+            background: #ffffff;
+            width: 300px;
+            position: absolute;
+            right: 20px;
+            top: 170px;
+            -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            -moz-box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+            display: block;
+            display: none;
+        }
+
+        .find-mao-detail-item {
+            line-height: 40px;
+            font-size: 16px;
+            padding-left: 12px;
+            padding-right: 12px;
+            border-bottom: 1px solid #dddddd;
+            color: #128bed;
+        }
+
+        #find-num {
+            margin-left: 10px;
+            color: #e33244;
+        }
+
+        .find-mao-detail-item div {
+            margin-top: 5px;
+        }
+
+        .find-mao-list-item {
+            padding: 10px 12px 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .find-mao-list-item a {
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .find-mao-list-item a:active {
+            background: #dddddd;
+        }
+
+        .find-mao-float-wrap {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .find-mao-cop-name {
+            float: left;
+            font-size: 15px;
+            color: #128bed;
+            width: 75%;
+        }
+
+        .find-mao-cop-province {
+            float: right;
+            color: #666666;
+            font-size: 13px;
+            background: url("material/theme/chacha/cms/v2/images/address.png") no-repeat 0% 50%;
+            background-size: 15px;
+            padding-left: 15px;
+        }
+
+        .find-mao-oper {
+            color: #666666;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .find-mao-cop-money {
+            float: left;
+            color: #666666;
+            font-size: 13px;
+        }
+
+        .find-mao-cop-time {
+            float: right;
+            color: #666666;
+            font-size: 13px;
+        }
+
+        #find-company-list {
+            padding-left: 12px;
+            height: 560px;
+            overflow: auto;
+        }
+
+        #find-company-close-button {
+            margin-top: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<div id="main"></div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/d3.v3.min.js" charset="utf-8"></script>
+<script type="text/javascript">
+
+    (function(window,$){
+
+        $(document).ready(function () {
+            getData();//先获取数据
+        });
+
+        function getData(){
+            var url = 'data/data-ys.json';
+            // console.log(url);
+            $.ajax({
+                url:url,
+                type: 'GET',
+                data:{
+                    keyNo:getQueryString("keyNo")
+                },
+                dataType: 'JSON',
+                success: function (data){
+                    $('#load_data').hide();
+                    drawMap(data.Result);     /*画图形的方法*/
+                    if(data.Result.FindList.length>0){
+                        $('#find-company-wrap').show();
+                        fillFindList(data.Result.FindList);   /*填充查询表单*/
+                    }
+                },error:function(data){
+                    console.log(data);
+                }
+            });
+        }
+
+        /*填充拼接字符串*/
+        function fillFindList(data){
+            $("#find-num").text(data.length);
+            $("#find-company-list").empty();
+            for(var i=0; i<data.length; i++){
+                var html = "<div class='find-mao-list-item' name='"+data[i].CompanyName+"' unique='"+data[i].KeyNo+"'>";
+                html += "<a href='http://www.qichacha.com/firm_"+data[i].KeyNo+".shtml' target='_blank'>";
+                html += "<div class='find-mao-float-wrap'>";
+                html += "<div class='find-mao-cop-name'>"+data[i].CompanyName+"</div>";
+                html += "<div class='find-mao-cop-province'>"+data[i].Province+"</div>";
+                html += "</div>";
+                html += "<div class='find-mao-oper'>"+(data[i].Name||"-")+"</div>";
+                html += "<div class='find-mao-float-wrap' style='margin-top: 5px'>";
+                html += "<div class='find-mao-cop-money'>"+(data[i].Money||"-")+"</div>";
+                html += "<div class='find-mao-cop-time'>"+(data[i].Date||"-")+"</div>";
+                html += "</div>";
+                html += "</a>";
+                html += "</div>";
+                $("#find-company-list").append(html);
+            }
+        }
+
+        /*绘制d3图*/
+        function drawMap(root){
+            $("#main").empty();
+            var width = $(document.body).width();
+            var height = $(document.body).height();
+
+            var svg = d3.select("#main").append("svg")
+                    .attr("width",width)
+                    .attr("height",height);
+
+            svg.append("text")
+                    .style("font-size","18px")
+                    .attr("x", 10)
+                    .attr("y", 25);
+            // .text(getQueryString("searchKey")+"的幕后关系");
+
+            var defs = svg.append("defs");
+            var arrowMarker = defs.append("marker")
+                    .attr("id","arrow")
+                    .attr("markerUnits","strokeWidth")
+                    .attr("markerWidth","12")
+                    .attr("markerHeight","12")
+                    .attr("viewBox","0 0 12 12")
+                    .attr("refX","50")/*******************/
+                    .attr("refY","6")
+                    .attr("orient","auto");
+
+            var arrowMarker2 = defs.append("marker")
+                    .attr("id","arrow2")
+                    .attr("markerUnits","strokeWidth")
+                    .attr("markerWidth","12")
+                    .attr("markerHeight","12")
+                    .attr("viewBox","0 0 12 12")
+                    .attr("refX","50")/*******************/
+                    .attr("refY","6")
+                    .attr("orient","auto");
+            var arrow_path = "M2,2 L10,6 L2,10 L6,6 L2,2";
+
+            arrowMarker.append("path")
+                    .attr("d",arrow_path)
+                    .attr("fill","#000");
+            arrowMarker2.append("path")
+                    .attr("d",arrow_path)
+                    .attr("fill","#000");
+
+            console.log(root);
+
+            var copNum=0;
+            var copFlag=0;
+            /*类别为2，level=0*/
+            for(var i=0; i<root.Nodes.length; i++){
+                if(root.Nodes[i].Category==2){
+                    root.Nodes[i].level = 0;
+                }else{
+                    copNum++;
+                }
+            }
+            /*类别为1，level=1或2*/
+            for(var i=0; i<root.Nodes.length; i++){
+                if(root.Nodes[i].Category==1){
+                    if(copFlag<copNum/2){
+                        root.Nodes[i].level = 1;
+                        copFlag++;
+                    }else{
+                        root.Nodes[i].level = 2;
+                    }
+                }
+            }
+
+            /*造节点数据*/
+            var nodes = [];
+            var tempNodesIndex = [];
+            for(var i=0; i<root.Nodes.length; i++){
+                var tempR = 20;
+                if(root.Nodes[i].Category==1){
+                    tempR = 38;
+                }else {
+                    tempR = 20;
+                }
+                nodes.push({
+                    "keyNo":root.Nodes[i].KeyNo,
+                    "name" :root.Nodes[i].Name,
+                    "category":root.Nodes[i].Category,
+                    "shortName":root.Nodes[i].ShortName,
+                    "r":tempR,
+                    "level": root.Nodes[i].level
+                });
+                tempNodesIndex.push(root.Nodes[i].KeyNo);
+            }
+            tempNodesIndex.reverse();
+            nodes.reverse();
+            console.log(nodes);
+
+            /*连线的数据*/
+            var links = [];
+            for(var i=0; i<root.Links.length; i++){
+                links.push({
+                    "source":tempNodesIndex.indexOf(root.Links[i].Source),
+                    "target":tempNodesIndex.indexOf(root.Links[i].Target),
+                    "relation":root.Links[i].Relation.toString()
+                });
+            }
+            console.log(links);
+
+            /*创建d3力学图*/
+            var force = d3.layout.force()
+                    .nodes(nodes)
+                    .links(links)
+                    .size([width,height])
+                    .linkDistance(200)
+                    .charge(-1500)
+                    .start();
+            /*连线*/
+            var edges_line = svg.selectAll("line")
+                    .data(links)
+                    .enter()
+                    .append("line")
+                    .style("stroke","#aaa")
+                    .style("stroke-width",1)
+                    .attr("marker-end", function (d) {   /*添加箭头*/
+                        if(d.target.r == 20){
+                            return "url(#arrow)";
+                        }else{
+                            return "url(#arrow2)";
+                        }
+                    });
+            /*关系*/
+            var edges_text = svg.selectAll(".linetext")
+                    .data(links)
+                    .enter()
+                    .append("text")
+                    .attr("class","linetext")
+                    .attr("fill","#bbb")
+                    .text(function(d){
+                        return d.relation;
+                    });
+            /*拖拽固定*/
+            var drag = force.drag()    /*问题   ：   循环每个节点都固定*/
+                    .on("dragstart",function(d){
+                        d.fixed = true ;  //拖拽开始后设定被拖拽对象为固定
+                    })
+                    .on("dragend",function(d){
+                        force.stop();
+                    });
+
+            /*节点圆圈*/
+            var nodes_circle = svg.selectAll("circle")
+                    .data(nodes)
+                    .enter()
+                    .append("circle")
+                    .attr("class","node")
+                    .attr("r",function(d){return d.r;})
+                    .style("fill",function(d,i){
+                        if(d.category==1){
+                            return "#2db294";
+                        }else{
+                            return "#727cd0";
+                        }
+                    })
+                    .style("cursor","pointer")
+                    .on("mouseover", function (d) {
+                        if(d.category == 1){
+                            this.style.fill = "#209b7f";
+                        }else {
+                            this.style.fill = "#5d67c0";
+                        }
+                        mouseOver(d);
+                    })
+                    .on("mouseout", function(d){
+                        if(d.category == 1){
+                            this.style.fill = "#2db294";
+                        }else {
+                            this.style.fill = "#727cd0";
+                        }
+                        mouseOut(d);
+                    })
+                    .on("mousemove", function () {
+                        nozoom();
+                    })
+                    .on("click",function(d,i){
+                        if(d3.event.defaultPrevented) return;
+                        if(d.category == 1){
+                            showDetail(d.keyNo);
+                        }
+                    })
+                    .call(drag);
+            /*节点里面的文字*/
+            var nodes_text = svg.selectAll(".nodetext")
+                    .data(nodes)
+                    .enter()
+                    .append("g")
+                    .attr("class","nodetext")
+                    .attr("keyNo", function (d) {
+                        return d.keyNo;
+                    })
+                    .style("cursor","pointer")
+                    .on("mouseover", function (t) {
+                        nodes_circle.style("fill",function(d){
+                            if(t.keyNo == d.keyNo){
+                                if(d.category==1){
+                                    return "#209b7f";
+                                }else{
+                                    return "#5d67c0";
+                                }
+                            }else {
+                                if(d.category==1){
+                                    return "#2db294";
+                                }else{
+                                    return "#727cd0";
+                                }
+                            }
+                        });
+                        mouseOver(t);
+                    })
+                    .on("mouseout", function(d){
+                        nodes_circle.style("fill",function(d){
+                            if(d.category==1){
+                                return "#2db294";
+                            }else{
+                                return "#727cd0";
+                            }
+                        });
+                        mouseOut(d);
+                    })
+                    .on("mousemove", function () {
+                        nozoom();           /*阻止冒泡传播*/
+                    })
+                    .on("click",function(d,i){
+                        if(d3.event.defaultPrevented) return;
+                        if(d.category == 1){
+                            showDetail(d.keyNo);
+                        }
+                    })
+                    .call(drag);
+
+            /*圆圈里面添加文字*/
+            nodes_text.each(function (d, i) {
+                var lines = Math.ceil(d.name.length/5);
+                var text="";
+                var dx = 0;
+                var dy = 0;
+                for(var line=0; line<lines; line++){
+                    if(d.category==2){
+                        dx = 0-d.name.length*6;
+                        dy = 3;
+                        d3.select(this).append("text").attr("dx",dx).attr("dy",dy).text(d.name);
+                    }else{
+                        dx = -12*2.5;
+                        if(line==(lines-1)){
+                            dx = 0-6*(d.name.substr(line*5,5).length);
+                        }
+                        dy = 14*line-lines*2.5;
+                        d3.select(this).append("text").attr("dx",dx).attr("dy",dy).text(d.name.substr(line*5, 5));
+                    }
+                    //text += "<text dx='"+dx+"' dy='"+dy+"'>"+ d.name.substr(line*5, 5)+"</text>";
+                }
+            });
+
+            /*移上去连接线和圆圈变色*/
+            function mouseOver(d){
+                edges_line.each(function (line) {
+                    if(line.source.keyNo== d.keyNo||line.target.keyNo== d.keyNo){
+                        d3.select(this).style("stroke","#128bed");
+                    }
+                });
+                edges_text.each(function (line) {
+                    if(line.source.keyNo== d.keyNo||line.target.keyNo== d.keyNo){
+                        d3.select(this).style("fill","#128bed");
+                    }
+                });
+
+            }
+            /*移出去连接线和圆圈颜色变回去*/
+            function mouseOut(d){
+                edges_line.each(function (line) {
+                    if(line.source.keyNo== d.keyNo||line.target.keyNo== d.keyNo){
+                        d3.select(this).style("stroke","#aaa");
+                    }
+                });
+                edges_text.each(function (line) {
+                    if(line.source.keyNo== d.keyNo||line.target.keyNo== d.keyNo){
+                        d3.select(this).style("fill","#bbb");
+                    }
+                });
+            }
+            /*改变位置的变化*/
+            force.on("tick", function(){
+                //限制结点的边界
+                nodes.forEach(function(d,i){
+                    d.x = d.x < d.r ? d.r : d.x ;
+                    d.x = d.x  > width- d.r ? width- d.r : d.x ;
+                    d.y = d.y < d.r ? d.r : d.y ;
+                    d.y = d.y > height- d.r ? height- d.r : d.y ;
+                });
+                //更新连接线的位置
+                edges_line.attr("x1",function(d){ return d.source.x; });
+                edges_line.attr("y1",function(d){ return d.source.y; });
+                edges_line.attr("x2",function(d){ return d.target.x; });
+                edges_line.attr("y2",function(d){ return d.target.y; });
+                //更新连接线上文字的位置
+                edges_text.attr("x",function(d){ return (d.source.x + d.target.x) / 2- d.relation.length/2*10 ; });
+                edges_text.attr("y",function(d){ return (d.source.y + d.target.y) / 2-5 ; });
+                edges_text.attr("transform", function (d) {
+                    var x = (d.source.x + d.target.x) / 2;
+                    var y = (d.source.y + d.target.y) / 2;
+                    var angle = 0;
+                    if(d.target.x-d.source.x==0){
+                        if(d.target.y> d.source.y){
+                            angle = 90;
+                        }else {
+                            angle = -90
+                        }
+                    }else{
+                        angle = Math.atan((d.target.y-d.source.y)/(d.target.x-d.source.x)) * 180 / Math.PI;
+                    }
+                    return "rotate("+angle+" "+x+","+y+")";
+                })
+                //更新结点图片和文字
+                nodes_circle.attr("cx",function(d){ return d.x; });
+                nodes_circle.attr("cy",function(d){ return d.y; });
+
+                nodes_text.attr("x",function(d){
+                    d3.select(this).selectAll("text").attr("x", d.x);
+                    return d.x
+                });
+                nodes_text.attr("y",function(d){
+                    d3.select(this).selectAll("text").attr("y", d.y);
+                    return d.y ;
+                });
+            });
+            /*初始停止*/
+            setTimeout(function(){
+                force.start();
+                for (var i = 0; i <root.Nodes.length; ++i) force.tick();	//执行n个力布局收敛节拍之后停止位置计算
+                force.stop();
+            },0);
+            /*公司自然人的小按钮*/
+            /*var legend = svg.append("g");
+            legend.append("circle")
+                    .attr("r",8)
+                    .style("fill","#727cd0")
+                    .attr("cx", width-100)
+                    .attr("cy", 50);
+            legend.append("text")
+                    .text("自然人")
+                    .attr("x", width-85)
+                    .attr("y", 55);
+
+            legend.append("circle")
+                    .attr("r",8)
+                    .style("fill","#2db294")
+                    .attr("cx", width-100)
+                    .attr("cy", 75);
+            legend.append("text")
+                    .text("公司")
+                    .attr("x", width-85)
+                    .attr("y", 80);*/
+        }
+        // 获取url中的参数
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");  /*空格或&开头   等号后边非&开头没有或者有&结尾*/
+            var r = window.location.search.substr(1).match(reg);  /*跳转页面*/
+            if (r != null) return decodeURIComponent(r[2]); return null;
+        }
+
+        //往小窗口绑定数据
+        function showDetail(keyNo){
+            console.log(keyNo);
+            var url = INDEX_URL+"more_findRelationsDetail";
+//            alert(url);return;
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: {"keyNo": keyNo},      /*keyNo就是id*/
+                dataType: 'JSON',
+                success: function (data) {
+                    console.log(data);
+                    $("#company-name").text(data.Result.Name);
+                    $("#company-status").text(data.Result.ShortStatus);
+                    $("#company-oper").text(data.Result.OperName);
+                    $("#company-ziben").text(data.Result.StartDate.substr(0,10));
+                    $("#company-date").text(data.Result.ShortStatus);
+                    $("#company-detail-link").attr("href","http://www.qichacha.com/firm_"+keyNo+".shtml");
+                    $("#company-tupu-link").attr("href","http://www.qichacha.com/company_relation?keyNo="+keyNo+"&name="+data.Result.Name);
+
+
+                    $("#company-gudong-table").empty();
+                    if(data.Result.Partners){
+                        for(var i=0; i<data.Result.Partners.length; i++){
+                            var html = "<tr>";
+                            if(data.Result.Partners[i].CompanyId){
+                                html += "<td><a href='http://www.qichacha.com/firm_"+data.Result.Partners[i].CompanyId+".shtml' target='_blank'>"+data.Result.Partners[i].StockName+"</a></td>";
+                            }else {
+                                html += "<td>"+data.Result.Partners[i].StockName+"</td>";
+                            }
+                            html += "<td>"+data.Result.Partners[i].StockType+"</td>";
+                            html += "</tr>";
+                            $("#company-gudong-table").append(html);
+                        }
+                    }else {
+                        $("#company-gudong-table-wrap").css("display",'none');
+                    }
+
+                    $("#company-touzi-table").empty();
+                    if(data.Result.touziList){
+                        for(var i=0; i<data.Result.touziList.length; i++){
+                            var html = "<tr>";
+                            html += "<td><a href='http://www.qichacha.com/firm_"+data.Result.touziList[i].KeyNo+".shtml' target='_blank'>"+data.Result.touziList[i].Name+"</a></td>";
+                            html += "</tr>";
+                            $("#company-touzi-table").append(html);
+                        }
+                    }else {
+                        $("#company-touzi-table-wrap").css("display",'none');
+                    }
+
+                    $("#company-chengyuan-table").empty();
+                    if(data.Result.Employees){
+                        for(var i=0; i<data.Result.Employees.length; i++){
+                            var html = "<tr>";
+                            html += "<td>"+data.Result.Employees[i].Name+"</td>";
+                            html += "<td>"+data.Result.Employees[i].Job+"</td>";
+                            html += "</tr>";
+                            $("#company-chengyuan-table").append(html);
+                        }
+                    }else {
+                        $("#company-chengyuan-table-wrap").css("display",'none');
+                    }
+
+                    //  $("#company-gudong-table");
+                    //  $("#company-touzi-table");
+                    //  $("#company-chengyuan-table");
+
+                    console.log("sssss");
+                    $("#company-detail").fadeIn();
+                },
+                error:function(XMLHttpRequest, textStatus, errorThrown){
+                    console.log(XMLHttpRequest.status);
+                    console.log(XMLHttpRequest.readyState);
+                    console.log(textStatus);
+                }
+            });
+        }
+
+        //阻止冒泡传播
+        function nozoom() {
+            d3.event.preventDefault();
+        }
+
+    })(window, jQuery);
+
+</script>
+</body>
+</html>

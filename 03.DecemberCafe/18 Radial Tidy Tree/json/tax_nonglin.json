@@ -1,0 +1,513 @@
+{
+  "Result":{
+    "Node":{
+      "name":"农、林、牧、渔业 0.48",
+      "Category":1,
+      "Level": 0,
+      "children":[
+        {
+          "name": "农业 1.45",
+          "Category": 2,
+          "Level": 1,
+          "children":[
+            {
+              "name": "谷物种植 1.36",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "稻谷种植 1.78",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "小麦种植 1.23",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "玉米种植 0.20",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "其他谷物种植 0.09",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "豆类、油料和薯类种植 0.66",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "豆类种植 0.30",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "油料种植 1.02",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "薯类种植 0.97",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "棉、麻、糖、烟草种植 2.00",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "棉花种植 0.73",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "麻类种植 2.07",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "糖料种植 0.25",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "烟草种植 13.32",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "蔬菜、食用菌及园艺作物种植 1.89",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "蔬菜种植 0.80",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "食用菌种植 1.11",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "花卉种植 1.67",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "其他园艺作物种植 3.69",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "水果种植 1.88",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "仁果类和核果类水果种植 2.24",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "葡萄种植 0.48",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "柑橘类种植 0.51",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "其他水果种植 0.49",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "香蕉等亚热带水果种植 0.03",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "坚果、含油果、香料和饮料作物种植 1.93",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "坚果种植 0.26",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "含油果种植 0.06",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "香料作物种植 1.68",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "茶及其他饮料作物种植 2.25",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "中药材种植 1.12",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            },
+            {
+              "name": "其他农业 0.42",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            }
+          ]
+        },
+        {
+          "name": "林业 1.78",
+          "Category": 2,
+          "Level": 1,
+          "children":[
+            {
+              "name": "林木育种和育苗 1.58",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "林木育种 1.62",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "林木育苗 1.48",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "造林和更新 1.90",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            },
+            {
+              "name": "森林经营和管护 1.56",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            },
+            {
+              "name": "森林经营和管护 1.56",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            },
+            {
+              "name": "木材和竹材采运 4.02",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "木材采运 4.04",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "竹材采运 2.30",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "林产品采集 1.46",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "木竹材林产品采集 1.62",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "非木竹材林产品采集 0.57",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "畜牧业 0.42",
+          "Category": 2,
+          "Level": 1,
+          "children":[
+            {
+              "name": "牲畜饲养 0.62",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "牛的饲养 0.56",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "马的饲养 1.60",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "猪的饲养 0.43",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "羊的饲养 2.70",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "其他牲畜饲养 1.37",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "家禽饲养 0.28",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "鸡的饲养 0.31",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "鸭的饲养 0.10",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "鹅的饲养 5.00",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "其他家禽饲养 0.10",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "狩猎和捕捉动物 2.30",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            },
+            {
+              "name": "其他畜牧业 0.87",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            }
+          ]
+        },
+        {
+          "name": "渔业 0.69",
+          "Category": 2,
+          "Level": 1,
+          "children":[
+            {
+              "name": "水产养殖 0.78",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "海水养殖 2.10",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "内陆养殖 0.75",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "水产捕捞 0.50",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "海水捕捞 0.50",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "内陆捕捞 --",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "农、林、牧、渔服务业 0.69",
+          "Category": 2,
+          "Level": 1,
+          "children":[
+            {
+              "name": "农业服务业 0.34",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "农业机械服务 0.38",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "灌溉服务 5.69",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "农产品初加工服务 0.34",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "其他农业服务 0.67",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "林业服务业 1.54",
+              "Category": 2,
+              "Level": 2,
+              "children":[
+                {
+                  "name": "林业有害生物防治服务 1.86",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "森林防火服务 --",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "林产品初级加工服务 1.32",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                },
+                {
+                  "name": "其他林业服务 1.56",
+                  "Category": 2,
+                  "Level": 3,
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "畜牧服务业 2.59",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            },
+            {
+              "name": "渔业服务业 2.17",
+              "Category": 2,
+              "Level": 2,
+              "children":null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "Status": 200,
+  "Message": null
+}
