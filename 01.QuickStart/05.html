@@ -38,6 +38,8 @@
 			.attr("width", 400)
 			.attr("height", 400);
 
+		var color = d3.scale.category20();
+
 		// 1. 生成散点图数据
 
 		var dataset = [];
@@ -82,6 +84,9 @@
 			.enter() // 初始构图，只需要 enter
 			.append("circle")
 			.attr("class", "point")
+			.style("fill", function (d, i) {
+                return color(i);
+            })
 			.attr("transform", "translate(30,50)")
 			.attr("r", 10)
 			.attr("cx", function (d) {
@@ -109,6 +114,9 @@
 				.attr("class", "point")
 				.attr("transform", "translate(30,50)")
 				.attr("r", 10)
+				.style("fill", function (d, i) {
+                    return color(i);
+                })
 				.attr("cx", function (d) {
 					return xScale(0);
 				})
