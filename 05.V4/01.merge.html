@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta index="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #main {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .nodes circle {
+            fill: steelblue;
+            stroke-width: 1;
+            stroke: white;
+            r: 10;
+        }
+
+        .links {
+            stroke: red;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <div id="main">
+        <div id="map">
+            <svg id="svg"></svg>
+        </div>
+    </div>
+    <script>
+
+        let h = 500;
+        let w = 960;
+
+        let Data = [];
+        for (let i = 0; i < 5; i++) {
+            let d = {
+                index: i,
+                x: Math.random() * w,
+                y: Math.random() * h
+            }
+            Data.push(d);
+        }
+
+        let appendCircle = function () {
+            let d = {
+                index: Data.length ? (Data[Data.length - 1].index + 1) : 1,
+                x: d3.mouse(this)[0],
+                y: d3.mouse(this)[1]
+            }
+            Data.push(d);
+            redraw();
+        }
+        let removeCircle = function (d) {
+            console.log(Data);
+            console.log(d);
+            for (let i = 0; i < Data.length; i++) {
+                if (Data[i].index == d.index) {
+                    Data.splice(i, 1);
+                }
+            }
+            console.log(Data);
+            redraw();
+            d3.event.stopPropagation();
+        }
+        let redraw = function () {
+
+            var update_nodes = svg.selectAll('circle')
+                .data(Data);
+                update_nodes.exit().remove();
+            
+            var update_text = svg.selectAll('text')
+                .data(Data);
+                update_text.exit().remove();
+
+            let _circle = update_nodes.enter().append('circle')
+                .merge(update_nodes)
+                .attr('r', 15)
+                .style('fill', 'steelblue')
+                .style('stroke-width', 1)
+                .style('stroke', 'white')
+                .attr('cx', (d) => d.x)
+                .attr('cy', (d) => d.y)
+                .on("click",removeCircle)
+            
+            let _text = update_text.enter().append('text')
+                .merge(update_text)
+                .attr('transform', function () {
+                    return 'translate(' + [0, 5.5] + ')';
+                })
+                .style('text-anchor', 'middle')
+                .text((d)=>d.index) 
+                .attr('dx', (d) => d.x)
+                .attr('dy', (d) => d.y)
+                .on("click",removeCircle);
+        }
+
+
+        let svg = d3.select('svg')
+            .attr('width', w)
+            .attr('height', h)
+            .style('background-color', '#ccc')
+            .on('click', appendCircle);
+
+            
+        let circles = svg.append("g")
+            .selectAll('.cirlce')
+            .data(Data)
+            .enter();
+        let texts = svg.append("g")
+            .selectAll('.text')
+            .data(Data)
+            .enter();
+
+
+
+        let circle = circles.append('circle')
+            .attr('r', 15)
+            .attr('cx', (d) => d.x)
+            .attr('cy', (d) => d.y)
+            .style('fill', 'steelblue')
+            .style('stroke-width', 1)
+            .style('stroke', 'white')
+            .on("click",removeCircle);
+
+        let text = texts.append('text')
+            .text((d) => d.index)
+            .attr('dx', (d) => d.x)
+            .attr('dy', (d) => d.y)
+            .attr('transform', function () {
+                return 'translate(' + [0, 5.5] + ')';
+            })
+            .style('text-anchor', 'middle')
+            .on("click",removeCircle);
+
+
+
+
+    </script>
+</body>
+
+</html>
