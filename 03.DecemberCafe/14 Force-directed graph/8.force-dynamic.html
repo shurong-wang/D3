@@ -50,9 +50,11 @@
                 return t;
             }
 
+            var color = d3.scaleOrdinal(d3.schemeCategory10);
+
             var w = 960,
                 h = 500,
-                n = 15;
+                n = 5;
 
             var svg = d3.select("svg");
 
@@ -103,6 +105,9 @@
             var nodes = g_nodes.selectAll("circle")
                 .data(nodesArray)
                 .enter().append("circle")
+                .style("fill", function (d, i) {
+                    return color(i);
+                })
                 .attr("cx", (d) => { return d.x; })
                 .attr("cy", (d) => { return d.y; })
                 .on("click", remove);
