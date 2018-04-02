@@ -30,7 +30,8 @@ var timeScale = d3.time.scale()
     .domain([new Date(2015, 0, 1), new Date(2016, 0, 1)])
     .range([0, width-40]);
 	
-timeScale.tickFormat([8],"%Y"); 
+timeScale.tickFormat([8],"%Y");
+ 
 //添加时间轴    
 var svg = d3.select("body").append("svg")
     .attr("width", width)

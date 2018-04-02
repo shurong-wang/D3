@@ -13,9 +13,10 @@
 			  shape-rendering: crispEdges;
 			}
 			g rect{
-				fill: white;
-				stroke: green;
-				stroke-width: 2;
+				fill: #ccc;
+				fill-opacity: .125;
+				stroke: #333;
+				stroke-width: .5;
 				height: 50px;
 			}
 			circle.hidden {
@@ -31,6 +32,7 @@
 			var margin = {top: 50, right: 50, bottom: 50, left: 50},
 				width = 960 - margin.left - margin.right,
 				height = 500 - margin.top - margin.bottom;
+
 			//向body标签增加svg子元素
 			var svg = d3.select('body')
 				.append('svg')
@@ -40,51 +42,72 @@
 				})
 				.append("g")
 				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-			var color=d3.scale.category10();
-			var data=d3.range(100).map(function(){
+
+			var color = d3.scale.category10();
+
+			// 生成数据
+			var data = d3.range(100).map(function(){
 				return {
-					cx:Math.random()*width/2,
-					cy:Math.random()*height/2,
-					r:Math.random()*10,
-					color:color(Math.random()*10)
+					cx: Math.random()*width/2,
+					cy: Math.random()*height/2,
+					r: Math.random()*10,
+					color: color(Math.random()*10)
 				}
 			});
+
 			//线性比例尺
 			var x = d3.scale.linear().domain([0, 50]).range([0, width/2]);
 			var y = d3.scale.linear().domain([0, 50]).range([height/2,0]);
-			var x2 = d3.scale.linear().domain([d3.min(data,function(d){return d.r}), d3.max(data,function(d){return d.r})]).range([0, width/2]);
+			var x2 = d3.scale.linear().domain([
+				d3.min(data, function(d){return d.r}), 
+				d3.max(data, function(d){return d.r})
+			])
+			.range([0, width/2]);
+
 			//轴
 			var xAxis = d3.svg.axis().scale(x);
-			var xAxis2 = d3.svg.axis().scale(x2);
 			var yAxis = d3.svg.axis().scale(y).orient("left");
+			var xAxis2 = d3.svg.axis().scale(x2);
+
 			//拖选器
 			var brush = d3.svg.brush()
 						.x(x2)
 						.extent([1,2]);
-			//小散点图
+
+			//散点图 应用坐标轴
 			svg.append('g').attr('transform', 'translate(0,'+(height/2)+')').call(xAxis);
 			svg.append('g').call(yAxis);
-			//半径范围
+
+			//散点半径范围 应用坐标轴
 			svg.append('g').attr('transform', 'translate(0,'+(height/2+100)+')').call(xAxis2);
-			//散点
-			var containt=svg.append('g');
+
+			//绘制散点
+			var containt = svg.append('g');
 
 			function draw(data){
-				containt.selectAll("circle").data(data).enter().append("circle").attr({
-					cx:function(d){ return d.cx;},
-					cy:function(d){ return d.cy;},
-					r:function(d){ return d.r;},
-					fill:function(d){ return d.color;}
-				});
-				
-				containt.selectAll("circle").data(data).exit().remove();
-			
+				containt.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr({
+						cx:function(d){ return d.cx;},
+						cy:function(d){ return d.cy;},
+						r:function(d){ return d.r;},
+						fill:function(d){ return d.color;}
+					});
+				containt.selectAll("circle")
+					.data(data)
+					.exit()
+					.remove();
 			}
 			draw(data);
+
 			//将拖选单独绘制在一个g里
 			var g = svg.append('g').attr("transform","translate(0,"+(height/2+70)+")");
+
 			//绘制brush
 			g.call(brush).call(brush.event);
+			
 			//调整拖选的范围、背景、按钮矩形等高度
 			g.selectAll('rect').attr({
 				"height": 30

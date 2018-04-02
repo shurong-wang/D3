@@ -23,13 +23,16 @@
 					"width": 700,
 					"height": 500,
 				});
+
 			//构造线性比例尺
 			var scale = d3.scale.linear().range([0, 100]).domain([0, 10]);
+
 			//四种方位的轴
-			var orient=["left","right","top","bottom"];
-			var axis=d3.range(orient.length).map(function(i){
+			var orient = ["left","right","top","bottom"];
+			var axis = d3.range(orient.length).map(function(i){
 				return d3.svg.axis().scale(scale).orient(orient[i])
 			});
+			
 			//绘制轴
 			svg.append('g').attr('transform', 'translate(100, 120)').call(axis[0])
 			svg.append('g').attr('transform', 'translate(240, 120)').call(axis[1])
