@@ -41,8 +41,9 @@
 				.scale(linearScale)
 				.orient("bottom");
 				
-			//设置轴的内外刻度长度为20像素，反方向50像素
+			//设置轴的内刻度长度为20像素，外刻度长度反方向50像素
 			xAxis.tickSize(20,-50);
+
 			//绘制轴
 			svg.append('g')
 				.attr('transform', 'translate(50, 220)')

@@ -29,9 +29,12 @@
 				.attr({
 					"width": 700,
 					"height": 500,
-				}).append('g').attr('transform', 'translate(10, 200)');
+				})
+				.append('g')
+				.attr('transform', 'translate(10, 200)');
 
 			var x = d3.scale.identity().range([0, 500]);
+
 			//构造刷子
 			var brush = d3.svg.brush().x(x).y(x);
 			brush(svg);	//在SVG元素上绘制刷子

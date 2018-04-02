@@ -14,11 +14,17 @@
 					"width": 960,
 					"height": 500,
 				});
+
 			//构造轴组件
 			var xAxis = d3.svg.axis()
 			
 			//指定时间比例尺
-			xAxis.scale(d3.time.scale().domain([new Date(2015, 8, 1), new Date(2016, 1, 1)]).range([0, 500]));
+			xAxis.scale(
+				d3.time.scale()
+				.domain([new Date(2015, 8, 1), new Date(2016, 1, 1)])
+				.range([0, 500])
+			);
+
 			svg.append('g')
 				.attr('transform', 'translate(100, 100)')
 				//调用轴
