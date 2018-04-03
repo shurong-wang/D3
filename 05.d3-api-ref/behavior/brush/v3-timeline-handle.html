@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv='X-UA-Compatible' content='ie=edge'>
+    <title>v3-timeline-handle</title>
+    <style>
+        .axis {
+            user-select: none;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: rgba(140, 140, 140, 0.5);
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            fill: rgb(51, 51, 51);
+            font-family: sans-serif;
+            font-size: 10px;
+        }
+
+        .brush .extent {
+            fill: rgb(212, 212, 212);
+            fill-opacity: .125;
+            shape-rendering: crispEdges;
+        }
+    </style>
+    <script src='//d3js.org/d3.v3.min.js'></script>
+</head>
+
+<body>
+    <div id="map">
+        <span id="start-date"></span>
+        TO
+        <span id="end-date"></span>
+    </div>
+    
+    <div id="canvas"></div>
+
+    <script>
+        var margin = {
+            top: 400,
+            right: 40,
+            bottom: 40,
+            left: 40
+        };
+        var width = 1000 - margin.left - margin.right,
+            height = 50;
+
+        // 画布
+        var svg = d3.select('#canvas').append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top)
+            .append('g')
+            .attr('class', 'container')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        // 时间比例尺
+        var xTimeScale = d3.time.scale()
+            .domain([new Date(2012, 0, 1), new Date(2017, 11, 30)])
+            .range([0, width - 40])
+            .nice(d3.time.month, 12)
+
+        // 坐标轴刻度标注格式化
+        var zhTimeFormat = d3.time.format.multi([
+            ['.%L毫秒', d => d.getMilliseconds()],
+            [':%S秒', d => d.getSeconds()],
+            ['%H点:%M分', d => d.getMinutes()],
+            ['%H点', d => d.getHours()],
+            ['%m月%d日', d => d.getDay() && d.getDate() != 1],
+            ['%m月%d日', d => d.getDate() != 1],
+            ['%Y-%m', d => d.getMonth()],
+            ['%Y-%m', () => true]
+        ]);
+
+        // x 坐标轴
+        var xAxis = d3.svg.axis()
+            .scale(xTimeScale)
+            .orient('bottom')
+            .tickSize(5) // 刻度线长度（负数表示 orient 反方向）
+            .tickPadding(5) // 刻度与标签之间的间距
+            .ticks(d3.time.month, 12)
+            .tickFormat(zhTimeFormat);
+
+        // 在 SVG 元素上绘制 x 坐标轴
+        svg.append('g')
+            .attr('class', 'axis axis--x')
+            .call(xAxis);
+
+        // 定义范围选择器
+        var brush = d3.svg.brush()
+            .x(xTimeScale)
+            .clamp([true]) // 闭合夹选范围
+            .on('brush', brushed);
+
+        // 设定初始选中范围
+        var start = Time2stamp('2014-01-01');
+        var end = Time2stamp('2014-12-31');
+        brush.extent([start, end]);
+
+        // 在 SVG 元素上绘制范围选择器
+        var gBrush = svg.append('g')
+            .attr('class', 'brush')
+            .attr('transform', 'translate(0, ' + -height + ')') // 拖选范围在 x 坐标轴上方显示
+            .call(brush);
+
+        // 设置拖选范围的高度（否则不会显示）
+        gBrush.selectAll('rect')
+            .attr('height', height);
+
+        // 范围选择器两侧半圆手柄
+        var handle = gBrush.selectAll('.resize') // 注意：resize 为 d3.svg.brush() 内置 class 
+            .append('path')
+            .attr('class', 'handle--custom')
+            .attr('fill', 'rgb(172, 172, 172)')
+            .attr('fill-opacity', .8)
+            .attr('cursor', 'ew-resize')
+            .attr('d', d3.svg.arc()
+                .innerRadius(0)
+                .outerRadius(this.height / 2)
+                .startAngle(0)
+                .endAngle(function (d, i) {
+                    return i ? -Math.PI : Math.PI;
+                }))
+            .attr('transform', 'translate(' + [0, height / 2] + ')');
+
+        // 执行
+        brushed();
+
+        // 监听拖选范围终点值
+        function brushed() {
+            var selection = brush.extent();
+            d3.select('#start-date')
+                .text(stamp2Time(selection[0]));
+            d3.select('#end-date')
+                .text(stamp2Time(selection[1]));
+        }
+
+        // 清空拖选范围
+        function clearBrush() {
+            brush.clear().event(svg);
+            if (brush.empty()) {
+                brush.extent([0, 0]);
+                brush(svg);
+            }
+        }
+
+        function stamp2Time(timestamp) {
+            var zeroize = s => s < 10 ? '0' + s : s;
+            var date = new Date(timestamp);
+            Y = date.getFullYear();
+            M = zeroize(date.getMonth() + 1);
+            D = zeroize(date.getDate());
+            h = zeroize(date.getHours());
+            m = zeroize(date.getMinutes());
+            s = zeroize(date.getSeconds());
+            // return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+            return `${Y}-${M}-${D}`;
+        }
+
+        function Time2stamp(datestring) {
+            return new Date(datestring).getTime();
+        }
+    </script>
+</body>
+
+</html>
